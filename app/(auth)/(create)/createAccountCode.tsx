@@ -66,13 +66,29 @@ export default function CreateAccountGetCode() {
     return `${minutes < 10 ? '0' : ''}${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
+
   function sendMail() {
-     fetch("http://10.0.2.2:3000/sendmail", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify({ name, email }),
+  fetch("http://10.0.2.2:3000/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email }),
+  })
+    .then(async (res) => {
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Erro do servidor:", res.status, data);
+        return;
+      }
+
+      // console.log("Resposta do backend:", data);
+    })
+    .catch((error) => {
+      console.error("Erro na requisição:", error);
     });
-  }
+}
+
+
 
   const onSubmit = async ({ code }: { code: string}) => {
     try {

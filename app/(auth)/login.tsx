@@ -63,7 +63,7 @@ export default function Login() {
     mutationFn: loginRequest,
     onSuccess: (data) => {
       login(data.access_token);
-      console.log("Login bem-sucedido:", data.access_token);
+      // console.log("Login bem-sucedido:", data.access_token);
     },
     onError: (error: any) => {
       Alert.alert(

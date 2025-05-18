@@ -513,13 +513,13 @@ export default function Map2() {
                   </Text>
                 </View>
                 <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-                  <Text className="font-inter-bold">2</Text>
+                  <Text className="font-inter-bold">{item.totalTasks}</Text>
                   <Text className="text-[10px] text-bondis-gray-secondary">
                     ATIVIDADES
                   </Text>
                 </View>
                 <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-                  <Text className="font-inter-bold">300</Text>
+                  <Text className="font-inter-bold">{item.totalCalories}</Text>
                   <Text className="text-[10px] text-bondis-gray-secondary">
                     CAL. TOTAIS
                   </Text>
