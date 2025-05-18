@@ -31,13 +31,14 @@ export default function CardDesafio({
   inscriptionId
 }: desafioProps) {
   const router = useRouter();
-  const { setMapData } = useDesafioStore();
-
+  const { setMapData, setDesafioData } = useDesafioStore();
+  
   const handleCardPress = () => {
     if (completed) return;
 
     if (isRegistered) {
       setMapData( desafioId, inscriptionId);
+      setDesafioData(inscriptionId, desafioName, +progress, +distance, desafioId);
       router.push({ pathname: "/map"});
     } else {
       router.push("/buy");
