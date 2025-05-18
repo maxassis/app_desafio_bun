@@ -37,7 +37,7 @@ interface Coordinate {
 
 interface UserParticipation {
   avatar: string;
-  location: LatLng;
+  location: Coordinate;
   name: string;
   userId: string;
   distance: number;
@@ -46,11 +46,6 @@ interface UserParticipation {
   totalCalories: number;
   totalDistanceKm: number;
   lastTaskDate: Date
-}
-
-interface LatLng {
-  latitude: number;
-  longitude: number;
 }
 
 export interface RankData {
@@ -279,7 +274,7 @@ export default function Map2() {
 
       const updatedParticipants: UserParticipation[] =
         routeData.inscription.map((dta) => {
-          let userLocation: LatLng = { latitude: 0, longitude: 0 };
+          let userLocation: Coordinate = { latitude: 0, longitude: 0 };
           let userDistance = 0;
           let progressPercentage = "0";
 

@@ -1,14 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, View, Text, Button, Dimensions } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import { StyleSheet, View, Text, Button } from 'react-native';
 import * as Location from 'expo-location';
 
+type SimpleLocation = {
+  latitude: number;
+  longitude: number;
+};
+
+type TrackingStatus = 'idle' | 'recording' | 'paused' | 'finished';
+
 export default function Gps() {
-  const [recording, setRecording] = useState(false);
-  const [locations, setLocations] = useState<Location.LocationObject[]>([]);
+  const [status, setStatus] = useState<TrackingStatus>('idle');
+  const [locations, setLocations] = useState<SimpleLocation[]>([]);
   const [distance, setDistance] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
-  const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null);
+  const [pauseTime, setPauseTime] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState<number>(0); // time in seconds
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
 
   useEffect(() => {
@@ -16,18 +23,31 @@ export default function Gps() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         alert('Permissão negada para acessar localização');
-      } else {
-        const loc = await Location.getCurrentPositionAsync({});
-        setCurrentLocation(loc);
       }
     })();
   }, []);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (status === 'recording') {
+      timer = setInterval(() => {
+        if (startTime) {
+          setElapsed(Math.floor((Date.now() - startTime) / 1000));
+        }
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [status, startTime]);
+
   const startTracking = async () => {
-    setRecording(true);
+    setStatus('recording');
     setLocations([]);
     setDistance(0);
-    setStartTime(Date.now());
+    const now = Date.now();
+    setStartTime(now);
+    setElapsed(0);
 
     locationSubscription.current = await Location.watchPositionAsync(
       {
@@ -36,19 +56,67 @@ export default function Gps() {
         distanceInterval: 5,
       },
       (location) => {
-        setCurrentLocation(location);
+        const newPoint: SimpleLocation = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+
         setLocations((prev) => {
           if (prev.length > 0) {
             const last = prev[prev.length - 1];
             const d = getDistanceFromLatLonInKm(
-              last.coords.latitude,
-              last.coords.longitude,
-              location.coords.latitude,
-              location.coords.longitude
+              last.latitude,
+              last.longitude,
+              newPoint.latitude,
+              newPoint.longitude
             );
             setDistance((total) => total + d);
           }
-          return [...prev, location];
+          return [...prev, newPoint];
+        });
+      }
+    );
+  };
+
+  const pauseTracking = () => {
+    locationSubscription.current?.remove();
+    locationSubscription.current = null;
+    setPauseTime(Date.now());
+    setStatus('paused');
+  };
+
+  const resumeTracking = async () => {
+    setStatus('recording');
+
+    if (pauseTime && startTime) {
+      const pausedDuration = Date.now() - pauseTime;
+      setStartTime((prev) => (prev ? prev + pausedDuration : null));
+    }
+
+    locationSubscription.current = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.Highest,
+        timeInterval: 2000,
+        distanceInterval: 5,
+      },
+      (location) => {
+        const newPoint: SimpleLocation = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+
+        setLocations((prev) => {
+          if (prev.length > 0) {
+            const last = prev[prev.length - 1];
+            const d = getDistanceFromLatLonInKm(
+              last.latitude,
+              last.longitude,
+              newPoint.latitude,
+              newPoint.longitude
+            );
+            setDistance((total) => total + d);
+          }
+          return [...prev, newPoint];
         });
       }
     );
@@ -57,12 +125,10 @@ export default function Gps() {
   const stopTracking = () => {
     locationSubscription.current?.remove();
     locationSubscription.current = null;
-    setRecording(false);
-  };
-
-  const getElapsedTime = () => {
-    if (!startTime) return 0;
-    return Math.floor((Date.now() - startTime) / 1000);
+    setStatus('finished');
+    console.log('Localizações gravadas:', locations);
+    console.log('Distância percorrida:', distance);
+    console.log('Tempo decorrido:', elapsed);
   };
 
   const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -71,56 +137,25 @@ export default function Gps() {
     const dLon = deg2rad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) *
-        Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
-    return d;
+    return R * c;
   };
 
   const deg2rad = (deg: number) => deg * (Math.PI / 180);
 
   return (
     <View style={styles.container}>
-      {currentLocation && (
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
-          }}
-          region={{
-            latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
-          }}
-          showsUserLocation
-        >
-          <Polyline
-            coordinates={locations.map(loc => ({
-              latitude: loc.coords.latitude,
-              longitude: loc.coords.longitude,
-            }))}
-            strokeColor="#007AFF"
-            strokeWidth={5}
-          />
-        </MapView>
-      )}
+      <Text style={styles.label}>Distância: {distance.toFixed(2)} km</Text>
+      <Text style={styles.label}>Tempo: {elapsed} s</Text>
 
-      <View style={styles.info}>
-        <Text>Distância: {distance.toFixed(2)} km</Text>
-        <Text>Tempo: {getElapsedTime()} s</Text>
-        {recording ? (
-          <Button title="Parar" onPress={stopTracking} />
-        ) : (
-          <Button title="Iniciar" onPress={startTracking} />
-        )}
-      </View>
+      {status === 'idle' && <Button title="Iniciar" onPress={startTracking} />}
+      {status === 'recording' && <Button title="Pausar" onPress={pauseTracking} />}
+      {status === 'paused' && <Button title="Continuar" onPress={resumeTracking} />}
+      {(status === 'recording' || status === 'paused') && (
+        <Button title="Finalizar" onPress={stopTracking} />
+      )}
     </View>
   );
 }
@@ -128,12 +163,12 @@ export default function Gps() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  map: {
-    width: Dimensions.get('window').width,
-    height: '80%',
-  },
-  info: {
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
+  },
+  label: {
+    fontSize: 18,
+    marginBottom: 12,
   },
 });
