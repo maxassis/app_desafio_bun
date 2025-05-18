@@ -7,7 +7,7 @@ export default function AccountDone() {
     const router = useRouter();
 
     return(
-        <SafeAreaView className="flex-1 bg-white ">
+        <SafeAreaView className="flex-1 justify-center">
             <View className="items-end mb-[10px] px-5 pt-[38px]">
                 <TouchableOpacity onPress={() => router.replace("/login")} className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
                     <Close />
