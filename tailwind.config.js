@@ -18,6 +18,7 @@ module.exports = {
       fontFamily: {
         'inter-regular': 'Inter_400Regular',
         'inter-bold': 'Inter_700Bold',
+        'anton-regular': 'Anton_400Regular',
       }
     },
   },

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SplashScreen from 'expo-splash-screen';
 import useAuthStore from '../store/auth-store';
 import { Inter_700Bold, Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
+import { Anton_400Regular } from '@expo-google-fonts/anton';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,6 +20,7 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Inter_700Bold,
     Inter_400Regular,
+    Anton_400Regular,
   });
 
   useEffect(() => {

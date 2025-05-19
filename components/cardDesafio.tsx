@@ -39,7 +39,7 @@ export default function CardDesafio({
     if (isRegistered) {
       setMapData( desafioId, inscriptionId);
       setDesafioData(inscriptionId, desafioName, +progress, +distance, desafioId);
-      router.push({ pathname: "/gps"});
+      router.push({ pathname: "/rastreador"});
     } else {
       router.push("/buy");
     }
