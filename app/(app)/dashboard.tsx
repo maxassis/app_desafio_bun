@@ -323,14 +323,14 @@ export default function Profile() {
       >
         <BottomSheetView className="flex-1 z-50">
           <Text className="font-inter-bold mt-[10px] text-base mx-5 mb-4">
-            Adicione uma atividade
+            Adicione uma nova atividade
           </Text>
           <View className="mx-5">
+            <TouchableOpacity onPress={() => router.push("/rastreador")} className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400">
+              <Text>Iniciar agora</Text>
+            </TouchableOpacity>
             <View className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400">
-              <Text>Via Strava</Text>
-            </View>
-            <View className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400">
-              <Text>Via Apple Saúde</Text>
+              <Text>Sincronizar via Strava</Text>
             </View>
             <TouchableOpacity
               onPress={() => router.push("/desafios")}
