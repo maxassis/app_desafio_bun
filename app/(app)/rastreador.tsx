@@ -134,6 +134,7 @@ import Play from "../../assets/play.svg";
 const boneco = require("../../assets/boneco.png");
 const fundoCinza = require("../../assets/fundo-cinza.png");
 const fundoVerde = require("../../assets/fundo-verde.png");
+const fundoPreto = require("../../assets/fundo-preto.png");
 
 import useTracker from "../../hooks/useTracker";
 
@@ -158,7 +159,7 @@ export default function Rastreador() {
   const opacity = useSharedValue(1);
 
   const isPaused = status === "paused";
-  const isRecording = status === "recording";
+  // const isRecording = status === 'recording';
 
   function pressStop() {
     setShowTooltip(true);
@@ -239,20 +240,22 @@ export default function Rastreador() {
   // Renderizar a tela de contagem regressiva ou a tela principal
   if (showCountdown) {
     return (
-      <SafeAreaView className="flex-1 bg-black">
+      <SafeAreaView className="flex-1">
         <StatusBar
           backgroundColor="#000"
           barStyle="light-content"
           translucent={false}
         />
-        <View className="flex-1 justify-center items-center">
-          <Animated.Text
-            style={[animatedNumberStyle, { color: "#74FE52" }]}
-            className="font-anton-regular text-9xl leading-[300px]"
-          >
-            {countdownNumber}
-          </Animated.Text>
-        </View>
+        <ImageBackground source={fundoPreto} className="flex-1">
+          <View className="flex-1 justify-center items-center">
+            <Animated.Text
+              style={[animatedNumberStyle, { color: "#74FE52" }]}
+              className="font-anton-regular text-9xl leading-[300px]"
+            >
+              {countdownNumber}
+            </Animated.Text>
+          </View>
+        </ImageBackground>
       </SafeAreaView>
     );
   }
@@ -300,7 +303,7 @@ export default function Rastreador() {
             <View className="mt-[143px] flex-row h-[90px] relative">
               <TouchableOpacity
                 onPress={pressStop}
-                onLongPress={() => console.log("Long Press")}
+                onLongPress={() => console.log("Long press")}
                 className=" rounded-full h-[90px] w-[90px] bg-black mx-auto flex items-center justify-center"
               >
                 <View className="w-4 h-4 bg-white" />
@@ -311,18 +314,16 @@ export default function Rastreador() {
               >
                 <Play />
               </TouchableOpacity>
+
               {showTooltip && (
-                <View className="absolute top-[-80px] left-[9.5%] bg-black w-[300px] flex items-center justify-center p-4 rounded-md">
-                  <Text className="text-white font-inter-regular text-sm">
-                    Mantenha o botão{" "}
-                    <Text className="font-inter-bold">pressionado</Text> para
-                    finalizar a atividade.
-                  </Text>
-                </View>
+                <View className=" top-[-75px] right-[35px] bg-black w-[300px] flex items-center justify-center p-4 absolute rounded-md">
+                <Text className="text-white font-inter-regular text-xs">
+                  Mantenha o botão{" "}
+                  <Text className="font-inter-bold">pressionado</Text> para
+                  finalizar a atividade.
+                </Text>
+              </View>
               )}
-              {/* <View className="absolute top-[-80px] left-[10%] bg-black w-[300px] flex items-center justify-center p-4 rounded-md">
-                  <Text className="text-white font-inter-regular text-sm" >Mantenha o botão <Text className="font-inter-bold">pressionado</Text> para finalizar a atividade.</Text>
-                </View> */}
             </View>
           ) : (
             <TouchableOpacity
