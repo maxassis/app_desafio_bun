@@ -156,7 +156,7 @@ export default function TaskEdit() {
       queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
       queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
 
-      router.push("/dashboard");
+      router.push("/taskList");
     },
     onError: (error) => {
       console.error("Erro ao atualizar tarefa:", error);

@@ -371,7 +371,7 @@ export default function Rastreador() {
   }
 
   function longPressStop() {
-    router.push("/createTaskGps");
+    router.push({ pathname: "/createTaskGps", params: { distance, elapsed, city } });
   }
 
   const formatTime = (seconds: number) => {
