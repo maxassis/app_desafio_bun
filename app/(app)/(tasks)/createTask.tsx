@@ -209,19 +209,26 @@ export default function TaskCreate() {
 
   function criarTarefa() {
     const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
-
+  
+    // Pega a hora atual (para usar tanto no caso do dia atual quanto de um dia específico)
+    const agora = dayjs();
+  
+    // Se não tiver `dia`, usamos a data e hora atuais
+    // Se tiver `dia`, combinamos a data dele com a hora atual
+    const dataFinal = !dia
+      ? agora
+      : dayjs(`${dia.dateString} ${agora.format('HH:mm:ss')}`); // adiciona a hora atual à data
+  
     const dadosTarefa: DadosTarefa = {
       name: nomeAtividade,
       distance: distanciaSelecionada,
       environment: ambiente,
       calories: +calorias,
       inscriptionId: inscriptionId!,
-      date: !dia
-        ? formatarDataParaISO(dayjs().format("YYYY-MM-DD"))
-        : formatarDataParaISO(dia.dateString),
+      date: dataFinal.toISOString(), // Formato final: "2025-05-23T14:01:07.606Z"
       duration: converterTempoParaSegundos(tempoSelecionado),
     };
-
+  
     criarTarefaMutation.mutate(dadosTarefa);
   }
 
@@ -233,11 +240,6 @@ export default function TaskCreate() {
     setLocal("");
     limparDistancia();
   }
-
-  const formatarDataParaISO = (data: string) => {
-    if (!data) return null;
-    return dayjs(data).toISOString();
-  };
 
   function converterTempoParaSegundos(tempo: {
     hours: number;

@@ -125,6 +125,20 @@ export default function TaskEdit() {
 
   const updateTaskMutation = useMutation({
     mutationFn: async () => {
+      const agora = dayjs(); // Hora atual do sistema
+
+      // Se initialDate tem data + hora, usamos diretamente
+      // Se não, combinamos day.dateString com a hora atual
+
+      console.log(taskData.date);
+      console.log(
+        dayjs(`${day.dateString} ${agora.format("HH:mm:ss")}`).toISOString()
+      );
+
+      // const dataFinal = initialDate
+      //   ? taskData.date // já tem data e hora
+      //   : dayjs(`${day.dateString} ${agora.format("HH:mm:ss")}`); // adiciona hora atual à data
+
       const response = await fetch(
         `http://10.0.2.2:3000/tasks/update-task/${taskData.id}`,
         {
@@ -137,17 +151,22 @@ export default function TaskEdit() {
             name: activityName,
             distanceKm: +`${distance.kilometers}.${distance.meters}`,
             environment: ambience,
+            // date: dataFinal.toISOString(), // Formato ISO completo: "2025-05-23T14:01:07.606Z"
             date: initialDate
-              ? formatDateToISO(initialDate)
-              : formatDateToISO(day.dateString),
+              ? taskData.date // mantém hora original
+              : dayjs(
+                  `${day.dateString} ${agora.format("HH:mm:ss")}`
+                ).toISOString(),
             duration: convertTimeToSeconds(selectedTime),
           }),
         }
       );
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Falha ao atualizar tarefa");
       }
+
       return response.json();
     },
     onSuccess: (data) => {
@@ -254,12 +273,20 @@ export default function TaskEdit() {
     return date.format("YYYY-MM-DD");
   }
 
+  // const formatDateToISO = (date: string) => {
+  //   if (!date) return null;
+  //   const [year, month, day] = date.split("-").map(Number);
+  //   const isoDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+  //   const formattedDate = isoDate.toISOString().replace(/\.\d{3}Z$/, "Z");
+  //   return formattedDate;
+  // };
+
   const formatDateToISO = (date: string) => {
     if (!date) return null;
-    const [year, month, day] = date.split("-").map(Number);
-    const isoDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
-    const formattedDate = isoDate.toISOString().replace(/\.\d{3}Z$/, "Z");
-    return formattedDate;
+
+    const isoDate = dayjs.utc(date, "YYYY-MM-DD").startOf("day").toISOString();
+
+    return isoDate;
   };
 
   function updateTask() {

@@ -23,12 +23,12 @@ import { cva } from "class-variance-authority";
 import RankingBottomSheet from "../../components/bottomSheeetMap";
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
-import utc from 'dayjs/plugin/utc'
 import relativeTime from 'dayjs/plugin/relativeTime';
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Octicons from "@expo/vector-icons/Octicons";
 import { fetchUserData, fetchRouteData } from "@/utils/api-service";
 import useDesafioStore from "@/store/desafio-store";
+import { haversine } from "@/utils/gpsFunctions";
 
 interface Coordinate {
   latitude: number;
@@ -57,21 +57,6 @@ export interface RankData {
   totalDuration: number;
   avgSpeed: number;
 }
-
-const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-  const toRad = (x: number) => (x * Math.PI) / 180;
-  const R = 6371; // km
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
 
 const findPointAtDistance = (
   coordinates: { latitude: number; longitude: number }[],

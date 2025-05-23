@@ -30,6 +30,7 @@ export interface Data {
   distanceKm: string;
   inscriptionId: number;
   usersId: string;
+  gpsTask: boolean;
 }
 
 const fetchTasks = async (

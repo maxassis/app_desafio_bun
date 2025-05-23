@@ -3,13 +3,14 @@ import Livre from "../assets/livre.svg";
 import Calendar from "../assets/calendar.svg";
 import Pin from "../assets/map-pin.svg";
 import Gear from "../assets/settings-black.svg";
-import Link from "../assets/link.svg";
-import { useNavigation } from "@react-navigation/native";
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration';
 import { convertSecondsToTimeString } from "../utils/timeUtils";
+import RSS from "../assets/rss.svg";
+import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(duration);
+dayjs.extend(relativeTime)
 
 export interface TaskItemProps {
   id: number
@@ -22,6 +23,7 @@ export interface TaskItemProps {
   distanceKm: string
   inscriptionId: number
   usersId: string
+  gpsTask: boolean
 }
 
 export interface TaskListProps {
@@ -29,27 +31,21 @@ export interface TaskListProps {
   openModalEdit: (taskData: TaskItemProps) => void
 }
 
-const timeSinceDate = (dateStr: string | Date): string => {
-  const targetDate = dayjs(dateStr);
-  if (!targetDate.isValid()) {
-    throw new Error("Data inválida");
-  }
-  const currentDate = dayjs();
-  const differenceInYears = currentDate.diff(targetDate, 'year');
-  const differenceInMonths = currentDate.diff(targetDate, 'month');
-  const differenceInDays = currentDate.diff(targetDate, 'day');
-  if (differenceInYears >= 1) {
-    return `Há ${differenceInYears} ano(s)`;
-  } else if (differenceInMonths >= 1) {
-    return differenceInMonths === 1 ? `Há 1 mês` : `Há ${differenceInMonths} meses`;
-  } else {
-    return differenceInDays === 1 ? `Há 1 dia` : `Há ${differenceInDays} dias`;
-  }
-};
+// function tempoDecorrido(data: Date) {
+//   return dayjs(data).fromNow();
+// }
+
+function tempoDecorrido(data: Date) {
+  const nowUTC = dayjs().utc();
+  const dateUTC = dayjs(data).utc();
+
+  console.log(data)
+  return dateUTC.from(nowUTC);
+}
+
 
 export default function TaskItem({ task, openModalEdit }: TaskListProps) {
-    const navigation = useNavigation<any>();
-
+    
     return(
         <View className="h-[165px] p-5 bg-white mb-4">
           <View className="flex-row w-full h-[42px]">
@@ -63,7 +59,7 @@ export default function TaskItem({ task, openModalEdit }: TaskListProps) {
                   <View className="flex-row gap-x-1 items-center justify-center">
                     <Calendar />
                     <Text className="text-bondis-gray-dark text-xs">
-                    {timeSinceDate(task.date!)}
+                    {tempoDecorrido(task.date!)}  
                     </Text>
                   </View>
                   <View className="flex-row gap-x-1 items-center justify-center ml-4">
@@ -82,8 +78,8 @@ export default function TaskItem({ task, openModalEdit }: TaskListProps) {
           </View>
 
           <View className="flex-row items-center gap-x-1 mt-3 none">
-            <Link />
-            <Text className="text-xs text-bondis-gray-dark">Cadastrado manualmente</Text>
+            {task.gpsTask && <RSS />}
+            <Text className="text-xs text-bondis-gray-dark">{task.gpsTask ? "Registrado em tempo real" : "Cadastrado manualmente" }</Text>
           </View> 
 
           <View className="flex-row mt-3">
