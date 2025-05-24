@@ -384,7 +384,7 @@ export default function useTracker() {
   const pausedTime = useRef<number>(0);
   const pauseTimestamp = useRef<number | null>(null);
 
-  // Atualiza o tempo decorrido a cada segundo enquanto está gravando
+
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
 
