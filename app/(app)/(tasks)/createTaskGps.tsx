@@ -19,7 +19,7 @@ import { useLocalSearchParams } from "expo-router";
 import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
 
 interface DadosTarefaGps {
@@ -41,11 +41,9 @@ interface CheckCompletion {
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { city, elapsed, distance } = useLocalSearchParams();
   const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
   const { inscriptionId, desafioId } = useLocalSearchParams();
-
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
 
   function converterKmParaString(km: number): string {
@@ -100,8 +98,8 @@ export default function CreateTaskGps() {
       setIsLoading(false);
       queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
-      queryClient.invalidateQueries({ queryKey: ["routeData", 1] }); //desafioId
-      queryClient.invalidateQueries({ queryKey: ["rankData", 1] }); //desafioId
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] }); 
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] }); 
 
       const metaAtingida = data.challengeCompleted;
 
@@ -123,8 +121,6 @@ export default function CreateTaskGps() {
 
   const verificarConclusaoDesafioMutation = useMutation({
     mutationFn: async () => {
-      // const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
-
       const response = await fetch(
         "http://10.0.2.2:3000/tasks/check-completion",
         {
@@ -182,8 +178,6 @@ export default function CreateTaskGps() {
   });
 
   function criarTarefa() {
-    // const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
-
     const distanceFormated = (d: number): number => {
       const num = d.toFixed(3);
       return +num;
@@ -194,7 +188,7 @@ export default function CreateTaskGps() {
       distance: distanceFormated(+distanceStore),
       environment: "livre",
       calories: 200,
-      inscriptionId: +inscriptionId, // inscriptionId
+      inscriptionId: +inscriptionId, 
       date: getFormattedCurrentUtcDate(),
       duration: +elapsedStore,
       gpsTask: true,
@@ -222,7 +216,7 @@ export default function CreateTaskGps() {
         </View>
 
         <Text className="text-2xl font-anton-regular mt-7 mx-5">
-          Como foi a sua atividade?
+          Como foi a sua atividade? {inscriptionId}
         </Text>
 
         <Text className="font-inter-bold text-base mt-7 mx-5">

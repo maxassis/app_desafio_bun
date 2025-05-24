@@ -5,7 +5,6 @@ import {
   View,
   ImageBackground,
   Text,
-  Image,
   TouchableOpacity,
 } from "react-native";
 import Animated, {
@@ -56,8 +55,6 @@ export default function Rastreador() {
 
     const {
       data: desafios,
-      // isLoading,
-      // error,
     } = useQuery({
       queryKey: ["desafios"],
       queryFn: () => fetchDesafios(token!),
@@ -86,8 +83,7 @@ export default function Rastreador() {
 
   function longPressStop() {
     if(desafios && desafios?.length === 1) {
-      console.log("tem 1 desafio");
-      router.push("/createTaskGps");
+      router.push({pathname: "/createTaskGps", params: { desafioId: desafios[0].desafioId, inscriptionId: desafios[0].id}});
     }
 
     if(desafios && desafios?.length > 1) {
