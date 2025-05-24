@@ -61,4 +61,4 @@ yarn-error.*
 
 app.json
 
-.apk
+*.apk
