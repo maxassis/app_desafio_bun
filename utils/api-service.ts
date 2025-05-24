@@ -69,8 +69,29 @@ export interface RankData {
   avgSpeed: number;
 }
 
+export type DesafioData = Data[];
+
+export interface Data {
+  id: number;
+  userId: string;
+  desafioId: number;
+  progress: string;
+  completed: boolean;
+  desafio: Desafio;
+}
+
+export interface Desafio {
+  id: number;
+  name: string;
+  description: string;
+  distance: number;
+  photo: string;
+}
+
+
+
 // API base URL
-const API_BASE_URL = "https://bondis-app-backend.onrender.com";
+const API_BASE_URL = "http://10.0.2.2:3000";
 
 // Get auth token from store
 const getToken = () => {
@@ -159,3 +180,22 @@ export const fetchRankData = async (desafioId: string | number): Promise<RankDat
 
   return await response.json();
 };
+
+
+// Pedos desafios de um usuario
+export async function fetchDesafios(token: string): Promise<DesafioData> {
+  const response = await fetch("http://10.0.2.2:3000/desafio/get-user-desafio/", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch desafios");
+  }
+
+  return response.json();
+}
+

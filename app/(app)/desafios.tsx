@@ -11,44 +11,13 @@ import Left from "../../assets/arrow-left.svg";
 import { router } from "expo-router";
 import tokenExists from "../../store/auth-store";
 import useDesafioStore from "../../store/desafio-store";
-
-export type DesafioData = Data[];
-
-export interface Data {
-  id: number;
-  userId: string;
-  desafioId: number;
-  progress: string;
-  completed: boolean;
-  desafio: Desafio;
-}
-
-export interface Desafio {
-  id: number;
-  name: string;
-  description: string;
-  distance: number;
-}
-
-async function fetchDesafios(token: string): Promise<DesafioData> {
-  const response = await fetch("https://bondis-app-backend.onrender.com/desafio/get-user-desafio/", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch desafios");
-  }
-
-  return response.json();
-}
+import { fetchDesafios } from "../../utils/api-service";
+import { useLocalSearchParams } from "expo-router";
 
 export default function DesafioSelect() {
   const token = tokenExists((state) => state.token);
   const setDesafioData = useDesafioStore((state) => state.setDesafioData);
+  const { gps } = useLocalSearchParams();
 
   const {
     data: desafios,
@@ -74,9 +43,26 @@ export default function DesafioSelect() {
           </TouchableOpacity>
         </View>
 
-        <Text className="text-2xl font-inter-bold mt-7 mb-7">
+        <Text
+          className={`text-2xl font-anton-regular mt-7 ${
+            gps === "true" ? "" : "mb-7"
+          }`}
+        >
           Escolha um desafio
         </Text>
+
+        {gps === "true" && (
+          <>
+            <Text className="text-base text-bondis-gray-dark mt-4">
+              Você possui{" "}
+              <Text className="font-inter-bold">{desafios?.length}</Text>{" "}
+              desafios ativos!
+            </Text>
+            <Text className="text-base text-bondis-gray-dark mb-7">
+              Escolha em qual deles deseja cadastrar sua atividade.
+            </Text>
+          </>
+        )}
 
         {isLoading && (
           <Text className="text-center text-gray-500">
@@ -104,14 +90,25 @@ export default function DesafioSelect() {
                       item.desafio.distance,
                       item.desafioId
                     );
-                    router.push("/createTask");
+
+                    if (gps === "true") {
+                      router.push({
+                        pathname: "/createTaskGps",
+                        params: {
+                          inscriptionId: item.id,
+                          desafioId: item.desafioId,
+                        },
+                      });
+                    } else {
+                      router.push("/createTask");
+                    }
                   }}
                   className="h-[94px] flex-row items-center px-3 py-[15px] border-b-[1px] border-b-[#D9D9D9]"
                 >
                   <Image
-                    source={require("../../assets/Bg.png")} 
+                    source={{ uri: item.desafio.photo }}
                     contentFit="cover"
-                    style={{ width: 80, height: 80 }} 
+                    style={{ width: 80, height: 80, borderRadius: 6 }}
                   />
                   <View className="ml-5">
                     <Text className="font-inter-bold text-base flex-wrap break-words">

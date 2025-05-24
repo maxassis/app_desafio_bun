@@ -2,11 +2,11 @@ import 'dotenv/config';
 
 export default {
   expo: {
+    name: "bondis-app",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
-    newArchEnabled: true,
     splash: {
       image: "./assets/splash-black.png",
       resizeMode: "cover",
@@ -21,7 +21,6 @@ export default {
       },
       infoPlist: {
         NSLocationWhenInUseUsageDescription: "Este app precisa da sua localização para mostrar sua posição no mapa",
-        NSLocationAlwaysUsageDescription: "Este app precisa da sua localização para mostrar sua posição no mapa",
         NSLocationAlwaysAndWhenInUseUsageDescription: "Este app precisa da sua localização para mostrar sua posição no mapa"
       }
     },
@@ -33,7 +32,8 @@ export default {
       permissions: [
         "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION"
       ],
       package: "com.maxassis.meudesafio2",
       config: {
@@ -52,12 +52,13 @@ export default {
           photosPermission: "The app accesses your photos to let you share them with your friends."
         }
       ],
-      "expo-router",
+      "expo-router"
     ],
     extra: {
       eas: {
         projectId: "230cd5ae-e636-4f24-a992-74172495dd48"
-      }
+      },
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
     }
   }
 };

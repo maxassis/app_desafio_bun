@@ -91,7 +91,7 @@ export default function TaskCreate() {
       const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
 
       const response = await fetch(
-        "https://bondis-app-backend.onrender.com/tasks/check-completion",
+        "http://10.0.2.2:3000/tasks/check-completion",
         {
           method: "POST",
           headers: {
@@ -145,7 +145,7 @@ export default function TaskCreate() {
 
   const criarTarefaMutation = useMutation({
     mutationFn: async (dadosTarefa: CheckCompletion) => {
-      const response = await fetch("https://bondis-app-backend.onrender.com/tasks/create", {
+      const response = await fetch("http://10.0.2.2:3000/tasks/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

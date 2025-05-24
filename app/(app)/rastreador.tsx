@@ -22,6 +22,9 @@ import Play from "../../assets/play.svg";
 import LottieView from "lottie-react-native";
 import useTracker from "../../hooks/useTracker";
 import { router } from "expo-router";
+import tokenExists from "../../store/auth-store";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDesafios } from "../../utils/api-service";
 
 const fundoCinza = require("../../assets/fundo-cinza.png");
 const fundoVerde = require("../../assets/fundo-verde.png");
@@ -44,11 +47,25 @@ export default function Rastreador() {
   const [showCountdown, setShowCountdown] = useState(true);
   const [countdownNumber, setCountdownNumber] = useState(3);
   const [showTooltip, setShowTooltip] = useState(false);
-
+  const token = tokenExists((state) => state.token);
+ 
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
   const isPaused = status === "paused";
+
+    const {
+      data: desafios,
+      // isLoading,
+      // error,
+    } = useQuery({
+      queryKey: ["desafios"],
+      queryFn: () => fetchDesafios(token!),
+      enabled: !!token,
+      retry: 1,
+      staleTime: 1000 * 60 * 10,
+    });
+
 
   const handlePause = () => {
     pauseTracking();
@@ -68,8 +85,17 @@ export default function Rastreador() {
   }
 
   function longPressStop() {
-    router.push({ pathname: "/createTaskGps", params: { distance, elapsed, city } });
-  }
+    if(desafios && desafios?.length === 1) {
+      console.log("tem 1 desafio");
+      router.push("/createTaskGps");
+    }
+
+    if(desafios && desafios?.length > 1) {
+      console.log("tem mais de 1 desafio");
+      // router.push("/desafios");
+      router.push({ pathname: "/desafios", params: { gps: "true"}});
+    }
+   }
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600).toString().padStart(2, "0");

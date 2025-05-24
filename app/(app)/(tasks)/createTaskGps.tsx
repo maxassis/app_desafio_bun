@@ -8,6 +8,8 @@ import {
   Text,
   TextInput,
   Alert,
+  ActivityIndicator,
+  Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Close from "../../../assets/Close.svg";
@@ -18,6 +20,7 @@ import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTrackerStore } from "@/store/rastreador-store";
 
 interface DadosTarefaGps {
   name: string;
@@ -37,9 +40,13 @@ interface CheckCompletion {
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { city, elapsed, distance } = useLocalSearchParams();
   const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
+  const { inscriptionId, desafioId } = useLocalSearchParams();
+
+  const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
 
   function converterKmParaString(km: number): string {
     const kmAbsoluto: number = Math.abs(km);
@@ -72,54 +79,54 @@ export default function CreateTaskGps() {
     return dataFormatada;
   }
 
-     const criarTarefaMutation = useMutation({
-        mutationFn: async (dadosTarefa: CheckCompletion) => {
-          const response = await fetch("https://bondis-app-backend.onrender.com/tasks/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(dadosTarefa),
-          });
-          if (!response.ok) {
-            const dadosErro = await response.json();
-            throw new Error(dadosErro.message || "Falha ao criar tarefa");
-          }
-          return response.json();
+  const criarTarefaMutation = useMutation({
+    mutationFn: async (dadosTarefa: CheckCompletion) => {
+      const response = await fetch("http://10.0.2.2:3000/tasks/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        onSuccess: (data) => {
-          // limparInputs();
-          queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
-          queryClient.invalidateQueries({ queryKey: ["desafios"] });
-          queryClient.invalidateQueries({ queryKey: ["routeData", 1] });  //desafioId
-          queryClient.invalidateQueries({ queryKey: ["rankData", 1] });  //desafioId
-    
-          const metaAtingida = data.challengeCompleted;
-    
-          if (metaAtingida) {
-            router.push({
-              pathname: "/dashboard",
-            });
-          } else {
-            router.push({
-              pathname: "/taskList",
-            });
-          }
-        },
-        onError: (erro) => {
-          console.error("Erro ao criar tarefa:", erro);
-        },
+        body: JSON.stringify(dadosTarefa),
       });
+      if (!response.ok) {
+        const dadosErro = await response.json();
+        throw new Error(dadosErro.message || "Falha ao criar tarefa");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // limparInputs();
+      setIsLoading(false);
+      queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
+      queryClient.invalidateQueries({ queryKey: ["desafios"] });
+      queryClient.invalidateQueries({ queryKey: ["routeData", 1] }); //desafioId
+      queryClient.invalidateQueries({ queryKey: ["rankData", 1] }); //desafioId
 
+      const metaAtingida = data.challengeCompleted;
 
+      if (metaAtingida) {
+        router.push({
+          pathname: "/dashboard",
+        });
+      } else {
+        router.push({
+          pathname: "/taskList",
+        });
+      }
+    },
+    onError: (erro) => {
+      console.error("Erro ao criar tarefa:", erro);
+      setIsLoading(false);
+    },
+  });
 
-    const verificarConclusaoDesafioMutation = useMutation({
+  const verificarConclusaoDesafioMutation = useMutation({
     mutationFn: async () => {
       // const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
 
       const response = await fetch(
-        "https://bondis-app-backend.onrender.com/tasks/check-completion",
+        "http://10.0.2.2:3000/tasks/check-completion",
         {
           method: "POST",
           headers: {
@@ -127,8 +134,8 @@ export default function CreateTaskGps() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            inscriptionId: 1,
-            distance: +distance,
+            inscriptionId: +inscriptionId,
+            distance: +distanceStore,
           }),
         }
       );
@@ -141,6 +148,7 @@ export default function CreateTaskGps() {
     },
     onSuccess: (data) => {
       if (data.willCompleteChallenge) {
+        setIsLoading(false);
         Alert.alert(
           "Atenção",
           "Ao adicionar esta tarefa, você concluirá o desafio. Uma vez concluído, não será mais possível adicionar nem alterar mais tarefas.",
@@ -152,6 +160,7 @@ export default function CreateTaskGps() {
             {
               text: "Concluir",
               onPress: () => {
+                setIsLoading(true);
                 criarTarefa();
               },
             },
@@ -164,6 +173,7 @@ export default function CreateTaskGps() {
     },
     onError: (erro) => {
       console.error("Erro ao verificar conclusão do desafio:", erro);
+      setIsLoading(false);
       Alert.alert(
         "Erro",
         "Não foi possível verificar se o desafio será concluído. Tente novamente."
@@ -171,41 +181,37 @@ export default function CreateTaskGps() {
     },
   });
 
+  function criarTarefa() {
+    // const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
 
-   function criarTarefa() {
-      // const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
+    const distanceFormated = (d: number): number => {
+      const num = d.toFixed(3);
+      return +num;
+    };
 
-      const distanceFormated = (d: number): number => {
-        const num = d.toFixed(3)
-        return +num
-      }
-  
-      const dadosTarefa: DadosTarefaGps = {
-        name: nomeAtividade,
-        distance: distanceFormated(+distance),
-        environment: "livre",
-        calories: 200,
-        inscriptionId: 1, // inscriptionId
-        date: getFormattedCurrentUtcDate() ,
-        duration: +elapsed,
-        gpsTask: true
-      };
-  
-      criarTarefaMutation.mutate(dadosTarefa);
-    }
+    const dadosTarefa: DadosTarefaGps = {
+      name: nomeAtividade,
+      distance: distanceFormated(+distanceStore),
+      environment: "livre",
+      calories: 200,
+      inscriptionId: +inscriptionId, // inscriptionId
+      date: getFormattedCurrentUtcDate(),
+      duration: +elapsedStore,
+      gpsTask: true,
+    };
 
-
+    criarTarefaMutation.mutate(dadosTarefa);
+  }
 
   function verificarConclusao() {
+    console.log("apertou verificar conclusao");
+    setIsLoading(true);
     verificarConclusaoDesafioMutation.mutate();
   }
 
-
-
-
   return (
     <SafeAreaView className="flex-1 ">
-      <ScrollView className="flex-1">
+      <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
         <View className="mb-[10px] pt-[38px] mx-5">
           <TouchableOpacity
             onPress={() => router.back()}
@@ -216,7 +222,7 @@ export default function CreateTaskGps() {
         </View>
 
         <Text className="text-2xl font-anton-regular mt-7 mx-5">
-          Como foi a sua atividade? {distance}
+          Como foi a sua atividade?
         </Text>
 
         <Text className="font-inter-bold text-base mt-7 mx-5">
@@ -261,7 +267,7 @@ export default function CreateTaskGps() {
         </Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
           <Text className="text-dark-gray p-4">
-            {convertSecondsToTimeStringWithSeconds(+elapsed)}
+            {convertSecondsToTimeStringWithSeconds(+elapsedStore)}
           </Text>
         </View>
 
@@ -270,7 +276,7 @@ export default function CreateTaskGps() {
         </Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
           <Text className="text-dark-gray p-4">
-            {converterKmParaString(+distance)}
+            {converterKmParaString(+distanceStore)}
           </Text>
         </View>
 
@@ -283,7 +289,7 @@ export default function CreateTaskGps() {
 
         <Text className="font-inter-bold text-base mt-7 mx-5">Local</Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
-          <Text className="text-dark-gray p-4">{city}</Text>
+          <Text className="text-dark-gray p-4">{cityStore}</Text>
         </View>
 
         <TouchableOpacity className="mt-[48px] mb-[24px]">
@@ -292,9 +298,24 @@ export default function CreateTaskGps() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={verificarConclusao} className={botaoDesabilitado()}>
-          <Text className="font-inter-bold text-base">Cadastra atividade</Text>
-        </TouchableOpacity>
+        <Pressable
+          onPress={verificarConclusao}
+          className={botaoDesabilitado({
+            intent: nomeAtividade.length === 0 || isLoading ? "disabled" : null,
+          })}
+          disabled={nomeAtividade.length === 0 || isLoading}
+        >
+          {isLoading ? (
+            <View className="flex-row items-center gap-x-2">
+              <Text className="font-inter-bold text-base">Carregando...</Text>
+              <ActivityIndicator color="#000000" />
+            </View>
+          ) : (
+            <Text className="font-inter-bold text-base">
+              Cadastrar atividade
+            </Text>
+          )}
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -305,10 +326,8 @@ const botaoDesabilitado = cva(
   {
     variants: {
       intent: {
-        disabled: "opacity-50",
+        disabled: "opacity-50 pointer-events-none",
       },
     },
   }
 );
-
-

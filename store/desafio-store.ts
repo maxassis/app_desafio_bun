@@ -26,12 +26,7 @@ interface DesafioStore {
   clearTaskData: () => void;
   setMapData: (
     desafioId: number,
-    // totalDuration: number,
-    // taskCount: number,
-    // progressPercentage: number,
-    // progress: number,
     inscriptionId: number,
-    // desafioName: string
   ) => void;
   totalDuration: number;
   taskCount: number; 
