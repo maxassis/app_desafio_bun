@@ -403,7 +403,6 @@ export default function useTracker() {
     };
   }, [status]);
 
-  // Atualiza automaticamente a store sempre que os valores mudarem
   useEffect(() => {
     setElapsedStore(elapsed);
   }, [elapsed]);
