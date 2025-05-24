@@ -70,7 +70,7 @@ export interface RankData {
 }
 
 // API base URL
-const API_BASE_URL = "http://10.0.2.2:3000";
+const API_BASE_URL = "https://bondis-app-backend.onrender.com";
 
 // Get auth token from store
 const getToken = () => {

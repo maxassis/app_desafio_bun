@@ -51,7 +51,8 @@ export default {
         {
           photosPermission: "The app accesses your photos to let you share them with your friends."
         }
-      ]
+      ],
+      "expo-router",
     ],
     extra: {
       eas: {

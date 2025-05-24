@@ -69,7 +69,7 @@ export default function RecoveryCreatePassword({ route }: any) {
     if (password !== password2) return
 
     try {
-      const response = await fetch("http://10.0.2.2:3000/users/change-password", {
+      const response = await fetch("https://bondis-app-backend.onrender.com/users/change-password", {
         method: "PATCH",
         headers: { "Content-type": "application/json" },
         body: JSON.stringify({ email, new_password: password }),
