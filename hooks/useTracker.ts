@@ -544,8 +544,6 @@ export default function useTracker() {
     lastLocation.current = null;
     kalman.current.reset();
 
-    // Resetar a store também, se quiser:
-    // resetStore();
   }
 
   return {
