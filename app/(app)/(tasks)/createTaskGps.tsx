@@ -19,8 +19,10 @@ import { useLocalSearchParams } from "expo-router";
 import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
+
+
 
 interface DadosTarefaGps {
   name: string;
@@ -45,7 +47,7 @@ export default function CreateTaskGps() {
   const queryClient = useQueryClient();
   const { inscriptionId, desafioId } = useLocalSearchParams();
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
-
+  
   function converterKmParaString(km: number): string {
     const kmAbsoluto: number = Math.abs(km);
 
@@ -93,7 +95,7 @@ export default function CreateTaskGps() {
       }
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: { challengeCompleted: boolean }) => {
       // limparInputs();
       setIsLoading(false);
       queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
@@ -216,7 +218,7 @@ export default function CreateTaskGps() {
         </View>
 
         <Text className="text-2xl font-anton-regular mt-7 mx-5">
-          Como foi a sua atividade? {inscriptionId}
+          Como foi a sua atividade?
         </Text>
 
         <Text className="font-inter-bold text-base mt-7 mx-5">

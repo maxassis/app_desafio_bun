@@ -24,6 +24,8 @@ import { router } from "expo-router";
 import tokenExists from "../../store/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDesafios } from "../../utils/api-service";
+import useDesafioStore from "../../store/desafio-store";
+import { set } from "react-hook-form";
 
 const fundoCinza = require("../../assets/fundo-cinza.png");
 const fundoVerde = require("../../assets/fundo-verde.png");
@@ -41,37 +43,35 @@ export default function Rastreador() {
     stopTracking,
   } = useTracker();
 
-  const lottieRef = useRef<any>(null); 
+  const lottieRef = useRef<any>(null);
 
   const [showCountdown, setShowCountdown] = useState(true);
   const [countdownNumber, setCountdownNumber] = useState(3);
   const [showTooltip, setShowTooltip] = useState(false);
   const token = tokenExists((state) => state.token);
- 
+  const setDesafioData = useDesafioStore((state) => state.setDesafioData);
+
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
   const isPaused = status === "paused";
 
-    const {
-      data: desafios,
-    } = useQuery({
-      queryKey: ["desafios"],
-      queryFn: () => fetchDesafios(token!),
-      enabled: !!token,
-      retry: 1,
-      staleTime: 1000 * 60 * 10,
-    });
-
+  const { data: desafios } = useQuery({
+    queryKey: ["desafios"],
+    queryFn: () => fetchDesafios(token!),
+    enabled: !!token,
+    retry: 1,
+    staleTime: 1000 * 60 * 10,
+  });
 
   const handlePause = () => {
     pauseTracking();
-    lottieRef.current?.pause(); 
+    lottieRef.current?.pause();
   };
 
   const handleResume = () => {
     resumeTracking();
-    lottieRef.current?.play(); 
+    lottieRef.current?.play();
   };
 
   function pressStop() {
@@ -82,20 +82,36 @@ export default function Rastreador() {
   }
 
   function longPressStop() {
-    if(desafios && desafios?.length === 1) {
-      router.push({pathname: "/createTaskGps", params: { desafioId: desafios[0].desafioId, inscriptionId: desafios[0].id}});
+    if (desafios && desafios?.length === 1) {
+      setDesafioData(
+        desafios[0].id,
+        desafios[0].desafio.name,
+        0,
+        0,
+        desafios[0].desafioId
+      )
+      
+      router.push({
+        pathname: "/createTaskGps",
+        params: {
+          desafioId: desafios[0].desafioId,
+          inscriptionId: desafios[0].id,
+        },
+      });
     }
 
-    if(desafios && desafios?.length > 1) {
-      console.log("tem mais de 1 desafio");
-      // router.push("/desafios");
-      router.push({ pathname: "/desafios", params: { gps: "true"}});
+    if (desafios && desafios?.length > 1) {
+      router.push({ pathname: "/desafios", params: { gps: "true" } });
     }
-   }
+  }
 
   const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600).toString().padStart(2, "0");
-    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
+    const h = Math.floor(seconds / 3600)
+      .toString()
+      .padStart(2, "0");
+    const m = Math.floor((seconds % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${h}:${m}:${s}`;
   };
@@ -183,7 +199,11 @@ export default function Rastreador() {
   if (showCountdown) {
     return (
       <SafeAreaView className="flex-1 bg-black">
-        <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
+        <StatusBar
+          backgroundColor="#000"
+          barStyle="light-content"
+          translucent={false}
+        />
         <ImageBackground source={fundoPreto} className="flex-1">
           <View className="flex-1 justify-center items-center">
             <Animated.Text
@@ -201,7 +221,10 @@ export default function Rastreador() {
   return (
     <SafeAreaView className="flex-1 text-white">
       <View className="bg-bondis-green flex-1">
-        <ImageBackground source={backgroundImage} className="flex-1 pt-[60px] px-5">
+        <ImageBackground
+          source={backgroundImage}
+          className="flex-1 pt-[60px] px-5"
+        >
           <LottieView
             ref={lottieRef}
             source={require("../../assets/lottie/run3.json")}
@@ -280,7 +303,11 @@ export default function Rastreador() {
           )}
         </ImageBackground>
       </View>
-      <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
+      <StatusBar
+        backgroundColor="#000"
+        barStyle="light-content"
+        translucent={false}
+      />
     </SafeAreaView>
   );
 }
