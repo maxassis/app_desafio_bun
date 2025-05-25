@@ -53,6 +53,7 @@ yarn-error.*
 # local env files
 .env*.local
 .env
+*.env
 
 # typescript
 *.tsbuildinfo
@@ -62,3 +63,4 @@ yarn-error.*
 app.json
 
 *.apk
+.apk
