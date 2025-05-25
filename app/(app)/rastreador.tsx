@@ -25,7 +25,6 @@ import tokenExists from "../../store/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDesafios } from "../../utils/api-service";
 import useDesafioStore from "../../store/desafio-store";
-import { set } from "react-hook-form";
 
 const fundoCinza = require("../../assets/fundo-cinza.png");
 const fundoVerde = require("../../assets/fundo-verde.png");
