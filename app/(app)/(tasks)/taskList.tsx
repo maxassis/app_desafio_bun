@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import tokenExists from "../../../store/auth-store";
 import {
   SafeAreaView,
@@ -9,12 +9,13 @@ import {
   Alert,
   ActivityIndicator,
   StatusBar,
+  BackHandler,
 } from "react-native";
 import Left from "../../../assets/Icon-left.svg";
 import TaskItem from "../../../components/taskItem";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Plus from "../../../assets/plus.svg";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
 
@@ -68,59 +69,78 @@ export default function TaskList() {
     desafioName,
     setTaskData,
     desafioId,
-  } = useDesafioStore(); // Certifique-se de que 'id' esteja no store
+  } = useDesafioStore();
+
   const token = tokenExists((state) => state.token);
   const [task, setTask] = useState<Data>();
+
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetEditRef = useRef<BottomSheet>(null);
+  const bottomSheetDeleteRef = useRef<BottomSheet>(null);
+
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [isDeleteSheetOpen, setIsDeleteSheetOpen] = useState(false);
+
   const snapPoints = useMemo(() => ["30%"], []);
   const snapPointsEdit = useMemo(() => ["20%"], []);
-  const queryClient = useQueryClient();
-  const { origin } = useLocalSearchParams();
+  const snapPointsDelete = useMemo(() => ["15%"], []);
 
-  // Query para buscar as tasks
+  const queryClient = useQueryClient();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["tasks", inscriptionId],
     queryFn: () => fetchTasks(inscriptionId as number, token!),
   });
 
-  // Mutation para deletar task
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteTaskApi(id, token!),
     onSuccess: () => {
-      // Invalida todas as queries relacionadas
       queryClient.invalidateQueries({ queryKey: ["tasks", inscriptionId] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
       queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
-
-      bottomSheetEditRef.current?.close();
+      closeAllSheets();
     },
-    onError: (error) => {
-      Alert.alert("Erro ao excluir tarefa", "", [
-        {
-          text: "Ok",
-          style: "cancel",
-        },
-      ]);
+    onError: () => {
+      Alert.alert("Erro ao excluir tarefa", "", [{ text: "Ok", style: "cancel" }]);
     },
   });
+
+  const closeAllSheets = () => {
+    bottomSheetRef.current?.close();
+    bottomSheetEditRef.current?.close();
+    bottomSheetDeleteRef.current?.close();
+    setIsBottomSheetOpen(false);
+    setIsEditSheetOpen(false);
+    setIsDeleteSheetOpen(false);
+  };
+
+  useEffect(() => {
+    const backAction = () => {
+      if (isBottomSheetOpen || isEditSheetOpen || isDeleteSheetOpen) {
+        closeAllSheets();
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [isBottomSheetOpen, isEditSheetOpen, isDeleteSheetOpen]);
 
   function deleteTask(id: number) {
     Alert.alert(
       "Confirmação de Exclusão",
       "Tem certeza que deseja excluir esta tarefa?",
       [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: () => deleteMutation.mutate(id),
-        },
+        { text: "Cancelar", style: "cancel" },
+        { text: "Excluir", style: "destructive", onPress: () => deleteMutation.mutate(id) },
       ],
       { cancelable: true }
     );
@@ -131,27 +151,27 @@ export default function TaskList() {
     bottomSheetEditRef.current?.expand();
   }
 
+  function openModalDelete(taskData: Data) {
+    setTask(taskData);
+    bottomSheetDeleteRef.current?.expand();
+  }
+
   function toNextPage() {
     router.replace("/map");
-    // if (origin === "map") {
-    //   router.replace("/map");
-    // } else {
-    //   router.replace("/createTask");
-    // }
   }
 
   return (
     <SafeAreaView className="flex-1">
-      <ScrollView overScrollMode="never" className="bg-[#F1F1F1] flex-1 ">
+      <ScrollView overScrollMode="never" className="bg-[#F1F1F1] flex-1">
         <View className="bg-white mb-7">
           <View className="flex-row mt-[49.5] px-5 bg-white">
             <TouchableOpacity
               className="w-[30px] h-[30px]"
-              onPress={() => toNextPage()}
+              onPress={toNextPage}
             >
               <Left />
             </TouchableOpacity>
-            <Text className="text-base font-inter-bold mx-auto ">
+            <Text className="text-base font-inter-bold mx-auto">
               Atividades recentes
             </Text>
           </View>
@@ -173,9 +193,13 @@ export default function TaskList() {
             <Text>Erro ao carregar tarefas</Text>
           </View>
         ) : (
-          data &&
-          data.map((task) => (
-            <TaskItem task={task} key={task.id} openModalEdit={openModalEdit} />
+          data?.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              openModalEdit={openModalEdit}
+              openModalDelete={openModalDelete}
+            />
           ))
         )}
       </ScrollView>
@@ -187,15 +211,14 @@ export default function TaskList() {
         <Plus />
       </TouchableOpacity>
 
-      {/* Bottom Sheet para adicionar atividade */}
+      {/* BottomSheet - Adicionar */}
       <BottomSheet
         ref={bottomSheetRef}
         snapPoints={snapPoints}
         index={-1}
         enablePanDownToClose
-        backgroundStyle={{
-          borderRadius: 20,
-        }}
+        onChange={(index) => setIsBottomSheetOpen(index !== -1)}
+        backgroundStyle={{ borderRadius: 20 }}
       >
         <BottomSheetView className="flex-1">
           <Text className="font-inter-bold mt-[10px] text-base mx-5 mb-4">
@@ -210,9 +233,7 @@ export default function TaskList() {
             </View>
             <TouchableOpacity
               onPress={() => {
-                if (task) {
-                  setTaskData(task);
-                }
+                if (task) setTaskData(task);
                 router.push("/createTask");
                 bottomSheetRef.current?.close();
               }}
@@ -224,15 +245,14 @@ export default function TaskList() {
         </BottomSheetView>
       </BottomSheet>
 
-      {/* Bottom Sheet para editar/excluir */}
+      {/* BottomSheet - Editar */}
       <BottomSheet
         ref={bottomSheetEditRef}
         snapPoints={snapPointsEdit}
         index={-1}
         enablePanDownToClose
-        backgroundStyle={{
-          borderRadius: 20,
-        }}
+        onChange={(index) => setIsEditSheetOpen(index !== -1)}
+        backgroundStyle={{ borderRadius: 20 }}
       >
         <BottomSheetView className="flex-1">
           <View className="mx-5">
@@ -248,6 +268,27 @@ export default function TaskList() {
             >
               <Text>Editar atividade</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => deleteTask(task!.id)}
+              className="h-[51px] justify-center items-center"
+            >
+              <Text className="text-bondis-alert-red">Excluir atividade</Text>
+            </TouchableOpacity>
+          </View>
+        </BottomSheetView>
+      </BottomSheet>
+
+      {/* BottomSheet - Excluir */}
+      <BottomSheet
+        ref={bottomSheetDeleteRef}
+        snapPoints={snapPointsDelete}
+        index={-1}
+        enablePanDownToClose
+        onChange={(index) => setIsDeleteSheetOpen(index !== -1)}
+        backgroundStyle={{ borderRadius: 20 }}
+      >
+        <BottomSheetView className="flex-1">
+          <View className="mx-5">
             <TouchableOpacity
               onPress={() => deleteTask(task!.id)}
               className="h-[51px] justify-center items-center"

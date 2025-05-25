@@ -3,99 +3,112 @@ import Livre from "../assets/livre.svg";
 import Calendar from "../assets/calendar.svg";
 import Pin from "../assets/map-pin.svg";
 import Gear from "../assets/settings-black.svg";
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration';
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import { convertSecondsToTimeString } from "../utils/timeUtils";
 import RSS from "../assets/rss.svg";
-import relativeTime from 'dayjs/plugin/relativeTime';
+import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(duration);
-dayjs.extend(relativeTime)
+dayjs.extend(relativeTime);
 
 export interface TaskItemProps {
-  id: number
-  name: string
-  environment: string
-  date: Date | null
-  duration: number
-  calories: number
-  local: string | null
-  distanceKm: string
-  inscriptionId: number
-  usersId: string
-  gpsTask: boolean
+  id: number;
+  name: string;
+  environment: string;
+  date: Date | null;
+  duration: number;
+  calories: number;
+  local: string | null;
+  distanceKm: string;
+  inscriptionId: number;
+  usersId: string;
+  gpsTask: boolean;
 }
 
 export interface TaskListProps {
-  task: TaskItemProps
-  openModalEdit: (taskData: TaskItemProps) => void
+  task: TaskItemProps;
+  openModalEdit: (taskData: TaskItemProps) => void;
+  openModalDelete: (taskData: TaskItemProps) => void;
 }
-
-// function tempoDecorrido(data: Date) {
-//   return dayjs(data).fromNow();
-// }
 
 function tempoDecorrido(data: Date) {
   const nowUTC = dayjs().utc();
   const dateUTC = dayjs(data).utc();
 
-  console.log(data)
+  console.log(data);
   return dateUTC.from(nowUTC);
 }
 
-
-export default function TaskItem({ task, openModalEdit }: TaskListProps) {
-    
-    return(
-        <View className="h-[165px] p-5 bg-white mb-4">
-          <View className="flex-row w-full h-[42px]">
-            <View className="h-[42px] flex-row">
-              <Livre />
-              <View className="ml-4 ">
-                <Text className="text-base font-inter-bold">
-                  {task.name}
+export default function TaskItem({
+  task,
+  openModalEdit,
+  openModalDelete,
+}: TaskListProps) {
+  return (
+    <View className="h-[165px] p-5 bg-white mb-4">
+      <View className="flex-row w-full h-[42px]">
+        <View className="h-[42px] flex-row">
+          <Livre />
+          <View className="ml-4 ">
+            <Text className="text-base font-inter-bold">{task.name}</Text>
+            <View className="flex-row">
+              <View className="flex-row gap-x-1 items-center justify-center">
+                <Calendar />
+                <Text className="text-bondis-gray-dark text-xs">
+                  {tempoDecorrido(task.date!)}
                 </Text>
-                <View className="flex-row">
-                  <View className="flex-row gap-x-1 items-center justify-center">
-                    <Calendar />
-                    <Text className="text-bondis-gray-dark text-xs">
-                    {tempoDecorrido(task.date!)}  
-                    </Text>
-                  </View>
-                  <View className="flex-row gap-x-1 items-center justify-center ml-4">
-                    {task.local && <Pin />}
-                    <Text className="text-bondis-gray-dark text-xs ml-4">
-                      {task.local}
-                    </Text>
-                  </View>
-                </View>
+              </View>
+              <View className="flex-row gap-x-1 items-center justify-center ml-4">
+                {task.local && <Pin />}
+                <Text className="text-bondis-gray-dark text-xs ml-4">
+                  {task.local}
+                </Text>
               </View>
             </View>
-
-            <TouchableOpacity onPress={() => openModalEdit(task)} className="ml-auto w-[40px] h-[32px] items-end">
-              <Gear />
-            </TouchableOpacity>
           </View>
-
-          <View className="flex-row items-center gap-x-1 mt-3 none">
-            {task.gpsTask && <RSS />}
-            <Text className="text-xs text-bondis-gray-dark">{task.gpsTask ? "Registrado em tempo real" : "Cadastrado manualmente" }</Text>
-          </View> 
-
-          <View className="flex-row mt-3">
-            <View className="w-[98px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
-                <Text className="text-[18px] font-inter-bold">{task.distanceKm}</Text>
-                <Text className="text-bondis-gray-dark text-[10px]">KM</Text>
-            </View>
-            <View className="w-[100px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
-                <Text className="text-[18px] font-inter-bold">{ convertSecondsToTimeString(task.duration) }</Text>
-                <Text className="text-bondis-gray-dark text-[10px]">DURAÇÃO</Text>
-            </View>
-            <View className="w-[98px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
-                <Text className="text-[18px] font-inter-bold">{task.calories}</Text>
-                <Text className="text-bondis-gray-dark text-[10px]">CAL</Text>
-            </View>
-          </View> 
         </View>
-    )
+
+        {/* <TouchableOpacity onPress={() => openModalEdit(task)} className="ml-auto w-[40px] h-[32px] items-end">
+              <Gear />
+            </TouchableOpacity> */}
+        <TouchableOpacity
+          onPress={() => {
+            if (task.gpsTask) {
+              openModalDelete(task);
+            } else {
+              openModalEdit(task);
+            }
+          }}
+          className="ml-auto w-[40px] h-[32px] items-end"
+        >
+          <Gear />
+        </TouchableOpacity>
+      </View>
+
+      <View className="flex-row items-center gap-x-1 mt-3 none">
+        {task.gpsTask && <RSS />}
+        <Text className="text-xs text-bondis-gray-dark">
+          {task.gpsTask ? "Registrado em tempo real" : "Cadastrado manualmente"}
+        </Text>
+      </View>
+
+      <View className="flex-row mt-3">
+        <View className="w-[98px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
+          <Text className="text-[18px] font-inter-bold">{task.distanceKm}</Text>
+          <Text className="text-bondis-gray-dark text-[10px]">KM</Text>
+        </View>
+        <View className="w-[100px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
+          <Text className="text-[18px] font-inter-bold">
+            {convertSecondsToTimeString(task.duration)}
+          </Text>
+          <Text className="text-bondis-gray-dark text-[10px]">DURAÇÃO</Text>
+        </View>
+        <View className="w-[98px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
+          <Text className="text-[18px] font-inter-bold">{task.calories}</Text>
+          <Text className="text-bondis-gray-dark text-[10px]">CAL</Text>
+        </View>
+      </View>
+    </View>
+  );
 }
