@@ -89,7 +89,7 @@ export default function ProfileEdit() {
     mutationFn: async (formData: FormData): Promise<uploadAvatarResponse> => {
       setLoadingUpload(true);
 
-      const response = await fetch("http://10.0.2.2:3000/users/upload-avatar", {
+      const response = await fetch("https://bondis-app-backend.onrender.com/users/upload-avatar", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -122,7 +122,7 @@ export default function ProfileEdit() {
     mutationFn: async () => {
       setLoadingUpload(true);
 
-      const result = await fetch(`http://10.0.2.2:3000/users/delete-avatar`, {
+      const result = await fetch(`https://bondis-app-backend.onrender.com/users/delete-avatar`, {
         method: "DELETE",
         headers: {
           authorization: "Bearer " + token,
@@ -195,7 +195,7 @@ export default function ProfileEdit() {
 
   const profileUpdateMutation = useMutation({
     mutationFn: async () => {
-      const result = await fetch("http://10.0.2.2:3000/users/edit-userdata", {
+      const result = await fetch("https://bondis-app-backend.onrender.com/users/edit-userdata", {
         method: "PATCH",
         headers: {
           "Content-type": "application/json",

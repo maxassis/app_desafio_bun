@@ -24,9 +24,9 @@ export interface Data {
   id: number;
   name: string;
   environment: string;
-  date: null | Date;
+  date: Date;
   duration: number;
-  calories: number;
+  calories: number | null;
   local: null | string;
   distanceKm: string;
   inscriptionId: number;
@@ -39,7 +39,7 @@ const fetchTasks = async (
   token: string
 ): Promise<TasksData> => {
   const response = await fetch(
-    `http://10.0.2.2:3000/tasks/get-tasks/${inscriptionId}`,
+    `https://bondis-app-backend.onrender.com/tasks/get-tasks/${inscriptionId}`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -51,7 +51,7 @@ const fetchTasks = async (
 };
 
 const deleteTaskApi = async (id: number, token: string) => {
-  const response = await fetch(`http://10.0.2.2:3000/tasks/delete-task/${id}`, {
+  const response = await fetch(`https://bondis-app-backend.onrender.com/tasks/delete-task/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -91,6 +91,7 @@ export default function TaskList() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["tasks", inscriptionId],
     queryFn: () => fetchTasks(inscriptionId as number, token!),
+    enabled: !!inscriptionId && !!token,
   });
 
   const deleteMutation = useMutation({
@@ -307,3 +308,4 @@ export default function TaskList() {
     </SafeAreaView>
   );
 }
+

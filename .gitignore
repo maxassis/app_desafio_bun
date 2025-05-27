@@ -60,7 +60,7 @@ yarn-error.*
 
 # @end expo-cli
 
-app.json
+# app.json
 
 *.apk
 .apk

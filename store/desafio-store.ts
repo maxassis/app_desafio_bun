@@ -6,7 +6,7 @@ interface Task {
   environment: string;
   date: null | Date;
   duration: number;
-  calories: number;
+  calories: number | null;
   local: null | string;
   distanceKm: string;
   inscriptionId: number;

@@ -10,7 +10,6 @@ export function convertSecondsToTimeString(totalSeconds: number): string {
     return `${paddedHours}:${paddedMinutes}`;
   }
 
-
   export function convertSecondsToTimeStringWithSeconds(totalSeconds: number): string {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);

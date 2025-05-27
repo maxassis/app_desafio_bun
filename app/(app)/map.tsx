@@ -7,6 +7,7 @@ import {
   StatusBar,
   Text,
   FlatList,
+  ScrollView,
 } from "react-native";
 import { Image as ExpoImage } from "expo-image";
 import MapView, {
@@ -21,9 +22,10 @@ import { router } from "expo-router";
 import Left from "../../assets/arrow-left.svg";
 import { cva } from "class-variance-authority";
 import RankingBottomSheet from "../../components/bottomSheeetMap";
-import dayjs from 'dayjs';
-import 'dayjs/locale/pt-br';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/pt-br";
+import relativeTime from "dayjs/plugin/relativeTime";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Octicons from "@expo/vector-icons/Octicons";
 import { fetchUserData, fetchRouteData } from "@/utils/api-service";
@@ -45,7 +47,7 @@ interface UserParticipation {
   totalTasks: number;
   totalCalories: number;
   totalDistanceKm: number;
-  lastTaskDate: Date
+  lastTaskDate: Date;
 }
 
 export interface RankData {
@@ -131,6 +133,7 @@ export default function Map2() {
     UserParticipation[]
   >([]);
   const { desafioId } = useDesafioStore();
+  const [showCardUser, setShowCardUser] = useState(false);
 
   // Novo estado para controlar o tipo de mapa
   const [mapType, setMapType] = useState<"standard" | "satellite" | "hybrid">(
@@ -142,7 +145,8 @@ export default function Map2() {
   // const [bearing, setBearing] = useState<number>(0); // 0 a 359 graus
 
   dayjs.extend(relativeTime);
-  dayjs.locale('pt-br');
+  dayjs.locale("pt-br");
+  dayjs.extend(utc);
 
   const getUserPath = useMemo(() => {
     if (!routeCoordinates || userDistance === 0) return [];
@@ -240,6 +244,12 @@ export default function Map2() {
       );
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowCardUser(true);
+    }, 8000);
+  }, [mapReady]);
 
   const {
     data: routeData,
@@ -359,7 +369,7 @@ export default function Map2() {
               }
               style={
                 user.userId === userConfig?.usersId
-                  ? { zIndex: 100000, elevation: 100000 }
+                  ? { zIndex: 50, elevation: 50 }
                   : { zIndex: index, elevation: index }
               }
               tracksViewChanges={true}
@@ -399,7 +409,7 @@ export default function Map2() {
                 longitude:
                   routeCoordinates[routeCoordinates.length - 1].longitude,
               }}
-              style={{ zIndex: 9999, elevation: 9999 }}
+              style={{ zIndex: 40, elevation: 40 }}
               title="Final"
               tracksViewChanges={true}
             >
@@ -430,7 +440,6 @@ export default function Map2() {
 
       {/* Controles de perspectiva do mapa */}
       <View className="absolute right-[13px] top-[100px] bg-bondis-text-gray rounded-full overflow-hidden">
-        {/* Aumentar inclinação */}
         <TouchableOpacity
           onPress={increaseTilt}
           className="h-[40px] w-[40px] justify-center items-center border-b border-gray-400"
@@ -438,7 +447,6 @@ export default function Map2() {
           <AntDesign name="arrowup" size={16} color="black" />
         </TouchableOpacity>
 
-        {/* Diminuir inclinação */}
         <TouchableOpacity
           onPress={decreaseTilt}
           className="h-[40px] w-[40px] justify-center items-center border-b border-gray-400"
@@ -446,7 +454,6 @@ export default function Map2() {
           <AntDesign name="arrowdown" size={16} color="black" />
         </TouchableOpacity>
 
-        {/* Resetar câmera */}
         <TouchableOpacity
           onPress={resetCamera}
           className="h-[40px] w-[40px] justify-center items-center"
@@ -475,14 +482,16 @@ export default function Map2() {
                   ) : (
                     <Image
                       source={require("../../assets/user2.png")}
-                      className="h-[32px] w-[32px] rounded-full"
+                      className="h-[43px] w-[43px] rounded-full"
                     />
                   )}
                   <Text className="text-base font-inter-bold ml-2">
                     {item.name}
                   </Text>
                 </View>
-                <Text className="text-[#707271] text-[12px]">{dayjs(item.lastTaskDate).utc().local().fromNow()}</Text>
+                <Text className="text-[#707271] text-[12px]">
+                  {dayjs(item.lastTaskDate).utc().local().fromNow()}
+                </Text>
               </View>
 
               <View className="flex-row w-1/3 h-[37px] items-center justify-between mt-3">

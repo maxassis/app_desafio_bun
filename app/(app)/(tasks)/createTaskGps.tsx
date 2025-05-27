@@ -81,7 +81,7 @@ export default function CreateTaskGps() {
 
   const criarTarefaMutation = useMutation({
     mutationFn: async (dadosTarefa: CheckCompletion) => {
-      const response = await fetch("http://10.0.2.2:3000/tasks/create", {
+      const response = await fetch("https://bondis-app-backend.onrender.com/tasks/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -124,7 +124,7 @@ export default function CreateTaskGps() {
   const verificarConclusaoDesafioMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(
-        "http://10.0.2.2:3000/tasks/check-completion",
+        "https://bondis-app-backend.onrender.com/tasks/check-completion",
         {
           method: "POST",
           headers: {

@@ -32,7 +32,6 @@ const RankingBottomSheet = ({
 }: BottomSheetProps) => {
   const bottomSheetRef = useRef(null);
   const snapPoints = useMemo(() => ["20%", "85%", "100%"], []);
-  const { totalDuration, taskCount, progressPercentage } = useDesafioStore();
   const { desafioId } = useDesafioStore();
 
   const { data: rankData, isLoading } = useQuery<
@@ -46,8 +45,6 @@ const RankingBottomSheet = ({
 
   const {
     data: allDesafios,
-    isLoading: isDesafiosLoading,
-    isError: isDesafiosError,
   } = useQuery({
     queryKey: ["getAllDesafios"],
     queryFn: fetchAllDesafios,
@@ -55,8 +52,7 @@ const RankingBottomSheet = ({
   });
 
   const currentDesafio = allDesafios?.find((desafio) => desafio.id === desafioId);
-  const distanceTotal = currentDesafio?.distance || 0;
-
+  
   return (
     <BottomSheet
       ref={bottomSheetRef}

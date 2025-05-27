@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: "bondis-app",
+    name: "meu-desafio-2",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -50,6 +50,14 @@ export default {
         "expo-image-picker",
         {
           photosPermission: "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission: "Este app precisa da sua localização para mostrar sua posição no mapa.",
+          locationAlwaysPermission: "Este app precisa da sua localização para mostrar sua posição no mapa.",
+          locationWhenInUsePermission: "Este app precisa da sua localização para mostrar sua posição no mapa."
         }
       ],
       "expo-router"

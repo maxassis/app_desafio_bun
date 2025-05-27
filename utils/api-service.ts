@@ -91,7 +91,7 @@ export interface Desafio {
 
 
 // API base URL
-const API_BASE_URL = "http://10.0.2.2:3000";
+const API_BASE_URL = "https://bondis-app-backend.onrender.com";
 
 // Get auth token from store
 const getToken = () => {
@@ -184,7 +184,7 @@ export const fetchRankData = async (desafioId: string | number): Promise<RankDat
 
 // Pedos desafios de um usuario
 export async function fetchDesafios(token: string): Promise<DesafioData> {
-  const response = await fetch("http://10.0.2.2:3000/desafio/get-user-desafio/", {
+  const response = await fetch("https://bondis-app-backend.onrender.com/desafio/get-user-desafio/", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

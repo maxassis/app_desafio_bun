@@ -8,17 +8,19 @@ import duration from "dayjs/plugin/duration";
 import { convertSecondsToTimeString } from "../utils/timeUtils";
 import RSS from "../assets/rss.svg";
 import relativeTime from "dayjs/plugin/relativeTime";
+import utc from "dayjs/plugin/utc";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
+dayjs.extend(utc);
 
 export interface TaskItemProps {
   id: number;
   name: string;
   environment: string;
-  date: Date | null;
+  date: Date;
   duration: number;
-  calories: number;
+  calories: number | null;
   local: string | null;
   distanceKm: string;
   inscriptionId: number;
@@ -32,13 +34,15 @@ export interface TaskListProps {
   openModalDelete: (taskData: TaskItemProps) => void;
 }
 
+
 function tempoDecorrido(data: Date) {
+  if (!data) return "Data indisponível";
   const nowUTC = dayjs().utc();
   const dateUTC = dayjs(data).utc();
 
-  console.log(data);
   return dateUTC.from(nowUTC);
 }
+
 
 export default function TaskItem({
   task,
@@ -56,13 +60,13 @@ export default function TaskItem({
               <View className="flex-row gap-x-1 items-center justify-center">
                 <Calendar />
                 <Text className="text-bondis-gray-dark text-xs">
-                  {tempoDecorrido(task.date!)}
+                  {tempoDecorrido(task.date)}
                 </Text>
               </View>
               <View className="flex-row gap-x-1 items-center justify-center ml-4">
                 {task.local && <Pin />}
                 <Text className="text-bondis-gray-dark text-xs ml-4">
-                  {task.local}
+                  {task.local ? task.local : ""}
                 </Text>
               </View>
             </View>
@@ -72,7 +76,7 @@ export default function TaskItem({
         {/* <TouchableOpacity onPress={() => openModalEdit(task)} className="ml-auto w-[40px] h-[32px] items-end">
               <Gear />
             </TouchableOpacity> */}
-        <TouchableOpacity
+         <TouchableOpacity
           onPress={() => {
             if (task.gpsTask) {
               openModalDelete(task);
@@ -95,7 +99,9 @@ export default function TaskItem({
 
       <View className="flex-row mt-3">
         <View className="w-[98px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
-          <Text className="text-[18px] font-inter-bold">{task.distanceKm}</Text>
+          <Text className="text-[18px] font-inter-bold">
+            {task.distanceKm}
+          </Text>
           <Text className="text-bondis-gray-dark text-[10px]">KM</Text>
         </View>
         <View className="w-[100px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
@@ -105,7 +111,9 @@ export default function TaskItem({
           <Text className="text-bondis-gray-dark text-[10px]">DURAÇÃO</Text>
         </View>
         <View className="w-[98px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
-          <Text className="text-[18px] font-inter-bold">{task.calories}</Text>
+          <Text className="text-[18px] font-inter-bold">
+            {task.calories}
+          </Text>
           <Text className="text-bondis-gray-dark text-[10px]">CAL</Text>
         </View>
       </View>

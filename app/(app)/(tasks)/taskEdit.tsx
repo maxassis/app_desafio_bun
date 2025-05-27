@@ -76,7 +76,7 @@ export default function TaskEdit() {
   const checkCompletionMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(
-        "http://10.0.2.2:3000/tasks/check-completion",
+        "https://bondis-app-backend.onrender.com/tasks/check-completion",
         {
           method: "POST",
           headers: {
@@ -140,7 +140,7 @@ export default function TaskEdit() {
       //   : dayjs(`${day.dateString} ${agora.format("HH:mm:ss")}`); // adiciona hora atual à data
 
       const response = await fetch(
-        `http://10.0.2.2:3000/tasks/update-task/${taskData.id}`,
+        `https://bondis-app-backend.onrender.com/tasks/update-task/${taskData.id}`,
         {
           method: "PATCH",
           headers: {
