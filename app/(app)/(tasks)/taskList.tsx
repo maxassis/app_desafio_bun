@@ -152,11 +152,6 @@ export default function TaskList() {
     bottomSheetEditRef.current?.expand();
   }
 
-  function openModalDelete(taskData: Data) {
-    setTask(taskData);
-    bottomSheetDeleteRef.current?.expand();
-  }
-
   function toNextPage() {
     router.replace("/map");
   }
@@ -199,7 +194,6 @@ export default function TaskList() {
               key={task.id}
               task={task}
               openModalEdit={openModalEdit}
-              // openModalDelete={openModalDelete}
             />
           ))
         )}
@@ -246,7 +240,6 @@ export default function TaskList() {
         </BottomSheetView>
       </BottomSheet>
 
-      {/* BottomSheet - Editar */}
       <BottomSheet
         ref={bottomSheetEditRef}
         snapPoints={snapPointsEdit}

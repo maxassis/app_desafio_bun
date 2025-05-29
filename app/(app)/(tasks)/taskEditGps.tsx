@@ -12,59 +12,33 @@ import {
   Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Close from "../../../assets/Close.svg";
 import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
 import { useLocalSearchParams } from "expo-router";
-import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTrackerStore } from "@/store/rastreador-store";
 import useDesafioStore from "../../../store/desafio-store";
 import Left from "../../../assets/Icon-left.svg";
 
-// interface DadosTarefaGps {
-//   name: string;
-//   distance: number;
-//   environment: string;
-//   calories: number;
-//   inscriptionId: number;
-//   date: string | null;
-//   duration: number;
-//   gpsTask: boolean;
-// }
-
-// interface CheckCompletion {
-//   inscriptionId: number;
-//   distance: number;
-// }
-
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
-  const { inscriptionId, desafioId } = useLocalSearchParams();
-
+  const { desafioId } = useLocalSearchParams();
   const { taskData } = useDesafioStore();
 
   useEffect(() => {
     if (taskData) {
       setNomeAtividade(taskData.name);
     }
-  },[taskData]);  
+  }, [taskData]);
 
   function converterKmParaString(km: number): string {
-    const kmAbsoluto: number = Math.abs(km);
-    const quilometrosInteiros: number = Math.floor(kmAbsoluto);
-    const metros: number = Math.round(
-      (kmAbsoluto - quilometrosInteiros) * 1000
-    );
-
-    const kmFormatado: string = String(quilometrosInteiros);
-    const metrosFormatado: string = String(metros);
-    return `${kmFormatado}km ${metrosFormatado}m`;
+    const kmAbsoluto = Math.abs(km);
+    const quilometrosInteiros = Math.floor(kmAbsoluto);
+    const metros = Math.round((kmAbsoluto - quilometrosInteiros) * 1000);
+    return `${quilometrosInteiros}km ${metros}m`;
   }
 
   function formatDate(isoDate: string | Date): string {
@@ -82,143 +56,69 @@ export default function CreateTaskGps() {
     )}:${String(seconds).padStart(2, "0")}`;
   }
 
-//   const criarTarefaMutation = useMutation({
-//     mutationFn: async (dadosTarefa: CheckCompletion) => {
-//       const response = await fetch(
-//         "https://bondis-app-backend.onrender.com/tasks/create",
-//         {
-//           method: "POST",
-//           headers: {
-//             "Content-Type": "application/json",
-//             Authorization: `Bearer ${token}`,
-//           },
-//           body: JSON.stringify(dadosTarefa),
-//         }
-//       );
-//       if (!response.ok) {
-//         const dadosErro = await response.json();
-//         throw new Error(dadosErro.message || "Falha ao criar tarefa");
-//       }
-//       return response.json();
-//     },
-//     onSuccess: (data: { challengeCompleted: boolean }) => {
-//       // limparInputs();
-//       setIsLoading(false);
-//       queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
-//       queryClient.invalidateQueries({ queryKey: ["desafios"] });
-//       queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
-//       queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
+  const mutation = useMutation({
+    mutationFn: async () => {
+      console.log("Payload enviado:", {
+        name: nomeAtividade,
+        environment: taskData?.environment,
+        distanceKm: taskData ? +taskData.distanceKm : 0,
+        date: taskData?.date,
+        duration: taskData?.duration,
+      });
 
-//       const metaAtingida = data.challengeCompleted;
+      const response = await fetch(
+        `https://bondis-app-backend.onrender.com/tasks/update-task/${taskData?.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: nomeAtividade,
+            environment: taskData?.environment,
+            distanceKm: taskData ? +taskData.distanceKm : 0,
+            date: taskData?.date,
+            duration: taskData?.duration ? +taskData.duration : 0,
+          }),
+        }
+      );
 
-//       if (metaAtingida) {
-//         router.push({
-//           pathname: "/dashboard",
-//         });
-//       } else {
-//         router.push({
-//           pathname: "/taskList",
-//         });
-//       }
-//     },
-//     onError: (erro) => {
-//       console.error("Erro ao criar tarefa:", erro);
-//       setIsLoading(false);
-//     },
-//   });
+      const data = await response.json();
+      console.log(data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["desafios"] });
+      queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
 
-//   const verificarConclusaoDesafioMutation = useMutation({
-//     mutationFn: async () => {
-//       const response = await fetch(
-//         "https://bondis-app-backend.onrender.com/tasks/check-completion",
-//         {
-//           method: "POST",
-//           headers: {
-//             "Content-Type": "application/json",
-//             Authorization: `Bearer ${token}`,
-//           },
-//           body: JSON.stringify({
-//             inscriptionId: +inscriptionId,
-//             distance: +distanceStore,
-//           }),
-//         }
-//       );
+      router.back();
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
 
-//       if (!response.ok) {
-//         throw new Error("Erro ao verificar conclusão do desafio");
-//       }
-
-//       return response.json();
-//     },
-//     onSuccess: (data) => {
-//       if (data.willCompleteChallenge) {
-//         setIsLoading(false);
-//         Alert.alert(
-//           "Atenção",
-//           "Ao adicionar esta tarefa, você concluirá o desafio. Uma vez concluído, não será mais possível adicionar nem alterar mais tarefas.",
-//           [
-//             {
-//               text: "Cancelar",
-//               style: "cancel",
-//             },
-//             {
-//               text: "Concluir",
-//               onPress: () => {
-//                 setIsLoading(true);
-//                 criarTarefa();
-//               },
-//             },
-//           ],
-//           { cancelable: true }
-//         );
-//       } else {
-//         criarTarefa();
-//       }
-//     },
-//     onError: (erro) => {
-//       console.error("Erro ao verificar conclusão do desafio:", erro);
-//       setIsLoading(false);
-//       Alert.alert(
-//         "Erro",
-//         "Não foi possível verificar se o desafio será concluído. Tente novamente."
-//       );
-//     },
-//   });
-
-//   function criarTarefa() {
-//     const distanceFormated = (d: number): number => {
-//       const num = d.toFixed(3);
-//       return +num;
-//     };
-
-//     const dadosTarefa: DadosTarefaGps = {
-//       name: nomeAtividade,
-//       distance: distanceFormated(+distanceStore),
-//       environment: "livre",
-//       calories: 200,
-//       inscriptionId: +inscriptionId,
-//       date: getFormattedCurrentUtcDate(),
-//       duration: +elapsedStore,
-//       gpsTask: true,
-//     };
-
-//     criarTarefaMutation.mutate(dadosTarefa);
-//   }
-
-//   function verificarConclusao() {
-//     setIsLoading(true);
-//     verificarConclusaoDesafioMutation.mutate();
-//   }
+  function editRequest() {
+    console.log("edit");
+    if (nomeAtividade.trim().length === 0) {
+      Alert.alert("Erro", "O nome da atividade é obrigatório.");
+      return;
+    }
+    mutation.mutate();
+  }
 
   return (
-    <SafeAreaView className="flex-1 ">
+    <SafeAreaView className="flex-1">
       <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-end h-[86px] pb-[14px] px-5">
           <TouchableOpacity onPress={() => router.back()}>
             <Left />
           </TouchableOpacity>
           <Text className="text-base font-inter-bold mx-auto">
-            Editar atividade
+            Editar atividade {taskData?.duration}
           </Text>
         </View>
 
@@ -242,9 +142,7 @@ export default function CreateTaskGps() {
         <View className="flex-row mt-4 ml-6">
           <LinearGradient
             colors={["rgba(178, 255, 115, 0.322)", "#12FF55"]}
-            className={
-              "border-0 h-[37px] rounded-full justify-center items-center flex-row gap-x-[8px] border-[#D9D9D9] pr-4 pl-2"
-            }
+            className="border-0 h-[37px] rounded-full justify-center items-center flex-row gap-x-[8px] border-[#D9D9D9] pr-4 pl-2"
           >
             <Outdoor />
             <Text>Ao ar livre</Text>
@@ -252,7 +150,6 @@ export default function CreateTaskGps() {
         </View>
 
         <Text className="font-inter-bold text-base mt-7 mx-5">Data</Text>
-
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
           <Text className="text-bondis-gray-dark p-4">
             {taskData && formatDate(taskData.date!)}
@@ -273,7 +170,9 @@ export default function CreateTaskGps() {
         </Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
           <Text className="text-bondis-gray-dark p-4">
-            {taskData && taskData.distanceKm !== undefined ? converterKmParaString(+taskData.distanceKm) : "0km"}
+            {taskData && taskData.distanceKm !== undefined
+              ? converterKmParaString(+taskData.distanceKm)
+              : "0km"}
           </Text>
         </View>
 
@@ -281,7 +180,9 @@ export default function CreateTaskGps() {
           Calorias queimadas
         </Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
-          <Text className="text-bondis-gray-dark p-4">{taskData?.calories}</Text>
+          <Text className="text-bondis-gray-dark p-4">
+            {taskData?.calories}
+          </Text>
         </View>
 
         <Text className="font-inter-bold text-base mt-7 mx-5">Local</Text>
@@ -290,13 +191,14 @@ export default function CreateTaskGps() {
         </View>
 
         <Pressable
-        //   onPress={verificarConclusao}
+          onPress={editRequest}
           className={botaoDesabilitado({
-            intent: nomeAtividade.length === 0 || isLoading ? "disabled" : null,
+            intent:
+              nomeAtividade.length === 0 || mutation.isPending  ? "disabled" : null,
           })}
-          disabled={nomeAtividade.length === 0 || isLoading}
+          disabled={nomeAtividade.length === 0 || mutation.isPending}
         >
-          {isLoading ? (
+          {mutation.isPending ? (
             <View className="flex-row items-center gap-x-2">
               <Text className="font-inter-bold text-base">Carregando...</Text>
               <ActivityIndicator color="#000000" />
