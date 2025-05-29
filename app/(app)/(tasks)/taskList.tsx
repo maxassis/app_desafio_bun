@@ -199,7 +199,7 @@ export default function TaskList() {
               key={task.id}
               task={task}
               openModalEdit={openModalEdit}
-              openModalDelete={openModalDelete}
+              // openModalDelete={openModalDelete}
             />
           ))
         )}
@@ -261,7 +261,11 @@ export default function TaskList() {
               onPress={() => {
                 if (task) {
                   setTaskData(task);
-                  router.push("/taskEdit");
+                  if (task.gpsTask) {
+                    router.push("/taskEditGps");
+                  } else {
+                    router.push("/taskEdit");
+                  }
                   bottomSheetEditRef.current?.close();
                 }
               }}
@@ -269,27 +273,6 @@ export default function TaskList() {
             >
               <Text>Editar atividade</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => deleteTask(task!.id)}
-              className="h-[51px] justify-center items-center"
-            >
-              <Text className="text-bondis-alert-red">Excluir atividade</Text>
-            </TouchableOpacity>
-          </View>
-        </BottomSheetView>
-      </BottomSheet>
-
-      {/* BottomSheet - Excluir */}
-      <BottomSheet
-        ref={bottomSheetDeleteRef}
-        snapPoints={snapPointsDelete}
-        index={-1}
-        enablePanDownToClose
-        onChange={(index) => setIsDeleteSheetOpen(index !== -1)}
-        backgroundStyle={{ borderRadius: 20 }}
-      >
-        <BottomSheetView className="flex-1">
-          <View className="mx-5">
             <TouchableOpacity
               onPress={() => deleteTask(task!.id)}
               className="h-[51px] justify-center items-center"

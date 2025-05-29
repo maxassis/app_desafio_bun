@@ -11,6 +11,7 @@ interface Task {
   distanceKm: string;
   inscriptionId: number;
   usersId: string;
+  gpsTask: boolean;
 }
 
 interface DesafioStore {

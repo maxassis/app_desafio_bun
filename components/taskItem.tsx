@@ -31,9 +31,7 @@ export interface TaskItemProps {
 export interface TaskListProps {
   task: TaskItemProps;
   openModalEdit: (taskData: TaskItemProps) => void;
-  openModalDelete: (taskData: TaskItemProps) => void;
 }
-
 
 function tempoDecorrido(data: Date) {
   if (!data) return "Data indisponível";
@@ -47,7 +45,6 @@ function tempoDecorrido(data: Date) {
 export default function TaskItem({
   task,
   openModalEdit,
-  openModalDelete,
 }: TaskListProps) {
   return (
     <View className="h-[165px] p-5 bg-white mb-4">
@@ -73,21 +70,9 @@ export default function TaskItem({
           </View>
         </View>
 
-        {/* <TouchableOpacity onPress={() => openModalEdit(task)} className="ml-auto w-[40px] h-[32px] items-end">
-              <Gear />
-            </TouchableOpacity> */}
-         <TouchableOpacity
-          onPress={() => {
-            if (task.gpsTask) {
-              openModalDelete(task);
-            } else {
-              openModalEdit(task);
-            }
-          }}
-          className="ml-auto w-[40px] h-[32px] items-end"
-        >
+        <TouchableOpacity onPress={() => openModalEdit(task)} className="ml-auto w-[40px] h-[32px] items-end">
           <Gear />
-        </TouchableOpacity>
+        </TouchableOpacity>     
       </View>
 
       <View className="flex-row items-center gap-x-1 mt-3 none">

@@ -262,7 +262,7 @@ export default function CreateTaskGps() {
           Duração da atividade
         </Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
-          <Text className="text-dark-gray p-4">
+          <Text className="text-bondis-gray-dark p-4">
             {convertSecondsToTimeStringWithSeconds(+elapsedStore)}
           </Text>
         </View>
@@ -271,7 +271,7 @@ export default function CreateTaskGps() {
           Distância percorrida
         </Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
-          <Text className="text-dark-gray p-4">
+          <Text className="text-bondis-gray-dark p-4">
             {converterKmParaString(+distanceStore)}
           </Text>
         </View>
@@ -280,12 +280,12 @@ export default function CreateTaskGps() {
           Calorias queimadas
         </Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
-          <Text className="text-dark-gray p-4"></Text>
+          <Text className="text-bondis-gray-dark p-4"></Text>
         </View>
 
         <Text className="font-inter-bold text-base mt-7 mx-5">Local</Text>
         <View className="mx-5 bg-bondis-text-gray h-[52px] mt-2 rounded-[4px]">
-          <Text className="text-dark-gray p-4">{cityStore}</Text>
+          <Text className="text-bondis-gray-dark p-4">{cityStore}</Text>
         </View>
 
         <TouchableOpacity className="mt-[48px] mb-[24px]">

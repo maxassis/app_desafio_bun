@@ -242,7 +242,7 @@ export default function TaskEdit() {
       kilometers: +taskData.distanceKm.split(".")[0],
       meters: +taskData.distanceKm.split(".")[1] || 0,
     });
-    setCalories(taskData.calories.toString());
+    setCalories(taskData.calories?.toString() ?? "");
     setLocal(taskData.local!);
     setAmbience(taskData.environment);
     ChangeDistancePicker();
@@ -272,22 +272,6 @@ export default function TaskEdit() {
     const date = dayjs(isoDate).utc();
     return date.format("YYYY-MM-DD");
   }
-
-  // const formatDateToISO = (date: string) => {
-  //   if (!date) return null;
-  //   const [year, month, day] = date.split("-").map(Number);
-  //   const isoDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
-  //   const formattedDate = isoDate.toISOString().replace(/\.\d{3}Z$/, "Z");
-  //   return formattedDate;
-  // };
-
-  const formatDateToISO = (date: string) => {
-    if (!date) return null;
-
-    const isoDate = dayjs.utc(date, "YYYY-MM-DD").startOf("day").toISOString();
-
-    return isoDate;
-  };
 
   function updateTask() {
     updateTaskMutation.mutate();
