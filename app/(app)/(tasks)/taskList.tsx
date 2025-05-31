@@ -80,12 +80,10 @@ export default function TaskList() {
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
-  const [isDeleteSheetOpen, setIsDeleteSheetOpen] = useState(false);
-
+ 
   const snapPoints = useMemo(() => ["30%"], []);
   const snapPointsEdit = useMemo(() => ["20%"], []);
-  const snapPointsDelete = useMemo(() => ["15%"], []);
-
+ 
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
@@ -115,12 +113,11 @@ export default function TaskList() {
     bottomSheetDeleteRef.current?.close();
     setIsBottomSheetOpen(false);
     setIsEditSheetOpen(false);
-    setIsDeleteSheetOpen(false);
   };
 
   useEffect(() => {
     const backAction = () => {
-      if (isBottomSheetOpen || isEditSheetOpen || isDeleteSheetOpen) {
+      if (isBottomSheetOpen || isEditSheetOpen) {
         closeAllSheets();
         return true;
       }
@@ -133,7 +130,7 @@ export default function TaskList() {
     );
 
     return () => backHandler.remove();
-  }, [isBottomSheetOpen, isEditSheetOpen, isDeleteSheetOpen]);
+  }, [isBottomSheetOpen, isEditSheetOpen]);
 
   function deleteTask(id: number) {
     Alert.alert(

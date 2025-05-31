@@ -58,7 +58,7 @@ export default function Profile() {
 
   const totalDistance = useMemo(() => {
     if (!allDesafios) return 0;
-  
+
     return allDesafios.reduce((total, desafio) => {
       if (desafio.isRegistered && (desafio.completed || !desafio.completed)) {
         return total + (Number(desafio.totalDistanceCompleted) || 0);
@@ -66,7 +66,6 @@ export default function Profile() {
       return total;
     }, 0);
   }, [allDesafios]);
-
 
   // Formata a distância para exibição (arredonda para o km mais próximo)
   const formattedDistance = `${totalDistance.toFixed(2)} km`;
@@ -113,7 +112,7 @@ export default function Profile() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1">
+      <ScrollView className="flex-1" overScrollMode="never">
         <View className="h-[300px] mb-[10px] bg-bondis-black">
           <View className="flex-row h-[92px] justify-between mx-4 mt-[35px]">
             <Logo />
@@ -157,7 +156,7 @@ export default function Profile() {
           )}
           {isUserSuccess && (
             <>
-              <Text className="text-bondis-green text-lg font-inter-bold text-center mt-[29px]">
+              <Text className="text-bondis-green text-lg font-anton-regular text-center mt-[29px]">
                 {userData.username}
               </Text>
               <Text className="text-center text-bondis-text-gray font-inter-regular text-sm mt-2">
@@ -168,7 +167,7 @@ export default function Profile() {
 
           <View className="flex-row justify-between h-[51px] mt-[10px] mx-4">
             <View>
-              <Text className="text-white text-lg text-center font-inter-bold">
+              <Text className="text-white text-lg text-center font-anton-regular">
                 {desafiosEmCurso.length}
               </Text>
               <Text className="text-[#828282] font-inter-regular">
@@ -178,7 +177,7 @@ export default function Profile() {
               </Text>
             </View>
             <View>
-              <Text className="text-white text-lg text-center font-inter-bold">
+              <Text className="text-white text-lg text-center font-anton-regular">
                 {desafiosConcluidos.length}
               </Text>
               <Text className="text-[#828282] font-inter-regular">
@@ -186,7 +185,7 @@ export default function Profile() {
               </Text>
             </View>
             <View>
-              <Text className="text-white text-lg text-center font-inter-bold">
+              <Text className="text-white text-lg text-center font-anton-regular">
                 {formattedDistance}
               </Text>
               <Text className="text-[#828282] font-inter-regular">
@@ -195,14 +194,14 @@ export default function Profile() {
             </View>
           </View>
         </View>
+    
 
-        {/* Parte dos desafios */}
-        <View className="h-full">
+        <View className="h-full pb-8 pt-4">
           {/* Desafios em Curso */}
           {desafiosEmCurso.length > 0 && (
             <>
               <View className="mb-4 pl-5">
-                <Text className="font-inter-bold text-2xl my-auto">
+                <Text className="font-anton-regular text-xl">
                   Desafios ativos
                 </Text>
               </View>
@@ -214,44 +213,79 @@ export default function Profile() {
                   Erro ao carregar desafios
                 </Text>
               ) : (
-                desafiosEmCurso.map((desafio) => (
-                  <CardDesafio
-                    desafioId={desafio.id}
-                    key={desafio.id}
-                    name={desafio.name}
-                    distance={desafio.distance}
-                    progress={desafio.progressPercentage + ""}
-                    isRegistered={desafio.isRegistered}
-                    completed={desafio.completed}
-                    photo={desafio.photo}
-                    inscriptionId={desafio.inscriptionId}
-                  />
-                ))
+                <View className="h-[182px] w-full">
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    // contentContainerStyle={{ paddingHorizontal: 16 }}
+                    overScrollMode="never"
+                    scrollEventThrottle={16}
+                    decelerationRate="fast"
+                    pagingEnabled={false}
+                  >
+                    {desafiosEmCurso.map((desafio, index) => (
+                      <View
+                        key={desafio.id}
+                        className="w-[216px] f-full"
+                      >
+                        <CardDesafio
+                          desafioId={desafio.id}
+                          name={desafio.name}
+                          distance={desafio.distance}
+                          progress={desafio.progressPercentage + ""}
+                          isRegistered={desafio.isRegistered}
+                          completed={desafio.completed}
+                          photo={desafio.photo}
+                          inscriptionId={desafio.inscriptionId}
+                        />
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
               )}
             </>
           )}
 
-          {/* Desafios Disponíveis - Only show if there are available challenges */}
           {!isDesafiosLoading &&
             !isDesafiosError &&
             desafiosDisponiveis.length > 0 && (
               <>
-                <View className="mb-4 pl-5">
-                  <Text className="font-inter-bold text-2xl my-auto">
+                <View className="mb-4 pl-5 mt-8">
+                  <Text className="font-anton-regular text-xl my-auto">
                     Desafios Disponíveis
                   </Text>
                 </View>
 
                 {desafiosDisponiveis.map((desafio) => (
-                  <CardDesafio
-                    desafioId={desafio.id}
-                    key={desafio.id}
-                    name={desafio.name}
-                    distance={desafio.distance}
-                    progress={desafio.progressPercentage + ""}
-                    photo={desafio.photo}
-                    inscriptionId={desafio.inscriptionId} 
-                  />
+                  <View className="h-[293px] w-full">
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    // contentContainerStyle={{ paddingHorizontal: 16 }}
+                    overScrollMode="never"
+                    scrollEventThrottle={16}
+                    decelerationRate="fast"
+                    pagingEnabled={false}
+                  >
+                    {desafiosDisponiveis.map((desafio, index) => (
+                      <View
+                        key={desafio.id}
+                        className="w-[253px] f-full"
+                      >
+                        <CardDesafio
+                          desafioId={desafio.id}
+                          name={desafio.name}
+                          distance={desafio.distance}
+                          progress={desafio.progressPercentage + ""}
+                          isRegistered={desafio.isRegistered}
+                          completed={desafio.completed}
+                          photo={desafio.photo}
+                          inscriptionId={desafio.inscriptionId}
+                        />
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
                 ))}
               </>
             )}
@@ -270,8 +304,8 @@ export default function Profile() {
           {/* Desafios Concluídos */}
           {desafiosConcluidos.length > 0 && (
             <>
-              <View className="mb-4 pl-5">
-                <Text className="font-inter-bold text-2xl my-auto">
+              <View className="mb-4 pl-5 mt-8">
+                <Text className="font-anton-regular text-xl my-auto">
                   Desafios Concluídos
                 </Text>
               </View>
@@ -283,18 +317,35 @@ export default function Profile() {
                   Erro ao carregar desafios
                 </Text>
               ) : (
-                desafiosConcluidos.map((desafio) => (
-                  <CardDesafio
-                    desafioId={desafio.id}
-                    key={desafio.id}
-                    name={desafio.name}
-                    distance={desafio.distance}
-                    progress={desafio.progressPercentage + ""}
-                    completed={desafio.completed}
-                    photo={desafio.photo}
-                    inscriptionId={desafio.inscriptionId}                    
-                  />
-                ))
+                <View className="h-[182px] w-full">
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    // contentContainerStyle={{ paddingHorizontal: 16 }}
+                    overScrollMode="never"
+                    scrollEventThrottle={16}
+                    decelerationRate="fast"
+                    pagingEnabled={false}
+                  >
+                    {desafiosConcluidos.map((desafio, index) => (
+                      <View
+                        key={desafio.id}
+                        className="w-[216px] f-full"
+                      >
+                        <CardDesafio
+                          desafioId={desafio.id}
+                          name={desafio.name}
+                          distance={desafio.distance}
+                          progress={desafio.progressPercentage + ""}
+                          isRegistered={desafio.isRegistered}
+                          completed={desafio.completed}
+                          photo={desafio.photo}
+                          inscriptionId={desafio.inscriptionId}
+                        />
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
               )}
             </>
           )}
@@ -326,7 +377,10 @@ export default function Profile() {
             Adicione uma nova atividade
           </Text>
           <View className="mx-5">
-            <TouchableOpacity onPress={() => router.push("/rastreador")} className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400">
+            <TouchableOpacity
+              onPress={() => router.push("/rastreador")}
+              className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
+            >
               <Text>Iniciar agora</Text>
             </TouchableOpacity>
             <View className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400">
