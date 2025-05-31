@@ -8,6 +8,7 @@ import {
   StatusBar,
   ActivityIndicator,
   BackHandler,
+  FlatList,
 } from "react-native";
 import { Image } from "expo-image";
 import Plus from "../../assets/plus.svg";
@@ -194,7 +195,6 @@ export default function Profile() {
             </View>
           </View>
         </View>
-    
 
         <View className="h-full pb-8 pt-4">
           {/* Desafios em Curso */}
@@ -214,33 +214,31 @@ export default function Profile() {
                 </Text>
               ) : (
                 <View className="h-[182px] w-full">
-                  <ScrollView
+                  <FlatList
+                    data={desafiosEmCurso}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    // contentContainerStyle={{ paddingHorizontal: 16 }}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={{ gap: 0, paddingHorizontal: 0 }}
                     overScrollMode="never"
-                    scrollEventThrottle={16}
-                    decelerationRate="fast"
-                    pagingEnabled={false}
-                  >
-                    {desafiosEmCurso.map((desafio, index) => (
-                      <View
-                        key={desafio.id}
-                        className="w-[216px] f-full"
-                      >
+                    // scrollEventThrottle={16}
+                    // decelerationRate="fast"
+                    // pagingEnabled={false}
+                    renderItem={({ item }) => (
+                      <View className="w-[216px] f-full">
                         <CardDesafio
-                          desafioId={desafio.id}
-                          name={desafio.name}
-                          distance={desafio.distance}
-                          progress={desafio.progressPercentage + ""}
-                          isRegistered={desafio.isRegistered}
-                          completed={desafio.completed}
-                          photo={desafio.photo}
-                          inscriptionId={desafio.inscriptionId}
+                          desafioId={item.id}
+                          name={item.name}
+                          distance={item.distance}
+                          progress={item.progressPercentage + ""}
+                          isRegistered={item.isRegistered}
+                          completed={item.completed}
+                          photo={item.photo}
+                          inscriptionId={item.inscriptionId}
                         />
                       </View>
-                    ))}
-                  </ScrollView>
+                    )}
+                  />
                 </View>
               )}
             </>
@@ -256,37 +254,33 @@ export default function Profile() {
                   </Text>
                 </View>
 
-                {desafiosDisponiveis.map((desafio) => (
-                  <View className="h-[293px] w-full">
-                  <ScrollView
+                <View className="h-[293px] w-full">
+                  <FlatList
+                    data={desafiosDisponiveis}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    // contentContainerStyle={{ paddingHorizontal: 16 }}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={{ gap: 0, paddingHorizontal: 0 }}
                     overScrollMode="never"
-                    scrollEventThrottle={16}
-                    decelerationRate="fast"
-                    pagingEnabled={false}
-                  >
-                    {desafiosDisponiveis.map((desafio, index) => (
-                      <View
-                        key={desafio.id}
-                        className="w-[253px] f-full"
-                      >
+                    // scrollEventThrottle={16}
+                    // decelerationRate="fast"
+                    // pagingEnabled={false}
+                    renderItem={({ item }) => (
+                      <View className="w-[253px]">
                         <CardDesafio
-                          desafioId={desafio.id}
-                          name={desafio.name}
-                          distance={desafio.distance}
-                          progress={desafio.progressPercentage + ""}
-                          isRegistered={desafio.isRegistered}
-                          completed={desafio.completed}
-                          photo={desafio.photo}
-                          inscriptionId={desafio.inscriptionId}
+                          desafioId={item.id}
+                          name={item.name}
+                          distance={item.distance}
+                          progress={item.progressPercentage + ""}
+                          isRegistered={item.isRegistered}
+                          completed={item.completed}
+                          photo={item.photo}
+                          inscriptionId={item.inscriptionId}
                         />
                       </View>
-                    ))}
-                  </ScrollView>
+                    )}
+                  />
                 </View>
-                ))}
               </>
             )}
 
@@ -301,7 +295,6 @@ export default function Profile() {
             </Text>
           )}
 
-          {/* Desafios Concluídos */}
           {desafiosConcluidos.length > 0 && (
             <>
               <View className="mb-4 pl-5 mt-8">
@@ -318,33 +311,31 @@ export default function Profile() {
                 </Text>
               ) : (
                 <View className="h-[182px] w-full">
-                  <ScrollView
+                  <FlatList
+                    data={desafiosConcluidos}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    // contentContainerStyle={{ paddingHorizontal: 16 }}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={{ gap: 0, paddingHorizontal: 0 }}
                     overScrollMode="never"
-                    scrollEventThrottle={16}
-                    decelerationRate="fast"
-                    pagingEnabled={false}
-                  >
-                    {desafiosConcluidos.map((desafio, index) => (
-                      <View
-                        key={desafio.id}
-                        className="w-[216px] f-full"
-                      >
+                    // scrollEventThrottle={16}
+                    // decelerationRate="fast"
+                    // pagingEnabled={false}
+                    renderItem={({ item }) => (
+                      <View className="w-[216px] f-full">
                         <CardDesafio
-                          desafioId={desafio.id}
-                          name={desafio.name}
-                          distance={desafio.distance}
-                          progress={desafio.progressPercentage + ""}
-                          isRegistered={desafio.isRegistered}
-                          completed={desafio.completed}
-                          photo={desafio.photo}
-                          inscriptionId={desafio.inscriptionId}
+                          desafioId={item.id}
+                          name={item.name}
+                          distance={item.distance}
+                          progress={item.progressPercentage + ""}
+                          isRegistered={item.isRegistered}
+                          completed={item.completed}
+                          photo={item.photo}
+                          inscriptionId={item.inscriptionId}
                         />
                       </View>
-                    ))}
-                  </ScrollView>
+                    )}
+                  />
                 </View>
               )}
             </>

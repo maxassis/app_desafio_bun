@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { router } from "expo-router";
 import {
   SafeAreaView,
@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
   Pressable,
+  BackHandler,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Close from "../../../assets/Close.svg";
@@ -21,8 +22,6 @@ import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
-
-
 
 interface DadosTarefaGps {
   name: string;
@@ -47,7 +46,7 @@ export default function CreateTaskGps() {
   const queryClient = useQueryClient();
   const { inscriptionId, desafioId } = useLocalSearchParams();
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
-  
+
   function converterKmParaString(km: number): string {
     const kmAbsoluto: number = Math.abs(km);
 
@@ -81,14 +80,17 @@ export default function CreateTaskGps() {
 
   const criarTarefaMutation = useMutation({
     mutationFn: async (dadosTarefa: CheckCompletion) => {
-      const response = await fetch("https://bondis-app-backend.onrender.com/tasks/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(dadosTarefa),
-      });
+      const response = await fetch(
+        "https://bondis-app-backend.onrender.com/tasks/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(dadosTarefa),
+        }
+      );
       if (!response.ok) {
         const dadosErro = await response.json();
         throw new Error(dadosErro.message || "Falha ao criar tarefa");
@@ -100,8 +102,8 @@ export default function CreateTaskGps() {
       setIsLoading(false);
       queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
-      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] }); 
-      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] }); 
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
 
       const metaAtingida = data.challengeCompleted;
 
@@ -179,6 +181,41 @@ export default function CreateTaskGps() {
     },
   });
 
+  useEffect(() => {
+    const backAction = () => {
+      confirmarDescarte();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  function confirmarDescarte() {
+    Alert.alert(
+      "Descartar atividade",
+      "Tem certeza que deseja descartar sua atividade?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Sim",
+          style: "destructive",
+          onPress: () => {
+            router.push("/dashboard");
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  }
+
   function criarTarefa() {
     const distanceFormated = (d: number): number => {
       const num = d.toFixed(3);
@@ -190,7 +227,7 @@ export default function CreateTaskGps() {
       distance: distanceFormated(+distanceStore),
       environment: "livre",
       calories: 200,
-      inscriptionId: +inscriptionId, 
+      inscriptionId: +inscriptionId,
       date: getFormattedCurrentUtcDate(),
       duration: +elapsedStore,
       gpsTask: true,
@@ -208,16 +245,7 @@ export default function CreateTaskGps() {
   return (
     <SafeAreaView className="flex-1 ">
       <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
-        <View className="mb-[10px] pt-[38px] mx-5">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
-          >
-            <Close />
-          </TouchableOpacity>
-        </View>
-
-        <Text className="text-2xl font-anton-regular mt-7 mx-5">
+        <Text className="text-2xl font-anton-regular mt-[38px] mx-5">
           Como foi a sua atividade?
         </Text>
 
@@ -288,7 +316,10 @@ export default function CreateTaskGps() {
           <Text className="text-bondis-gray-dark p-4">{cityStore}</Text>
         </View>
 
-        <TouchableOpacity className="mt-[48px] mb-[24px]">
+        <TouchableOpacity
+          className="mt-[48px] mb-[24px]"
+          onPress={confirmarDescarte}
+        >
           <Text className="text-bondis-alert-red text-base mx-auto font-inter-bold">
             Descartar atividade
           </Text>

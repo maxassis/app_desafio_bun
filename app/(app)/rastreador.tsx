@@ -81,7 +81,7 @@ export default function Rastreador() {
   }
 
   function longPressStop() {
-    if (desafios && desafios?.length === 1) {
+    if (desafios && desafios.filter((desafio) => !desafio.completed).length === 1) {
       setDesafioData(
         desafios[0].id,
         desafios[0].desafio.name,
@@ -99,7 +99,8 @@ export default function Rastreador() {
       });
     }
 
-    if (desafios && desafios?.length > 1) {
+    if (desafios && desafios.filter((desafio) => !desafio.completed).length > 1) {
+      console.log("tamanho",desafios.length);
       router.push({ pathname: "/desafios", params: { gps: "true" } });
     }
   }

@@ -78,6 +78,7 @@ export interface Data {
   progress: string;
   completed: boolean;
   desafio: Desafio;
+  isRegistered: boolean,
 }
 
 export interface Desafio {
