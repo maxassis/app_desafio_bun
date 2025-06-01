@@ -113,7 +113,7 @@ export default function CreateTaskGps() {
         });
       } else {
         router.push({
-          pathname: "/taskList",
+          pathname: "/taskCreatedSuccess",
         });
       }
     },

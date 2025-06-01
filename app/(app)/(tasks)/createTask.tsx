@@ -174,7 +174,7 @@ export default function TaskCreate() {
         });
       } else {
         router.push({
-          pathname: "/taskList",
+          pathname: "/taskCreatedSuccess",
         });
       }
     },
