@@ -169,11 +169,11 @@ export default function TaskCreate() {
       const metaAtingida = data.challengeCompleted;
 
       if (metaAtingida) {
-        router.push({
+        router.replace({
           pathname: "/dashboard",
         });
       } else {
-        router.push({
+        router.replace({
           pathname: "/taskCreatedSuccess",
         });
       }

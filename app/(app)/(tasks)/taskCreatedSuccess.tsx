@@ -63,7 +63,7 @@ export default function TaskCreatedSuccess() {
           <Text className="font-inter-bold text-base">Compartilhar</Text>
         </TouchableOpacity>
 
-         <TouchableOpacity onPress={() => router.push("/taskList")} className="w-[120px] items-center mx-auto"> 
+         <TouchableOpacity onPress={() => router.replace("/taskList")} className="w-[120px] items-center mx-auto"> 
           <Text className="font-inter-bold text-base mt-8 underline">Ver atividade</Text>
          </TouchableOpacity>
       </View>
