@@ -127,18 +127,6 @@ export default function TaskEdit() {
     mutationFn: async () => {
       const agora = dayjs(); // Hora atual do sistema
 
-      // Se initialDate tem data + hora, usamos diretamente
-      // Se não, combinamos day.dateString com a hora atual
-
-      console.log(taskData.date);
-      console.log(
-        dayjs(`${day.dateString} ${agora.format("HH:mm:ss")}`).toISOString()
-      );
-
-      // const dataFinal = initialDate
-      //   ? taskData.date // já tem data e hora
-      //   : dayjs(`${day.dateString} ${agora.format("HH:mm:ss")}`); // adiciona hora atual à data
-
       const response = await fetch(
         `https://bondis-app-backend.onrender.com/tasks/update-task/${taskData.id}`,
         {
