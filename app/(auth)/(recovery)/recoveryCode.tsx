@@ -67,7 +67,7 @@ export default function RecoveryGetCode({ route }: any) {
   };
 
   function sendMail() {
-    fetch("https://bondis-app-backend.onrender.com/sendMailRecovery", {
+    fetch("https://bondis-app-backend.onrender.com/send-mail-recovery", {
       method: "POST",
       headers: { "Content-type": "application/json" },
       body: JSON.stringify({ email }),
@@ -158,7 +158,7 @@ export default function RecoveryGetCode({ route }: any) {
         )}
       />
       {errors.code && (
-        <Text className="mt-1 text-bondis-gray-dark">
+        <Text className="mt-1 text-bondis-alert-red">
           {String(errors?.code?.message)}
         </Text>
       )}

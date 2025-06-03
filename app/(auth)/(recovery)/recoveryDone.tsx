@@ -8,11 +8,6 @@ export default function AccountDone() {
 
     return(
         <SafeAreaView className="flex-1 bg-white ">
-            <View className="items-end mb-[10px] px-5 pt-[38px]">
-                <TouchableOpacity onPress={() => router.replace("/login")} className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
-                    <Close />
-                </TouchableOpacity>
-            </View>
             <View className="px-5 h-full justify-center">
 
             <View className="justify-center items-center flex ">
