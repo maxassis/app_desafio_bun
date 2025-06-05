@@ -118,7 +118,8 @@ export default function Profile() {
           <View className="flex-row h-[92px] justify-between mx-4 mt-[35px]">
             <Logo />
             {isUserLoading ? (
-              <ActivityIndicator size="small" color="#00ff00" />
+              // <ActivityIndicator size="small" color="#00ff00" />
+              <View style={{ width: 72, height: 72, borderRadius: 999, backgroundColor: "#e0e0e0" }} />
             ) : isUserSuccess && userData?.avatar_url ? (
               <Image
                 source={{ uri: userData.avatar_url }}

@@ -99,6 +99,10 @@ const getToken = () => {
   return useAuthStore.getState().token;
 };
 
+const token = getToken();
+console.log(token);
+
+
 // pegas os dados do usuário
 export const fetchUserData = async (): Promise<UserData> => {
   const token = getToken();

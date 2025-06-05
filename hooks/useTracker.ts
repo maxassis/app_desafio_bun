@@ -422,7 +422,7 @@ export default function useTracker() {
         const locationInfo = results[0];
         const detectedCity = locationInfo.city || locationInfo.subregion || null;
         setCity(detectedCity);
-        console.log("Cidade detectada:", detectedCity);
+        // console.log("Cidade detectada:", detectedCity);
       }
     } catch (error) {
       console.error("Erro ao obter cidade:", error);
@@ -439,7 +439,7 @@ export default function useTracker() {
         },
         async (location) => {
           const { latitude, longitude } = location.coords;
-          console.log("Nova posição:", latitude, longitude);
+          // console.log("Nova posição:", latitude, longitude);
 
           const filtered = kalman.current.filtrar(latitude, longitude);
 
@@ -480,7 +480,7 @@ export default function useTracker() {
     console.log("Status da permissão:", permissionStatus);
 
     if (permissionStatus !== PermissionStatus.GRANTED) {
-      console.warn("Permissão de localização não concedida.");
+      // console.warn("Permissão de localização não concedida.");
       return;
     }
 
@@ -503,7 +503,7 @@ export default function useTracker() {
 
   function pauseTracking() {
     if (status === "recording") {
-      console.log("Pausando tracking...");
+      // console.log("Pausando tracking...");
       setStatus("paused");
       pauseTimestamp.current = Date.now();
 
@@ -516,7 +516,7 @@ export default function useTracker() {
 
   async function resumeTracking() {
     if (status === "paused") {
-      console.log("Retomando tracking...");
+      // console.log("Retomando tracking...");
 
       if (pauseTimestamp.current) {
         pausedTime.current += Date.now() - pauseTimestamp.current;
@@ -529,7 +529,7 @@ export default function useTracker() {
   }
 
   function stopTracking() {
-    console.log("Parando tracking...");
+    // console.log("Parando tracking...");
     setStatus("idle");
 
     if (watcher.current) {

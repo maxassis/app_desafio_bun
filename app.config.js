@@ -60,7 +60,8 @@ export default {
           locationWhenInUsePermission: "Este app precisa da sua localização para mostrar sua posição no mapa."
         }
       ],
-      "expo-router"
+      "expo-router",
+      "expo-secure-store"
     ],
     extra: {
       eas: {
