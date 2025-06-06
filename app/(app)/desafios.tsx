@@ -11,7 +11,7 @@ import Left from "../../assets/arrow-left.svg";
 import { router } from "expo-router";
 import tokenExists from "../../store/auth-store";
 import useDesafioStore from "../../store/desafio-store";
-import { fetchDesafios } from "../../utils/api-service";
+import { fetchAllDesafios } from "../../utils/api-service";
 import { useLocalSearchParams } from "expo-router";
 
 export default function DesafioSelect() {
@@ -24,11 +24,10 @@ export default function DesafioSelect() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["desafios"],
-    queryFn: () => fetchDesafios(token!),
+    queryKey: ["getAllDesafios"],
+    queryFn: fetchAllDesafios,
+    staleTime: 5 * 60 * 1000,
     enabled: !!token,
-    retry: 1,
-    staleTime: 1000 * 60 * 10,
   });
 
   return (
@@ -57,7 +56,7 @@ export default function DesafioSelect() {
           <>
             <Text className="text-base text-bondis-gray-dark mt-4">
               Você possui{" "}
-              <Text className="font-inter-bold">{desafios?.length}</Text>{" "}
+              <Text className="font-inter-bold">{desafios?.filter((item) => item.completed == false && item.isRegistered == true).length}</Text>{" "}
               desafios ativos!
             </Text>
             <Text className="text-base text-bondis-gray-dark mb-7">
@@ -78,27 +77,32 @@ export default function DesafioSelect() {
           </Text>
         )}
 
-        {desafios && desafios.filter((item) => !item.completed).length > 0
+        {desafios &&
+        desafios.filter(
+          (item) => item.completed == false && item.isRegistered == true
+        ).length > 0
           ? desafios
-              .filter((item) => !item.completed)
+              .filter(
+                (item) => item.completed == false && item.isRegistered == true
+              )
               .map((item) => (
                 <TouchableOpacity
                   key={item.id}
                   onPress={() => {
                     setDesafioData(
                       item.id,
-                      item.desafio.name,
-                      +item.progress,
-                      item.desafio.distance,
-                      item.desafioId
+                      item.name,
+                      +item.progressPercentage,
+                      +item.distance,
+                      item.id
                     );
 
                     if (gps === "true") {
                       router.push({
                         pathname: "/createTaskGps",
                         params: {
-                          inscriptionId: item.id,
-                          desafioId: item.desafioId,
+                          inscriptionId: item.inscriptionId,
+                          desafioId: item.id,
                         },
                       });
                     } else {
@@ -108,16 +112,16 @@ export default function DesafioSelect() {
                   className="h-[94px] flex-row items-center px-3 py-[15px] border-b-[1px] border-b-[#D9D9D9]"
                 >
                   <Image
-                    source={{ uri: item.desafio.photo }}
+                    source={{ uri: item.photo }}
                     contentFit="cover"
                     style={{ width: 80, height: 80, borderRadius: 6 }}
                   />
                   <View className="ml-5">
                     <Text className="font-inter-bold text-base flex-wrap break-words">
-                      {item.desafio.name}
+                      {item.name}
                     </Text>
                     <Text className="font-inter-bold mt-[6.44px]">
-                      {parseFloat(item.progress).toFixed(2)}km
+                      {(item.progressPercentage || 0).toFixed(2)}km
                     </Text>
                   </View>
                 </TouchableOpacity>

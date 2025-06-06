@@ -188,19 +188,19 @@ export const fetchRankData = async (desafioId: string | number): Promise<RankDat
 
 
 // Pedos desafios de um usuario
-export async function fetchDesafios(token: string): Promise<DesafioData> {
-  const response = await fetch("https://bondis-app-backend.onrender.com/desafio/get-user-desafio/", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+// export async function fetchDesafios(token: string): Promise<DesafioData> {
+//   const response = await fetch("https://bondis-app-backend.onrender.com/desafio/get-user-desafio/", {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch desafios");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to fetch desafios");
+//   }
 
-  return response.json();
-}
+//   return response.json();
+// }
 
