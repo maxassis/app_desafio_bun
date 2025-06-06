@@ -1,6 +1,22 @@
 import { useEffect, useState, useRef } from "react";
-import { SafeAreaView, StatusBar, View, ImageBackground, Text, TouchableOpacity } from "react-native";
-import Animated, { useSharedValue, useAnimatedStyle, withSequence, withTiming, withDelay, runOnJS, Easing } from "react-native-reanimated";
+import {
+  SafeAreaView,
+  StatusBar,
+  View,
+  ImageBackground,
+  Text,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  withDelay,
+  runOnJS,
+  Easing,
+} from "react-native-reanimated";
 import Pause from "../../assets/Pause.svg";
 import Play from "../../assets/play.svg";
 import LottieView from "lottie-react-native";
@@ -10,13 +26,23 @@ import tokenExists from "../../store/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllDesafios } from "../../utils/api-service";
 import useDesafioStore from "../../store/desafio-store";
+import { HoldProgressButton } from "@/components/buttonAnime";
 
 const fundoCinza = require("../../assets/fundo-cinza.png");
 const fundoVerde = require("../../assets/fundo-verde.png");
 const fundoPreto = require("../../assets/fundo-preto.png");
 
 export default function Rastreador() {
-  const { status, elapsed, city, distance, startTracking, pauseTracking, resumeTracking, stopTracking } = useTracker();
+  const {
+    status,
+    elapsed,
+    city,
+    distance,
+    startTracking,
+    pauseTracking,
+    resumeTracking,
+    stopTracking,
+  } = useTracker();
   const lottieRef = useRef<any>(null);
 
   const [showCountdown, setShowCountdown] = useState(true);
@@ -43,7 +69,6 @@ export default function Rastreador() {
     staleTime: 5 * 60 * 1000,
   });
 
-
   const handlePause = () => {
     pauseTracking();
     lottieRef.current?.pause();
@@ -55,6 +80,7 @@ export default function Rastreador() {
   };
 
   function pressStop() {
+    console.log("Botão pressionado!");
     setShowTooltip(true);
     setTimeout(() => setShowTooltip(false), 2000);
   }
@@ -76,8 +102,12 @@ export default function Rastreador() {
   }
 
   const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600).toString().padStart(2, "0");
-    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
+    const h = Math.floor(seconds / 3600)
+      .toString()
+      .padStart(2, "0");
+    const m = Math.floor((seconds % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${h}:${m}:${s}`;
   };
@@ -116,9 +146,12 @@ export default function Rastreador() {
 
       opacity.value = withSequence(
         withTiming(1, { duration: 500 }),
-        withDelay(500, withTiming(0, { duration: 500 }, (finished) => {
-          if (finished) runOnJS(decrementCount)();
-        }))
+        withDelay(
+          500,
+          withTiming(0, { duration: 500 }, (finished) => {
+            if (finished) runOnJS(decrementCount)();
+          })
+        )
       );
     }
   }, [countdownNumber, showCountdown]);
@@ -142,15 +175,22 @@ export default function Rastreador() {
 
   const backgroundImage = isPaused ? fundoCinza : fundoVerde;
 
-  const paceAtual = calculatePace(elapsed, distance);  // pace em tempo real
-  const paceMedio = calculatePace(elapsed, distance);  // pace médio igual ao atual neste caso
+  const paceAtual = calculatePace(elapsed, distance); // pace em tempo real
+  const paceMedio = calculatePace(elapsed, distance); // pace médio igual ao atual neste caso
 
   return showCountdown ? (
     <SafeAreaView className="flex-1 bg-black">
-      <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
+      <StatusBar
+        backgroundColor="#000"
+        barStyle="light-content"
+        translucent={false}
+      />
       <ImageBackground source={fundoPreto} className="flex-1">
         <View className="flex-1 justify-center items-center">
-          <Animated.Text style={[animatedNumberStyle, { color: "#74FE52" }]} className="font-anton-regular text-9xl leading-[300px]">
+          <Animated.Text
+            style={[animatedNumberStyle, { color: "#74FE52" }]}
+            className="font-anton-regular text-9xl leading-[300px]"
+          >
             {countdownNumber}
           </Animated.Text>
         </View>
@@ -159,13 +199,21 @@ export default function Rastreador() {
   ) : (
     <SafeAreaView className="flex-1 text-white">
       <View className="bg-bondis-green flex-1">
-        <ImageBackground source={backgroundImage} className="flex-1 pt-[60px] px-5">
+        <ImageBackground
+          source={backgroundImage}
+          className="flex-1 pt-[60px] px-5"
+        >
           <LottieView
             ref={lottieRef}
             source={require("../../assets/lottie/run3.json")}
             autoPlay
             loop
-            style={{ width: 80, height: 80, alignSelf: "center", marginBottom: 25 }}
+            style={{
+              width: 80,
+              height: 80,
+              alignSelf: "center",
+              marginBottom: 25,
+            }}
           />
 
           <Text className="font-anton-regular text-[92px] text-center leading-[112px] pb-0">
@@ -178,7 +226,9 @@ export default function Rastreador() {
           <Text className="text-[64px] text-center font-anton-regular leading-[78px] mt-[28px]">
             {distance.toFixed(2)}
           </Text>
-          <Text className="text-center font-inter-regular text-xs text-[#00000099]">Distancia (Km)</Text>
+          <Text className="text-center font-inter-regular text-xs text-[#00000099]">
+            Distancia (Km)
+          </Text>
 
           <View className="flex-row justify-between mt-[28px] mx-3">
             <View className="justify-center items-center">
@@ -200,40 +250,70 @@ export default function Rastreador() {
           </View>
 
           {isPaused ? (
-            <View className="mt-[143px] flex-row h-[90px] relative">
-              <TouchableOpacity
-                onPress={pressStop}
-                onLongPress={longPressStop}
-                className="rounded-full h-[90px] w-[90px] bg-black mx-auto flex items-center justify-center"
-              >
-                <View className="w-4 h-4 bg-white" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleResume}
-                className="rounded-full h-[90px] w-[90px] bg-[#74FE52] mx-auto flex items-center justify-center"
-              >
-                <Play />
-              </TouchableOpacity>
+  <View className="mt-[143px] flex-row justify-between h-[90px] relative px-14">
+    {/* Botão antigo comentado */}
+    {/* <TouchableOpacity
+      onPress={pressStop}
+      onLongPress={longPressStop}
+      className="rounded-full h-[90px] w-[90px] bg-black mx-auto flex items-center justify-center"
+    >
+      <View className="w-4 h-4 bg-white" />
+    </TouchableOpacity> */}
 
-              {showTooltip && (
-                <View className="top-[-75px] right-[35px] bg-black w-[300px] flex items-center justify-center p-4 absolute rounded-md">
-                  <Text className="text-white font-inter-regular text-xs">
-                    Mantenha o botão <Text className="font-inter-bold">pressionado</Text> para finalizar a atividade.
-                  </Text>
-                </View>
-              )}
-            </View>
-          ) : (
-            <TouchableOpacity
-              onPress={handlePause}
-              className="rounded-full h-[90px] w-[90px] bg-black mx-auto mt-[143px]"
-            >
-              <Pause />
-            </TouchableOpacity>
-          )}
+    {/* Novo HoldProgressButton */}
+    <HoldProgressButton
+      onComplete={longPressStop}
+      onShortPress={pressStop}
+      duration={2000}
+      style={{
+        position: 'relative',
+        width: 90,
+        height: 90,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <View className="w-4 h-4 bg-white" />
+    </HoldProgressButton>
+
+    <TouchableOpacity
+      onPress={handleResume}
+      className="rounded-full h-[90px] w-[90px] bg-[#74FE52] flex items-center justify-center"
+    >
+      <Play />
+    </TouchableOpacity>
+
+    {showTooltip && (
+      <View className="top-[-75px] right-[35px] bg-black w-[300px] flex items-center justify-center p-4 absolute rounded-md">
+        <Text className="text-white font-inter-regular text-xs">
+          Mantenha o botão{" "}
+          <Text className="font-inter-bold">pressionado</Text> para finalizar a atividade.
+        </Text>
+      </View>
+    )}
+  </View>
+) : (
+  <TouchableOpacity
+    onPress={handlePause}
+    className="rounded-full h-[90px] w-[90px] bg-black mx-auto mt-[143px]"
+  >
+    <Pause />
+  </TouchableOpacity>
+)}
+
+          {/* <HoldProgressButton
+            onComplete={() => Alert.alert("Ação completa!")}
+            duration={2000}
+          /> */}
         </ImageBackground>
       </View>
-      <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
+      <StatusBar
+        backgroundColor="#000"
+        barStyle="light-content"
+        translucent={false}
+      />
     </SafeAreaView>
   );
 }
