@@ -405,7 +405,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
-  ActivityIndicator,
   BackHandler,
   FlatList,
 } from "react-native";

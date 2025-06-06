@@ -57,7 +57,7 @@ export default function CardDesafio({
   return (
     <TouchableOpacity
       onPress={handleCardPress}
-      activeOpacity={completed ? 1 : 0.9}
+      // activeOpacity={completed ? 1 : 0.9}
       className="items-center mb-4 overflow-hidden h-full mx-[15px] bg-gray-200 rounded-2xl"
     >
       <Image
