@@ -10,13 +10,15 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import Left from "../../assets/arrow-left.svg";
-import Bolinha from "../../assets/bolinha.svg";
 import Track from "../../assets/track.svg";
 import Carousel from "react-native-reanimated-carousel";
 import { Dimensions } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 const buyData = {
   name: "Desafio Cidade Maravilhosa",
+  backgroundPhoto:
+    "https://yvievpygnysrufdcakbz.supabase.co/storage/v1/object/public/desafios//f78f5525-2ef6-48d5-85e8-232bc846344b-20241207-ArraialdoCabo_PT-BR0624214500_UHD.jpg",
   photos: [
     "https://yvievpygnysrufdcakbz.supabase.co/storage/v1/object/public/avatars//cmalo7ke2000099vb6mj80lum-1747102632973.jpeg",
     "https://yvievpygnysrufdcakbz.supabase.co/storage/v1/object/public/avatars//cmaprckxh0000997gx4xocpy2-1747337080499.jpeg",
@@ -58,34 +60,49 @@ export default function Buy() {
       <ScrollView overScrollMode="never">
         <ImageBackground
           className="px-5"
-          source={require("../../assets/Card-back.png")}
+          source={{ uri: buyData.backgroundPhoto }}
+          style={{ position: "relative" }}
         >
-          <View className="mt-[35px]">
-            <TouchableOpacity
-              onPress={() => router.push("/dashboard")}
-              className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
-            >
-              <Left />
-            </TouchableOpacity>
-          </View>
+          <LinearGradient
+            colors={["transparent", "white"]}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 250, 
+              zIndex: 0,
+            }}
+          />
 
-          <View className="w-full h-[374px] mt-4 bg-white rounded-t-3xl px-4 pt-3 justify-center items-center">
-            <View className="w-full h-full rounded-2xl overflow-hidden">
-              <Carousel
-                width={screenWidth - 60}
-                height={340}
-                data={buyData.photos}
-                scrollAnimationDuration={500}
-                loop={false}
-                onSnapToItem={(index) => setCurrentIndex(index)}
-                renderItem={({ item }) => (
-                  <Image
-                    source={{ uri: item }}
-                    resizeMode="cover"
-                    className="w-full h-full"
-                  />
-                )}
-              />
+          <View style={{ zIndex: 1 }}>
+            <View className="mt-[35px]">
+              <TouchableOpacity
+                onPress={() => router.push("/dashboard")}
+                className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
+              >
+                <Left />
+              </TouchableOpacity>
+            </View>
+
+            <View className="w-full h-[374px] mt-4 bg-white rounded-t-3xl px-4 pt-3 justify-center items-center">
+              <View className="w-full h-full rounded-2xl overflow-hidden">
+                <Carousel
+                  width={screenWidth - 60}
+                  height={340}
+                  data={buyData.photos}
+                  scrollAnimationDuration={500}
+                  loop={false}
+                  onSnapToItem={(index) => setCurrentIndex(index)}
+                  renderItem={({ item }) => (
+                    <Image
+                      source={{ uri: item }}
+                      resizeMode="cover"
+                      className="w-full h-full"
+                    />
+                  )}
+                />
+              </View>
             </View>
           </View>
         </ImageBackground>
