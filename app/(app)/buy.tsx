@@ -3,64 +3,67 @@ import {
   View,
   Text,
   SafeAreaView,
-  Image,
   TouchableOpacity,
   ImageBackground,
   ScrollView,
+  ActivityIndicator,
+  Dimensions,
 } from "react-native";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { Linking } from "react-native";
 import Left from "../../assets/arrow-left.svg";
 import Track from "../../assets/track.svg";
 import Carousel from "react-native-reanimated-carousel";
-import { Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
-const buyData = {
-  name: "Desafio Cidade Maravilhosa",
-  backgroundPhoto:
-    "https://yvievpygnysrufdcakbz.supabase.co/storage/v1/object/public/desafios//f78f5525-2ef6-48d5-85e8-232bc846344b-20241207-ArraialdoCabo_PT-BR0624214500_UHD.jpg",
-  photos: [
-    "https://yvievpygnysrufdcakbz.supabase.co/storage/v1/object/public/avatars//cmalo7ke2000099vb6mj80lum-1747102632973.jpeg",
-    "https://yvievpygnysrufdcakbz.supabase.co/storage/v1/object/public/avatars//cmaprckxh0000997gx4xocpy2-1747337080499.jpeg",
-    "https://yvievpygnysrufdcakbz.supabase.co/storage/v1/object/public/avatars//cmazouwxc000099vn6guahnap-1748299775503.jpeg",
-    "https://yvievpygnysrufdcakbz.supabase.co/storage/v1/object/public/avatars//cmaiq90xs000099osfult7dzq-1747336639187.jpeg",
-  ],
-  shortDescription:
-    "150 km virtuais pelos pontos turísticos mais icônicos do Rio 🧡",
-  description:
-    "Bem-vindo ao Desafio Cidade Maravilhosa, uma jornada única que leva você a percorrer virtualmente 150 km pelos pontos mais icônicos e deslumbrantes do Rio de Janeiro! Este desafio é uma oportunidade imperdível para corredores de todos os níveis, proporcionando uma experiência enriquecedora e motivadora enquanto você se mantém ativo e saudável",
-  trackPhoto:
-    "https://www.google.com/maps/d/u/0/edit?mid=1GZx3Xyv5RzJ8z8l5r0aRfM4r5b2&usp=sharing",
-  howParticipate:
-    "Para participar, inscreva-se agora e pague a taxa de inscrição. Após a confirmação do pagamento, você estará oficialmente inscrito e pronto para iniciar sua jornada. Lembre-se de confirmar seu endereço para receber os itens de recompensa ao final do desafio.",
-  price: "30,00",
-  benefits: [
-    "Camisa: Uma camisa exclusiva do Desafio Cidade Maravilhosa 150km.",
-    "Garrafa personalizada: Uma garrafa d'água personalizada do desafio.",
-    "Medalha de conclusão: Após completar 100% do desafio, solicite e receba em casa sua medalha de finisher.",
-    "Ranking e Perfil Social: A todo momento acompanhe seu progresso e compare seu desempenho com outros participantes.",
-  ],
-  rules: [
-    "Inscreva-se no desafio pelo valor de R$ 120,00, e aguarde a chegada do seu Kit starter no endereço informado.",
-    "Rastreie sua atividade de corrida ou caminhada através de dispositivos e aplicativos compatíveis, como smartwatches e Strava.",
-    "Cada quilometro importa! As distâncias acumuladas serão automaticamente registradas no mapa do desafio.",
-    "Mantenha sua rotina de exercícios até concluir todo o desafio. Ao final do desafio, você poderá reivindicar o seu Kit finisher e compartilhar com o mundo a sua conquista.",
-  ],
-};
+import { useQuery } from "@tanstack/react-query";
+import { fetchPurchaseData } from "@/utils/api-service";
+import { useLocalSearchParams } from "expo-router";
 
 export default function Buy() {
   const router = useRouter();
   const [show, setShow] = useState(false);
+  const { desafioId } = useLocalSearchParams();
 
   const screenWidth = Dimensions.get("window").width;
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const {
+    data: purchaseData,
+    isLoading: purchaseDataLoading,
+    isError: isDesafiosError,
+  } = useQuery({
+    queryKey: ["purchaseData", desafioId],
+    queryFn: () => fetchPurchaseData(desafioId as string),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Se estiver carregando, exibe um loading centralizado
+  if (purchaseDataLoading) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#00B37E" />
+      </SafeAreaView>
+    );
+  }
+
+  // Se deu erro na query
+  if (isDesafiosError) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center px-5">
+        <Text className="text-center text-red-500">
+          Ocorreu um erro ao carregar os dados. Tente novamente.
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1">
       <ScrollView overScrollMode="never">
         <ImageBackground
           className="px-5"
-          source={{ uri: buyData.backgroundPhoto }}
+          source={{ uri: purchaseData?.backgroundPhoto }}
           style={{ position: "relative" }}
         >
           <LinearGradient
@@ -70,7 +73,7 @@ export default function Buy() {
               bottom: 0,
               left: 0,
               right: 0,
-              height: 250, 
+              height: 250,
               zIndex: 0,
             }}
           />
@@ -90,15 +93,15 @@ export default function Buy() {
                 <Carousel
                   width={screenWidth - 60}
                   height={340}
-                  data={buyData.photos}
+                  data={purchaseData?.photos ?? []}
                   scrollAnimationDuration={500}
                   loop={false}
                   onSnapToItem={(index) => setCurrentIndex(index)}
                   renderItem={({ item }) => (
                     <Image
                       source={{ uri: item }}
-                      resizeMode="cover"
-                      className="w-full h-full"
+                      contentFit="cover"
+                      style={{ width: "100%", height: "100%" }}
                     />
                   )}
                 />
@@ -112,7 +115,7 @@ export default function Buy() {
         </Text>
 
         <View className="flex-row justify-center mt-4">
-          {buyData.photos.map((_, index) => (
+          {purchaseData?.photos.map((_, index) => (
             <View
               key={index}
               className={`h-2 w-2 mx-[2px] rounded-full ${
@@ -123,11 +126,11 @@ export default function Buy() {
         </View>
 
         <Text className="text-center mt-[51px] text-2xl font-inter-bold">
-          {buyData.name}
+          {purchaseData?.name}
         </Text>
 
         <Text className="text-base text-bondis-gray-dark text-center mt-4 mx-5">
-          {buyData.shortDescription}
+          {purchaseData?.shortDescription}
         </Text>
 
         <View className="flex-row flex-wrap gap-3 mx-5 mt-4">
@@ -165,7 +168,7 @@ export default function Buy() {
             </Text>
 
             <Text className="mx-5 mt-4 text-base text-left">
-              {buyData.description}
+              {purchaseData?.description}
             </Text>
 
             <View className="mx-5 mt-8 p-4 border-[1px] border-[#D9D9D9] rounded-md">
@@ -173,8 +176,9 @@ export default function Buy() {
                 Percurso
               </Text>
               <Image
-                className="w-full"
-                source={require("../../assets/map.png")}
+                source={{ uri: purchaseData?.trackPhoto }}
+                contentFit="cover"
+                style={{ width: "100%", height: 115 }}
               />
             </View>
 
@@ -183,11 +187,11 @@ export default function Buy() {
                 Como participar?
               </Text>
               <Text className="text-base text-bondis-gray-dark text-left">
-                {buyData.howParticipate}
+                {purchaseData?.howParticipate}
               </Text>
 
               <Text className="text-base text-bondis-gray-dark mt-8">
-                Preço: R$ {buyData.price}
+                Preço: R$ {purchaseData?.price}
               </Text>
             </View>
 
@@ -196,7 +200,7 @@ export default function Buy() {
                 Benefícios
               </Text>
 
-              {buyData.benefits.map((benefit, index) => (
+              {purchaseData?.benefits.map((benefit, index) => (
                 <Text
                   key={index}
                   className={`text-base text-bondis-gray-dark text-left ${
@@ -213,7 +217,7 @@ export default function Buy() {
                 Regras
               </Text>
 
-              {buyData.rules.map((rule, index) => (
+              {purchaseData?.rules.map((rule, index) => (
                 <Text
                   key={index}
                   className={`text-base text-bondis-gray-dark text-left ${
@@ -225,11 +229,20 @@ export default function Buy() {
               ))}
             </View>
 
-            <TouchableOpacity className="h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5">
+            <TouchableOpacity
+              onPress={() => Linking.openURL("https://www.google.com")}
+              className="h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5"
+            >
               <Text className="text-center font-inter-bold text-base">
                 Aceito o desafio 💪
               </Text>
             </TouchableOpacity>
+
+            {/* <TouchableOpacity className="h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5">
+              <Text className="text-center font-inter-bold text-base">
+                Aceito o desafio 💪
+              </Text>
+            </TouchableOpacity> */}
           </View>
         )}
       </ScrollView>

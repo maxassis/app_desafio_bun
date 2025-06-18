@@ -89,10 +89,22 @@ export interface Desafio {
   photo: string;
 }
 
-
+interface BuyData {
+  name: string;
+  backgroundPhoto: string;
+  photos: string[];
+  shortDescription: string;
+  description: string;
+  trackPhoto: string;
+  howParticipate: string;
+  price: string;
+  benefits: string[];
+  rules: string[];
+}
 
 // API base URL
-const API_BASE_URL = "https://bondis-app-backend.onrender.com";
+// const API_BASE_URL = "https://bondis-app-backend.onrender.com";
+const API_BASE_URL = "http://10.0.2.2:3000"
 
 // Get auth token from store
 const getToken = () => {
@@ -100,7 +112,6 @@ const getToken = () => {
 };
 
 const token = getToken();
-console.log(token);
 
 
 // pegas os dados do usuário
@@ -184,6 +195,31 @@ export const fetchRankData = async (desafioId: string | number): Promise<RankDat
   }
 
   return await response.json();
+};
+
+
+export const fetchPurchaseData = async (desafioId: string | number): Promise<BuyData> => {
+  const token = getToken();
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/desafio/purchase-data/${desafioId}`,
+      {
+        headers: {
+          "Content-type": "application/json",
+          authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return {} as BuyData; // Return an empty object as a default value
+  }
 };
 
 
