@@ -80,10 +80,10 @@
 
 //   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 //   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
- 
+
 //   const snapPoints = useMemo(() => ["30%"], []);
 //   const snapPointsEdit = useMemo(() => ["20%"], []);
- 
+
 //   const queryClient = useQueryClient();
 
 //   const { data, isLoading, error } = useQuery({
@@ -347,12 +347,8 @@ const deleteTaskApi = async (id: number, token: string) => {
 };
 
 export default function TaskList() {
-  const {
-    inscriptionId,
-    desafioName,
-    setTaskData,
-    desafioId,
-  } = useDesafioStore();
+  const { inscriptionId, desafioName, setTaskData, desafioId } =
+    useDesafioStore();
 
   const token = tokenExists((state) => state.token);
   const [task, setTask] = useState<Data>();
@@ -384,7 +380,9 @@ export default function TaskList() {
       closeAllSheets();
     },
     onError: () => {
-      Alert.alert("Erro ao excluir tarefa", "", [{ text: "Ok", style: "cancel" }]);
+      Alert.alert("Erro ao excluir tarefa", "", [
+        { text: "Ok", style: "cancel" },
+      ]);
     },
   });
 
@@ -403,7 +401,10 @@ export default function TaskList() {
       }
       return false;
     };
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
     return () => backHandler.remove();
   }, [isBottomSheetOpen, isEditSheetOpen]);
 
@@ -413,7 +414,11 @@ export default function TaskList() {
       "Tem certeza que deseja excluir esta atividade?",
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Excluir", style: "destructive", onPress: () => deleteMutation.mutate(id) },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: () => deleteMutation.mutate(id),
+        },
       ],
       { cancelable: true }
     );
@@ -437,6 +442,14 @@ export default function TaskList() {
       );
     }
 
+    if (data?.length === 0) {
+      return (
+        <View className="flex-1 justify-center items-center py-10">
+          <Text>Nenhuma atividade criada</Text>
+        </View>
+      );
+    }
+
     return data?.map((task) => (
       <TaskItem key={task.id} task={task} openModalEdit={handleEdit} />
     ));
@@ -447,15 +460,22 @@ export default function TaskList() {
       <ScrollView overScrollMode="never">
         <View className="bg-white mb-7">
           <View className="flex-row mt-[49.5] px-5">
-            <TouchableOpacity className="w-[30px] h-[30px]" onPress={() => router.replace("/map")}>
+            <TouchableOpacity
+              className="w-[30px] h-[30px]"
+              onPress={() => router.replace("/map")}
+            >
               <Left />
             </TouchableOpacity>
-            <Text className="text-base font-inter-bold mx-auto">Atividades recentes</Text>
+            <Text className="text-base font-inter-bold mx-auto">
+              Atividades recentes
+            </Text>
           </View>
 
           <View className="h-[60px] mt-4 pt-2 px-5 mb-7">
             <Text className="text-sm text-bondis-gray-secondary">Desafio</Text>
-            <Text className="text-base font-inter-bold mt-2">{desafioName}</Text>
+            <Text className="text-base font-inter-bold mt-2">
+              {desafioName}
+            </Text>
           </View>
         </View>
 
@@ -480,7 +500,9 @@ export default function TaskList() {
         backgroundStyle={{ borderRadius: 20 }}
       >
         <BottomSheetView className="flex-1">
-          <Text className="font-inter-bold mt-[10px] text-base mx-5 mb-4">Adicione uma atividade</Text>
+          <Text className="font-inter-bold mt-[10px] text-base mx-5 mb-4">
+            Adicione uma atividade
+          </Text>
           <View className="mx-5">
             {["Via Strava", "Via Apple Saúde"].map((title, idx) => (
               <View
@@ -537,7 +559,11 @@ export default function TaskList() {
         </BottomSheetView>
       </BottomSheet>
 
-      <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
+      <StatusBar
+        backgroundColor="#000"
+        barStyle="light-content"
+        translucent={false}
+      />
     </SafeAreaView>
   );
 }
