@@ -91,27 +91,24 @@ export interface Desafio {
 
 interface BuyData {
   name: string;
-  backgroundPhoto: string;
-  photos: string[];
-  shortDescription: string;
-  description: string;
-  trackPhoto: string;
-  howParticipate: string;
   price: string;
-  benefits: string[];
   rules: string[];
+  images: string[];
+  benefits: string[];
+  description: string;
+  howParticipate: string;
+  shortDescription: string;
+  distance: string
 }
 
 // API base URL
-// const API_BASE_URL = "https://bondis-app-backend.onrender.com";
-const API_BASE_URL = "http://10.0.2.2:3000"
+const API_BASE_URL = "https://bondis-app-backend.onrender.com";
+// const API_BASE_URL = "http://10.0.2.2:3000"
 
 // Get auth token from store
 const getToken = () => {
   return useAuthStore.getState().token;
 };
-
-const token = getToken();
 
 
 // pegas os dados do usuário
