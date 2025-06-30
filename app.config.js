@@ -61,7 +61,14 @@ export default {
         }
       ],
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "@stripe/stripe-react-native",
+        {
+          // "merchantIdentifier": string | string [],
+          "enableGooglePay": false
+        }
+      ]
     ],
     extra: {
       eas: {
