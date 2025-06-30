@@ -700,11 +700,11 @@ export default function Profile() {
           )}
         </View>
 
-        <View className="h-full pb-8 pt-4">
+        <View className="h-full pb-8">
           {/* Desafios em Curso */}
           {desafiosEmCurso.length > 0 && (
             <>
-              <View className="mb-4 pl-5">
+              <View className="mb-4 pl-5 mt-4">
                 <Text className="font-anton-regular text-xl">
                   Desafios ativos
                 </Text>
@@ -759,7 +759,7 @@ export default function Profile() {
             !isDesafiosError &&
             desafiosDisponiveis.length > 0 && (
               <>
-                <View className="mb-4 pl-5 mt-8">
+                <View className="mb-4 pl-5 mt-4">
                   <Text className="font-anton-regular text-xl my-auto">
                     Desafios Disponíveis
                   </Text>
@@ -795,7 +795,7 @@ export default function Profile() {
           {/* Loading skeletons for Desafios Disponíveis */}
           {isDesafiosLoading && desafiosEmCurso.length === 0 && (
             <>
-              <View className="mb-4 pl-5 mt-8">
+              <View className="mb-4 pl-5 mt-4">
                 <ContentLoader 
                   speed={2}
                   width={200}
