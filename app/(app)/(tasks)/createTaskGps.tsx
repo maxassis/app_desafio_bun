@@ -100,7 +100,7 @@ export default function CreateTaskGps() {
     onSuccess: (data: { challengeCompleted: boolean }) => {
       // limparInputs();
       setIsLoading(false);
-      queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
+      queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
       queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });

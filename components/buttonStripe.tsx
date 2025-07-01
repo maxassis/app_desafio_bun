@@ -1,96 +1,46 @@
-// import React from "react";
-// import { Text, TouchableOpacity } from "react-native";
-// import { useStripe } from "@stripe/stripe-react-native";
-
-// const AceitarDesafioButton = ({ desafioId }: { desafioId: string }) => {
-//   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-
-//   const handleBuy = async () => {
-//     try {
-//       // 1. Solicita o clientSecret do backend
-//       const response = await fetch(
-//         "http://10.0.2.2:3000/payments/payment-intent",
-//         {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({
-//             amount: 1000,
-//             currency: "brl",
-//             userId: "user-123",
-//             desafioId: 23,
-//           }),
-//         }
-//       );
-
-//       const data = await response.json();
-//       const { clientSecret } = data;
-
-//       if (!clientSecret) {
-//         throw new Error("Resposta inválida do servidor");
-//       }
-
-//       // 2. Inicializa o PaymentSheet
-//       const init = await initPaymentSheet({
-//         merchantDisplayName: "Seu App",
-//         paymentIntentClientSecret: clientSecret,
-//         allowsDelayedPaymentMethods: true,
-//       });
-
-//       if (init.error) {
-//         console.error("Erro ao inicializar PaymentSheet:", init.error.message);
-//         return;
-//       }
-
-//       // 3. Apresenta o PaymentSheet
-//       const paymentResult = await presentPaymentSheet();
-
-//       if (paymentResult.error) {
-//         alert(`Pagamento foi cancelado`);
-//       } else {
-//         alert("Pagamento realizado com sucesso!");
-//         // Ação após pagamento aqui
-//       }
-//     } catch (error) {
-//       console.error("Erro no pagamento:", error);
-//       alert("Erro ao processar o pagamento. Tente novamente.");
-//     }
-//   };
-
-//   return (
-//     <TouchableOpacity
-//       onPress={handleBuy}
-//       className="h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5"
-//     >
-//       <Text className="text-center font-inter-bold text-base text-black">
-//         Aceito o desafio 💪
-//       </Text>
-//     </TouchableOpacity>
-//   );
-// };
-
-// export default AceitarDesafioButton;
-
-
 import React from "react";
 import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useStripe } from "@stripe/stripe-react-native";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchUserData } from "@/utils/api-service";
 
-const AceitarDesafioButton = ({ desafioId }: { desafioId: string }) => {
+const AceitarDesafioButton = ({
+  desafioId,
+  price,
+}: {
+  desafioId: number;
+  price: string;
+}) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const queryClient = useQueryClient();
 
+  const valor = price;
+  const valorFloat = parseFloat(valor.replace(",", "."));
+  const valorCentavos = Math.round(valorFloat * 100);
+  // console.log(valorCentavos); // Saída: 5000
+
+  const { data: userData } = useQuery({
+    queryKey: ["userData"],
+    queryFn: fetchUserData,
+    staleTime: 45 * 60 * 1000,
+  });
+
+  
   const mutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("http://10.0.2.2:3000/payments/payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: 1000,
-          currency: "brl",
-          userId: "user-123",
-          desafioId: 23,
-        }),
-      });
+      const response = await fetch(
+        "http://10.0.2.2:3000/payments/payment-intent",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: valorCentavos,
+            currency: "brl",
+            userId: userData?.usersId,
+            desafioId: String(desafioId),
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -119,6 +69,10 @@ const AceitarDesafioButton = ({ desafioId }: { desafioId: string }) => {
       } else {
         alert("Pagamento realizado com sucesso!");
         // Ação após pagamento aqui
+        queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
+        queryClient.invalidateQueries({ queryKey: ["desafios"] });
+        queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
+        queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
       }
     },
     onError: (error) => {

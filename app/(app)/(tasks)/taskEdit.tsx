@@ -159,7 +159,7 @@ export default function TaskEdit() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
-      queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
+      queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
       queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
 

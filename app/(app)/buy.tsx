@@ -240,7 +240,7 @@ export default function Buy() {
             </View>
 
             {/* BUTTON ACCEPT */}
-            <AceitarDesafioButton desafioId={"29"} />
+            <AceitarDesafioButton desafioId={27} price={purchaseData?.price as string} />
             {/* <TouchableOpacity
               onPress={() => Linking.openURL("https://www.google.com")}
               className="h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5"
