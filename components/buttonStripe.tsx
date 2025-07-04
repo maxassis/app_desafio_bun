@@ -29,7 +29,7 @@ const AceitarDesafioButton = ({
   const mutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(
-        "http://10.0.2.2:3000/payments/payment-intent",
+        "https://bondis-app-backend.onrender.com/payments/payment-intent",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

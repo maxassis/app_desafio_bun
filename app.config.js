@@ -67,6 +67,7 @@ export default {
         {
           // "merchantIdentifier": string | string [],
           "enableGooglePay": false
+          
         }
       ]
     ],

@@ -18,7 +18,6 @@ import Carousel from "react-native-reanimated-carousel";
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPurchaseData } from "@/utils/api-service";
-// import { push } from "expo-router/build/global-state/routing";
 import AceitarDesafioButton from "@/components/buttonStripe";
 
 export default function Buy() {
@@ -240,7 +239,7 @@ export default function Buy() {
             </View>
 
             {/* BUTTON ACCEPT */}
-            <AceitarDesafioButton desafioId={27} price={purchaseData?.price as string} />
+            <AceitarDesafioButton desafioId={+desafioId} price={purchaseData?.price as string} />
             {/* <TouchableOpacity
               onPress={() => Linking.openURL("https://www.google.com")}
               className="h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5"
