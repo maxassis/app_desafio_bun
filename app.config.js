@@ -5,10 +5,10 @@ export default {
     name: "meu-desafio-2",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/icon.png",
+    icon: "./assets/icon2.png",
     userInterfaceStyle: "light",
     splash: {
-      image: "./assets/splash-black.png",
+      image: "./assets/gpt.png",
       resizeMode: "cover",
       backgroundColor: "#ffffff"
     },
