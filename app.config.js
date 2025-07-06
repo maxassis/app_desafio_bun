@@ -61,7 +61,9 @@ export default {
         }
       ],
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font",
+      "expo-web-browser"
     ],
     extra: {
       eas: {

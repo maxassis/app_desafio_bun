@@ -11,7 +11,8 @@ module.exports = function (api) {
         "whitelist": null,
         "safe": false,
         "allowUndefined": true
-      }]
+      }],
+      ['babel-plugin-transform-import-meta']
     ]
   };
 };

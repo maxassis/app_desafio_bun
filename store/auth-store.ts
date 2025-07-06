@@ -100,7 +100,7 @@
 
 // export default useAuthStore;
 
-import { create } from 'zustand';
+import { createWithEqualityFn as create } from 'zustand/traditional';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
 
