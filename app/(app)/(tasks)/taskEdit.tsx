@@ -32,6 +32,7 @@ import TimePickerModal, {
 } from "../../../components/timePicker";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 dayjs.extend(utc);
 LocaleConfig.locales["pt-br"] = ptBR;
@@ -66,6 +67,7 @@ export default function TaskEdit() {
   const timePickerRef = useRef<TimePickerModalRef>(null);
   const childRef = useRef<KilometerMeterPickerModalRef>(null);
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   if (!taskData) {
     router.back();
@@ -146,6 +148,7 @@ export default function TaskEdit() {
                   `${day.dateString} ${agora.format("HH:mm:ss")}`
                 ).toISOString(),
             duration: convertTimeToSeconds(selectedTime),
+            local: local
           }),
         }
       );
@@ -231,7 +234,7 @@ export default function TaskEdit() {
       meters: +taskData.distanceKm.split(".")[1] || 0,
     });
     setCalories(taskData.calories?.toString() ?? "");
-    setLocal(taskData.local!);
+    setLocal(taskData.local ?? "");
     setAmbience(taskData.environment);
     ChangeDistancePicker();
     setInitialDate(formatDate(taskData.date + ""));
@@ -266,13 +269,13 @@ export default function TaskEdit() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white px-5">
+    <View className="flex-1 bg-white px-5 pb-4"  style={{ paddingTop: insets.top }}>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
       >
-        <View className="flex-row items-end h-[86px] pb-[14px]">
+        <View className="flex-row h-[86px] pb-[14px] pt-[28px]">
           <TouchableOpacity onPress={() => router.back()}>
             <Left />
           </TouchableOpacity>
@@ -464,7 +467,7 @@ export default function TaskEdit() {
         barStyle="light-content"
         translucent={false}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

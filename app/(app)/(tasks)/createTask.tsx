@@ -8,7 +8,6 @@ import {
   TextInput,
   Modal,
   Pressable,
-  StatusBar,
   ActivityIndicator,
   Alert,
 } from "react-native";
@@ -31,6 +30,8 @@ import TimePickerModal, {
 import { router } from "expo-router";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { SystemBars } from "react-native-edge-to-edge";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 LocaleConfig.locales["pt-br"] = ptBR;
 LocaleConfig.defaultLocale = "pt-br";
@@ -48,6 +49,7 @@ interface DadosTarefa {
   inscriptionId: number;
   date: string | null;
   duration: number;
+  local: string | null;
 }
 
 interface CheckCompletion {
@@ -80,15 +82,21 @@ export default function TaskCreate() {
     seconds: 0,
   });
   const token = tokenExists((state) => state.token);
-  const { inscriptionId, progress, distanceTotal, desafioId } =
+  const { inscriptionId, desafioId } =
     useDesafioStore();
   const childRef = useRef<KilometerMeterPickerModalRef>(null);
   const timePickerRef = useRef<TimePickerModalRef>(null);
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   const verificarConclusaoDesafioMutation = useMutation({
     mutationFn: async () => {
       const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
+
+      console.log("Corpo da requisição para verificar conclusão:", {
+        inscriptionId: inscriptionId,
+        distance: distanciaSelecionada,
+      });
 
       const response = await fetch(
         "https://bondis-app-backend.onrender.com/tasks/check-completion",
@@ -227,6 +235,7 @@ export default function TaskCreate() {
       inscriptionId: inscriptionId!,
       date: dataFinal.toISOString(), // Formato final: "2025-05-23T14:01:07.606Z"
       duration: converterTempoParaSegundos(tempoSelecionado),
+      local: local
     };
   
     criarTarefaMutation.mutate(dadosTarefa);
@@ -258,13 +267,13 @@ export default function TaskCreate() {
       tempoSelecionado.seconds > 0);
 
   return (
-    <SafeAreaView className="flex-1 bg-white px-5">
+    <View className="flex-1 bg-white px-5 pb-4" style={{paddingTop: insets.top}}>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
       >
-        <View className="mb-[10px] pt-[38px]">
+        <View className="mb-[10px] pt-[28px]">
           <TouchableOpacity
             onPress={() => router.back()}
             className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
@@ -472,12 +481,8 @@ export default function TaskCreate() {
           </Text>
         )}
       </ScrollView>
-      <StatusBar
-        backgroundColor="#000"
-        barStyle="light-content"
-        translucent={false}
-      />
-    </SafeAreaView>
+      <SystemBars style="dark" />
+    </View>
   );
 }
 

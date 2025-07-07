@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import {
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   View,
@@ -20,6 +19,7 @@ import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
 import Left from "../../../assets/Icon-left.svg";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
@@ -27,6 +27,7 @@ export default function CreateTaskGps() {
   const queryClient = useQueryClient();
   const { desafioId } = useLocalSearchParams();
   const { taskData } = useDesafioStore();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (taskData) {
@@ -111,14 +112,14 @@ export default function CreateTaskGps() {
   }
 
   return (
-    <SafeAreaView className="flex-1">
+    <View className="flex-1 bg-white"  style={{ paddingTop: insets.top }}>
       <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
-        <View className="flex-row items-end h-[86px] pb-[14px] px-5">
+        <View className="flex-row h-[86px] pt-[28px] pb-[14px] px-5">
           <TouchableOpacity onPress={() => router.back()}>
             <Left />
           </TouchableOpacity>
           <Text className="text-base font-inter-bold mx-auto">
-            Editar atividade {taskData?.duration}
+            Editar atividade
           </Text>
         </View>
 
@@ -210,7 +211,7 @@ export default function CreateTaskGps() {
           )}
         </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -54,11 +54,21 @@ export default function TaskItem({
           <View className="ml-4 ">
             <Text className="text-base font-inter-bold">{task.name}</Text>
             <View className="flex-row">
-              <View className="flex-row gap-x-1 items-center justify-center">
+              <View className="flex-row items-center justify-center">
+                <View className="flex-row items-center gap-1">
                 <Calendar />
                 <Text className="text-bondis-gray-dark text-xs">
                   {tempoDecorrido(task.date)}
                 </Text>
+                </View>
+
+                {/* {task.gpsTask && (
+                  <View className="ml-4 flex-row items-center">
+                  <Pin />
+                  <Text className="text-bondis-gray-dark text-xs ml-1">{task.local}</Text>     
+                </View>
+                )} */}
+            
               </View>
               <View className="flex-row gap-x-1 items-center justify-center ml-4">
                 {task.local && <Pin />}

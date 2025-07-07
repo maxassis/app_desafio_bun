@@ -5,8 +5,8 @@ import {
   SafeAreaView,
   View,
   TouchableOpacity,
-  StatusBar
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import {
   Inter_700Bold,
   Inter_400Regular,
@@ -68,7 +68,7 @@ export default function Intro() {
           </Text>
         </View>
       </ImageBackground>
-      <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
+      <StatusBar style="dark" />
     </SafeAreaView>
   );
 }

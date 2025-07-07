@@ -1,13 +1,16 @@
-import { Text, View, SafeAreaView, Alert, StatusBar } from "react-native";
+import { Text, View, SafeAreaView, Alert, TouchableOpacity } from "react-native";
 import Left from "../../../assets/arrow-left.svg";
 import Pen from "../../../assets/pen.svg";
 import Tool from "../../../assets/tool.svg";
 import Chat from "../../../assets/chat.svg";
 import Lock from "../../../assets/lock.svg"
-import { TouchableOpacity } from "react-native-gesture-handler";
+// import { TouchableOpacity } from "react-native-gesture-handler";
 import useAuthStore from "../../../store/auth-store";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { SystemBars } from "react-native-edge-to-edge";
+
+
 
 export default function MenuConfigurations() {
     const queryClient = useQueryClient()
@@ -63,7 +66,7 @@ export default function MenuConfigurations() {
         <Text className="text-center text-sm font-inter-regular text-bg-gray-dark">Versão 1.0</Text>
     </View> 
     </View> 
-    <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
+    <SystemBars style="dark" />
     </SafeAreaView>
   );
 }
