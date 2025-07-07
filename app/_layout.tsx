@@ -6,7 +6,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import useAuthStore from '../store/auth-store';
 import { Inter_700Bold, Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
 import { Anton_400Regular } from '@expo-google-fonts/anton';
-import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 
 SplashScreen.preventAutoHideAsync();
@@ -87,7 +86,6 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar style="light" />
         <Slot />
       </GestureHandlerRootView>
     </QueryClientProvider>

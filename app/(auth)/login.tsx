@@ -5,10 +5,10 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
-  StatusBar,
   ScrollView,
   ActivityIndicator,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import { useForm, Controller } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import Close from "../../assets/Close.svg";
@@ -83,7 +83,7 @@ export default function Login() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView>
-        <View className="pt-[38px] px-5 bg-white flex-1">
+        <View className="pt-[58px] px-5 bg-white flex-1">
           <View className="items-end mb-[10px]">
             <View className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
               <TouchableOpacity onPress={() => router.push("/intro")}>
@@ -184,9 +184,7 @@ export default function Login() {
           </View>
         </View>
         <StatusBar
-          backgroundColor="#000"
-          barStyle="light-content"
-          translucent={false}
+          style="dark"
         />
       </ScrollView>
     </SafeAreaView>

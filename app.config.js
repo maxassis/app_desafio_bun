@@ -2,11 +2,13 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: "meu-desafio-2",
+    name: "Meu Desafio",
+    slug: "meu-desafio-2",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
+    scheme: "meudesafio2",
     splash: {
       image: "./assets/splash-black.png",
       resizeMode: "cover",
@@ -25,6 +27,7 @@ export default {
       }
     },
     android: {
+      edgeToEdgeEnabled: true,
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
@@ -63,7 +66,16 @@ export default {
       "expo-router",
       "expo-secure-store",
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "react-native-edge-to-edge",
+        {
+          "android": {
+            "parentTheme": "Default",
+            "enforceNavigationBarContrast": false
+          }
+        }
+      ]
     ],
     extra: {
       eas: {
