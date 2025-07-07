@@ -17,6 +17,7 @@ import { cva } from "class-variance-authority";
 import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import CheckGreen from "../../../assets/check-green.svg";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface Criteria {
   length: boolean;
@@ -38,6 +39,7 @@ export default function RecoveryCreatePassword({ route }: any) {
     number: false,
     specialChar: false,
   });
+  const insets = useSafeAreaInsets();
 
   const validatePassword = (text: string): void => {
     const length = text.length >= 8;
@@ -45,6 +47,7 @@ export default function RecoveryCreatePassword({ route }: any) {
     const lowercase = /[a-z]/.test(text);
     const number = /[0-9]/.test(text);
     const specialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
+   
 
     setCriteria({
       length,
@@ -99,8 +102,8 @@ export default function RecoveryCreatePassword({ route }: any) {
   return (
     <KeyboardAvoidingView className="flex-1 bg-white" behavior="padding">
       <ScrollView className="flex-1 bg-white" overScrollMode="never">
-        <SafeAreaView className="flex-1 bg-white ">
-          <View className="px-5 pt-[38px]">
+        <View className="flex-1 bg-white " style={{ paddingTop: insets.top }} >
+          <View className="px-5 pt-[28px]">
           <View className="items-end mb-[10px]">
             <TouchableOpacity
               onPress={() => router.replace("/login")}
@@ -241,7 +244,7 @@ export default function RecoveryCreatePassword({ route }: any) {
             </Text>
           </Text>
           </View>
-        </SafeAreaView>
+        </View>
       </ScrollView>
       <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
     </KeyboardAvoidingView>

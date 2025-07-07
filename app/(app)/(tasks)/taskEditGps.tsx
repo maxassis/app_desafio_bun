@@ -112,7 +112,7 @@ export default function CreateTaskGps() {
   }
 
   return (
-    <View className="flex-1 bg-white"  style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-white"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
       <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
         <View className="flex-row h-[86px] pt-[28px] pb-[14px] px-5">
           <TouchableOpacity onPress={() => router.back()}>

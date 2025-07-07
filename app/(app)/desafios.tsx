@@ -74,7 +74,7 @@ export default function DesafioSelect() {
   };
 
   return (
-    <View className="bg-white flex-1"  style={{ paddingTop: insets.top }}  >
+    <View className="bg-white flex-1"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}  >
       <SystemBars style="dark" />
       <View className="pt-[28px] px-5 flex-1">
         {!gps && (

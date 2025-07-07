@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPurchaseData } from "@/utils/api-service";
 import AceitarDesafioButton from "@/components/buttonStripe";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Buy() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function Buy() {
   const [show, setShow] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const screenWidth = Dimensions.get("window").width;
+  const insets = useSafeAreaInsets();
 
   const {
     data: purchaseData,
@@ -61,7 +63,7 @@ export default function Buy() {
   }
 
   return (
-    <SafeAreaView className="flex-1">
+    <View className="flex-1 bg-white">
       <ScrollView overScrollMode="never">
         {/* BACKGROUND */}
         <ImageBackground
@@ -81,8 +83,8 @@ export default function Buy() {
             }}
           />
 
-          <View style={{ zIndex: 1 }}>
-            <View className="mt-[35px]">
+          <View style={{ zIndex: 1, marginTop: insets.top }}>
+            <View className="mt-[28px]" >
               <TouchableOpacity
                 onPress={() => router.push("/dashboard")}
                 className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
@@ -171,7 +173,7 @@ export default function Buy() {
 
         {/* DETAILS */}
         {show && (
-          <View>
+          <View style={{ paddingBottom: insets.bottom }}>
             {/* DESCRIPTION */}
             <Text className="mx-5 mt-8 text-base font-inter-bold">
               Descrição:
@@ -251,6 +253,6 @@ export default function Buy() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

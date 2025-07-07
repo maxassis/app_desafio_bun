@@ -269,7 +269,7 @@ export default function TaskEdit() {
   }
 
   return (
-    <View className="flex-1 bg-white px-5 pb-4"  style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-white px-5 pb-4"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}

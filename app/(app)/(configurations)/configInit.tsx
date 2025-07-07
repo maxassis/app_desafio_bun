@@ -4,18 +4,18 @@ import Pen from "../../../assets/pen.svg";
 import Tool from "../../../assets/tool.svg";
 import Chat from "../../../assets/chat.svg";
 import Lock from "../../../assets/lock.svg"
-// import { TouchableOpacity } from "react-native-gesture-handler";
 import useAuthStore from "../../../store/auth-store";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { SystemBars } from "react-native-edge-to-edge";
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 export default function MenuConfigurations() {
     const queryClient = useQueryClient()
     const router = useRouter(); 
     const { logout } = useAuthStore();
+    const insets = useSafeAreaInsets();
    
     function showAlert() {
       Alert.alert("Deseja sair do App ?", "", [
@@ -34,8 +34,8 @@ export default function MenuConfigurations() {
     }
 
   return (
-    <SafeAreaView className="flex-1 bg-white ">
-      <View className="px-5 pb-4 pt-[38px] flex-1">
+    <View className="flex-1 bg-white "  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }} >
+      <View className="px-5 pb-4 pt-[28px] flex-1">
       <TouchableOpacity onPress={() => router.push("/dashboard")} className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
         <Left  />
       </TouchableOpacity>
@@ -67,6 +67,6 @@ export default function MenuConfigurations() {
     </View> 
     </View> 
     <SystemBars style="dark" />
-    </SafeAreaView>
+    </View>
   );
 }

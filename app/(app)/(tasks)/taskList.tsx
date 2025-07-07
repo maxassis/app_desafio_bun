@@ -174,7 +174,7 @@ export default function TaskList() {
   };
 
   return (
-    <View className="flex-1 bg-[#F1F1F1]"  style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-[#F1F1F1]"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
       <ScrollView overScrollMode="never">
         <View className="bg-white mb-7">
           <View className="flex-row mt-[29.5] px-5">
@@ -203,7 +203,8 @@ export default function TaskList() {
       {/* Botão flutuante */}
       <TouchableOpacity
         onPress={() => bottomSheetRef.current?.expand()}
-        className="rounded-full bg-bondis-green absolute w-16 h-16 justify-center items-center right-4 bottom-6"
+        className="rounded-full bg-bondis-green absolute w-16 h-16 justify-center items-center right-4"
+        style={{ bottom: insets.bottom + 10 }}
       >
         <Plus />
       </TouchableOpacity>

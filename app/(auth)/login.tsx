@@ -19,6 +19,7 @@ import Apple from "../../assets/apple.svg";
 import useAuthStore from "../../store/auth-store";
 import { Link, useRouter } from "expo-router";
 import { URL } from '@env'
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type FormData = {
   email: string;
@@ -53,6 +54,7 @@ const loginRequest = async ({
 export default function Login() {
   const { login } = useAuthStore();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const {
     handleSubmit,
@@ -82,9 +84,9 @@ export default function Login() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
       <ScrollView>
-        <View className="pt-[58px] px-5 bg-white flex-1">
+        <View className="pt-[28px] px-5 bg-white flex-1">
           <View className="items-end mb-[10px]">
             <View className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
               <TouchableOpacity onPress={() => router.push("/intro")}>
@@ -188,6 +190,6 @@ export default function Login() {
           style="dark"
         />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

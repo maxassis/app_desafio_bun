@@ -31,7 +31,7 @@ const RankingBottomSheet = ({
   userData,
 }: BottomSheetProps) => {
   const bottomSheetRef = useRef(null);
-  const snapPoints = useMemo(() => ["18%", "85%", "100%"], []);
+  const snapPoints = useMemo(() => ["21%", "85%", "100%"], []);
   const { desafioId } = useDesafioStore();
 
   const { data: rankData, isLoading } = useQuery<

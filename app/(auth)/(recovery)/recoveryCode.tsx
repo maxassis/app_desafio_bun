@@ -15,6 +15,8 @@ import Refresh from "../../../assets/refresh.svg";
 import Arrow from "../../../assets/arrow-right.svg";
 import { cva } from "class-variance-authority";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SystemBars } from "react-native-edge-to-edge";
 
 
 export default function RecoveryGetCode({ route }: any) {
@@ -23,6 +25,7 @@ export default function RecoveryGetCode({ route }: any) {
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const router = useRouter();
   const { email } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
 
   const {
@@ -114,8 +117,8 @@ export default function RecoveryGetCode({ route }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white ">
-      <View className="px-5 pt-[38px] pb-8 flex-1">
+    <View className="flex-1 bg-white"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+      <View className="px-5 pt-[28px] pb-8 flex-1">
       <View className="items-end mb-[10px]">
         <TouchableOpacity
           onPress={() => router.push("/intro")}
@@ -204,8 +207,8 @@ export default function RecoveryGetCode({ route }: any) {
         <Arrow />
       </TouchableOpacity>
       </View>
-      <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
-    </SafeAreaView>
+      <SystemBars style="dark" />
+    </View>
   );
 }
 

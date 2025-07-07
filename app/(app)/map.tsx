@@ -240,7 +240,7 @@ export default function Map2() {
         </TouchableOpacity>
       </View>
 
-      <View className="absolute w-full bottom-[190px] items-center">
+      <View className="absolute w-full bottom-[22.5%] items-center">
         <FlatList
           data={usersParticipants}
           keyExtractor={(item) => item.userId}

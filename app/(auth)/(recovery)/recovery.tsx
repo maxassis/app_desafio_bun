@@ -11,9 +11,12 @@ import {
   import Logo from "../../../assets/logo2.svg";
   import { useForm, Controller } from "react-hook-form";
   import { useRouter } from "expo-router";
+  import { useSafeAreaInsets } from 'react-native-safe-area-context';
+  import { SystemBars } from "react-native-edge-to-edge";
 
   export default function Recovery() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
 
     const {
       handleSubmit,
@@ -54,8 +57,8 @@ import {
     };
 
     return (
-      <SafeAreaView className="flex-1 bg-white">
-        <View className=" px-5 pt-[38px]">
+      <View className="flex-1 bg-white" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+        <View className=" px-5 pt-[28px]">
         <View className="items-end mb-[10px]">
           <TouchableOpacity
             onPress={() => router.back()}
@@ -104,7 +107,7 @@ import {
           </TouchableOpacity>
         </View>
         </View>
-        <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
-      </SafeAreaView>
+        <SystemBars style="dark" />
+      </View>
     );
   }

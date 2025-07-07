@@ -25,6 +25,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { cva } from "class-variance-authority";
 import { fetchUserData } from "@/utils/api-service";
 import { SystemBars } from "react-native-edge-to-edge";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface uploadAvatarResponse {
   avatar_url: string;
@@ -52,6 +53,7 @@ export default function ProfileEdit() {
   const [unMaskedValue, setUnmaskedValue] = useState("");
   const [isModalVisible, setModalVisible] = useState(false);
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   const [genderOpen, setGenderOpen] = useState(false);
   const [genderValue, setGenderValue] = useState("");
@@ -250,7 +252,7 @@ export default function ProfileEdit() {
   }, [genderOpen, sportsOpen, isModalVisible]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white" style={{paddingTop: insets.top, paddingBottom: insets.bottom}}>
       <FlatList
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
@@ -258,7 +260,7 @@ export default function ProfileEdit() {
         renderItem={() => null}
         data={[]}
         ListHeaderComponent={
-          <View className="px-5 pb-8 pt-[38px] flex-1">
+          <View className="px-5 pb-8 pt-[28px] flex-1">
             <View className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
               <Left onPress={() => router.push("/configInit")} />
             </View>
@@ -426,7 +428,7 @@ export default function ProfileEdit() {
       </Modal>
 
       <SystemBars style="dark" />
-    </SafeAreaView>
+    </View>
   );
 }
 

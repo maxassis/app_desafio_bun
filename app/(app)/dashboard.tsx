@@ -491,7 +491,8 @@ export default function Profile() {
       {hasActiveDesafios && (
         <TouchableOpacity
           onPress={handleOpenBottomSheet}
-          className="rounded-full bg-bondis-green absolute w-16 h-16 justify-center items-center right-5 bottom-5"
+          className="rounded-full bg-bondis-green absolute w-16 h-16 justify-center items-center right-5"
+          style={{ bottom: insets.bottom + 10 }}
         >
           <Plus />
         </TouchableOpacity>

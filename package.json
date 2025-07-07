@@ -65,7 +65,7 @@
     "react-native-svg": "15.11.2",
     "react-native-web": "^0.20.0",
     "react-native-wheely": "^0.6.0",
-    "@stripe/stripe-react-native": "0.38.6",
+    "@stripe/stripe-react-native": "0.45.0",
     "zustand": "^4.5.7",
     "react-native-edge-to-edge": "1.6.0",
     "expo-navigation-bar": "~4.2.7"
