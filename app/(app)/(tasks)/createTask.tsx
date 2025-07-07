@@ -49,6 +49,7 @@ interface DadosTarefa {
   inscriptionId: number;
   date: string | null;
   duration: number;
+  local: string | null;
 }
 
 interface CheckCompletion {
@@ -233,6 +234,7 @@ export default function TaskCreate() {
       inscriptionId: inscriptionId!,
       date: dataFinal.toISOString(), // Formato final: "2025-05-23T14:01:07.606Z"
       duration: converterTempoParaSegundos(tempoSelecionado),
+      local: local
     };
   
     criarTarefaMutation.mutate(dadosTarefa);
