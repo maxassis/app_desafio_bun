@@ -31,6 +31,7 @@ import TimePickerModal, {
 import { router } from "expo-router";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { SystemBars } from "react-native-edge-to-edge";
 
 LocaleConfig.locales["pt-br"] = ptBR;
 LocaleConfig.defaultLocale = "pt-br";
@@ -89,6 +90,11 @@ export default function TaskCreate() {
   const verificarConclusaoDesafioMutation = useMutation({
     mutationFn: async () => {
       const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
+
+      console.log("Corpo da requisição para verificar conclusão:", {
+        inscriptionId: inscriptionId,
+        distance: distanciaSelecionada,
+      });
 
       const response = await fetch(
         "https://bondis-app-backend.onrender.com/tasks/check-completion",
@@ -472,11 +478,7 @@ export default function TaskCreate() {
           </Text>
         )}
       </ScrollView>
-      <StatusBar
-        backgroundColor="#000"
-        barStyle="light-content"
-        translucent={false}
-      />
+      <SystemBars style="dark" />
     </SafeAreaView>
   );
 }

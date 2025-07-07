@@ -146,6 +146,7 @@ export default function TaskEdit() {
                   `${day.dateString} ${agora.format("HH:mm:ss")}`
                 ).toISOString(),
             duration: convertTimeToSeconds(selectedTime),
+            local: local
           }),
         }
       );
@@ -231,7 +232,7 @@ export default function TaskEdit() {
       meters: +taskData.distanceKm.split(".")[1] || 0,
     });
     setCalories(taskData.calories?.toString() ?? "");
-    setLocal(taskData.local!);
+    setLocal(taskData.local ?? "");
     setAmbience(taskData.environment);
     ChangeDistancePicker();
     setInitialDate(formatDate(taskData.date + ""));

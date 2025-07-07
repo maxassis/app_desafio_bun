@@ -1,12 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import {
   SafeAreaView,
-  StatusBar,
   View,
   ImageBackground,
   Text,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -27,6 +25,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchAllDesafios } from "../../utils/api-service";
 import useDesafioStore from "../../store/desafio-store";
 import { HoldProgressButton } from "@/components/buttonAnime";
+import { SystemBars } from "react-native-edge-to-edge";
 
 const fundoCinza = require("../../assets/fundo-cinza.png");
 const fundoVerde = require("../../assets/fundo-verde.png");
@@ -180,11 +179,7 @@ export default function Rastreador() {
 
   return showCountdown ? (
     <SafeAreaView className="flex-1 bg-black">
-      <StatusBar
-        backgroundColor="#000"
-        barStyle="light-content"
-        translucent={false}
-      />
+      <SystemBars style="light" />
       <ImageBackground source={fundoPreto} className="flex-1">
         <View className="flex-1 justify-center items-center">
           <Animated.Text
@@ -309,11 +304,9 @@ export default function Rastreador() {
           /> */}
         </ImageBackground>
       </View>
-      <StatusBar
-        backgroundColor="#000"
-        barStyle="light-content"
-        translucent={false}
-      />
+      
+      <SystemBars style="dark" />
+      
     </SafeAreaView>
   );
 }

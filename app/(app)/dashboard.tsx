@@ -408,6 +408,8 @@ import {
   BackHandler,
   FlatList,
 } from "react-native";
+import { SystemBars } from "react-native-edge-to-edge";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from "expo-image";
 import ContentLoader, { Rect, Circle } from "react-content-loader/native";
 import Plus from "../../assets/plus.svg";
@@ -526,6 +528,7 @@ export default function Profile() {
   const router = useRouter();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["30%"], []);
+  const insets = useSafeAreaInsets();
 
   const isBottomSheetOpen = useRef(false);
 
@@ -616,8 +619,8 @@ export default function Profile() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1" overScrollMode="never">
-        <View className="h-[300px] mb-[10px] bg-bondis-black">
-          <View className="flex-row h-[92px] justify-between mx-4 mt-[35px]">
+        <View className="mb-[10px] pb-4 bg-bondis-black" style={{ paddingTop: insets.top }}>
+          <View className="flex-row h-[92px] justify-between mx-4 mt-4 ">
             <Logo />
             {isUserLoading ? (
               <AvatarSkeleton />
@@ -927,11 +930,8 @@ export default function Profile() {
         </BottomSheetView>
       </BottomSheet>
 
-      <StatusBar
-        backgroundColor="#000"
-        barStyle="light-content"
-        translucent={false}
-      />
+      <SystemBars style="light" />
+      
     </SafeAreaView>
   );
 }

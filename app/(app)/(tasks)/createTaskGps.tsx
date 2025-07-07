@@ -383,6 +383,7 @@ import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface DadosTarefaGps {
   name: string;
@@ -393,6 +394,7 @@ interface DadosTarefaGps {
   date: string | null;
   duration: number;
   gpsTask: boolean;
+  local: string | null;
 }
 
 interface CheckCompletion {
@@ -407,6 +409,7 @@ export default function CreateTaskGps() {
   const queryClient = useQueryClient();
   const { inscriptionId, desafioId } = useLocalSearchParams();
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
+  const insets = useSafeAreaInsets();
 
   function converterKmParaString(km: number): string {
     const kmAbsoluto: number = Math.abs(km);
@@ -594,6 +597,7 @@ export default function CreateTaskGps() {
       date: getFormattedCurrentUtcDate(),
       duration: +elapsedStore,
       gpsTask: true,
+      local: cityStore,
     };
 
     criarTarefaMutation.mutate(dadosTarefa);
@@ -606,14 +610,14 @@ export default function CreateTaskGps() {
   }
 
   return (
-    <SafeAreaView className="flex-1 ">
+    <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
       <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
         <Text className="text-2xl font-anton-regular mt-[38px] mx-5">
           Como foi a sua atividade?
         </Text>
 
         <Text className="font-inter-bold text-base mt-7 mx-5">
-          Nome da atividade
+          Nome da atividade {cityStore}
         </Text>
 
         <TextInput
@@ -707,7 +711,7 @@ export default function CreateTaskGps() {
           )}
         </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

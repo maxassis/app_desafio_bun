@@ -18,6 +18,7 @@ import Facebook from "../../assets/facebook.svg";
 import Apple from "../../assets/apple.svg";
 import useAuthStore from "../../store/auth-store";
 import { Link, useRouter } from "expo-router";
+import { URL } from '@env'
 
 type FormData = {
   email: string;
@@ -32,7 +33,7 @@ const loginRequest = async ({
   email,
   password,
 }: FormData): Promise<TokenType> => {
-  const response = await fetch("https://bondis-app-backend.onrender.com/signin", {
+  const response = await fetch(`${URL}/signin`, {
     method: "POST",
     headers: { "Content-type": "application/json" },
     body: JSON.stringify({ email, password }),

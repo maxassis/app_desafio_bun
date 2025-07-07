@@ -111,14 +111,14 @@ export default function CreateTaskGps() {
   }
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-white">
       <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-end h-[86px] pb-[14px] px-5">
           <TouchableOpacity onPress={() => router.back()}>
             <Left />
           </TouchableOpacity>
           <Text className="text-base font-inter-bold mx-auto">
-            Editar atividade {taskData?.duration}
+            Editar atividade
           </Text>
         </View>
 
