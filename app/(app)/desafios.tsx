@@ -76,7 +76,7 @@ export default function DesafioSelect() {
   return (
     <View className="bg-white flex-1"  style={{ paddingTop: insets.top }}  >
       <SystemBars style="dark" />
-      <View className="pt-[38px] px-5 flex-1">
+      <View className="pt-[28px] px-5 flex-1">
         {!gps && (
           <TouchableOpacity
             onPress={() => router.push("/dashboard")}

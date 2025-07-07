@@ -66,7 +66,8 @@
     "react-native-web": "^0.20.0",
     "react-native-wheely": "^0.6.0",
     "zustand": "^4.5.7",
-    "react-native-edge-to-edge": "1.6.0"
+    "react-native-edge-to-edge": "1.6.0",
+    "expo-navigation-bar": "~4.2.7"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

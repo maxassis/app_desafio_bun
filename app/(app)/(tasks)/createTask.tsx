@@ -8,7 +8,6 @@ import {
   TextInput,
   Modal,
   Pressable,
-  StatusBar,
   ActivityIndicator,
   Alert,
 } from "react-native";
@@ -32,6 +31,7 @@ import { router } from "expo-router";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SystemBars } from "react-native-edge-to-edge";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 LocaleConfig.locales["pt-br"] = ptBR;
 LocaleConfig.defaultLocale = "pt-br";
@@ -82,11 +82,12 @@ export default function TaskCreate() {
     seconds: 0,
   });
   const token = tokenExists((state) => state.token);
-  const { inscriptionId, progress, distanceTotal, desafioId } =
+  const { inscriptionId, desafioId } =
     useDesafioStore();
   const childRef = useRef<KilometerMeterPickerModalRef>(null);
   const timePickerRef = useRef<TimePickerModalRef>(null);
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   const verificarConclusaoDesafioMutation = useMutation({
     mutationFn: async () => {
@@ -266,13 +267,13 @@ export default function TaskCreate() {
       tempoSelecionado.seconds > 0);
 
   return (
-    <SafeAreaView className="flex-1 bg-white px-5">
+    <View className="flex-1 bg-white px-5 pb-4" style={{paddingTop: insets.top}}>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
       >
-        <View className="mb-[10px] pt-[38px]">
+        <View className="mb-[10px] pt-[28px]">
           <TouchableOpacity
             onPress={() => router.back()}
             className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
@@ -481,7 +482,7 @@ export default function TaskCreate() {
         )}
       </ScrollView>
       <SystemBars style="dark" />
-    </SafeAreaView>
+    </View>
   );
 }
 

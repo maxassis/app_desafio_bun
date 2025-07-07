@@ -18,6 +18,7 @@ import Plus from "../../../assets/plus.svg";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type TasksData = Data[];
 export interface Data {
@@ -72,6 +73,7 @@ export default function TaskList() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetEditRef = useRef<BottomSheet>(null);
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
@@ -172,10 +174,10 @@ export default function TaskList() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F1F1F1]">
+    <View className="flex-1 bg-[#F1F1F1]"  style={{ paddingTop: insets.top }}>
       <ScrollView overScrollMode="never">
         <View className="bg-white mb-7">
-          <View className="flex-row mt-[49.5] px-5">
+          <View className="flex-row mt-[29.5] px-5">
             <TouchableOpacity
               className="w-[30px] h-[30px]"
               onPress={() => router.replace("/map")}
@@ -276,6 +278,6 @@ export default function TaskList() {
       </BottomSheet>
 
       <SystemBars style="dark" />
-    </SafeAreaView>
+    </View>
   );
 }
