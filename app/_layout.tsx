@@ -6,6 +6,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import useAuthStore from '../store/auth-store';
 import { Inter_700Bold, Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
 import { Anton_400Regular } from '@expo-google-fonts/anton';
+import { StripeProvider } from '@stripe/stripe-react-native'; // ✅ importe aqui
+import { STRIPE_PUBLIC_KEY } from '@env';
+
+console.log('STRIPE_PUBLIC_KEY', STRIPE_PUBLIC_KEY);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -74,15 +78,18 @@ export default function RootLayout() {
     return () => clearInterval(interval);
   }, [isAuthenticated, checkTokenExpiration]);
 
-  if (!appIsReady) {
-    return null;
-  }
+  if (!appIsReady) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView className="flex-1">
-        <Slot />
-      </GestureHandlerRootView>
-    </QueryClientProvider>
+    <StripeProvider
+      publishableKey={STRIPE_PUBLIC_KEY}
+      // merchantIdentifier="merchant.com.seuapp.id"     // apenas necessário no iOS Apple Pay
+    >
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView className="flex-1">
+          <Slot />
+        </GestureHandlerRootView>
+      </QueryClientProvider>
+    </StripeProvider>
   );
 }

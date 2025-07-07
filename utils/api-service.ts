@@ -90,6 +90,7 @@ export interface Desafio {
 }
 
 interface BuyData {
+  userId: number; 
   name: string;
   price: string;
   rules: string[];

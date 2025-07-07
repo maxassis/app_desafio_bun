@@ -161,7 +161,7 @@ export default function TaskCreate() {
     },
     onSuccess: (data) => {
       limparInputs();
-      queryClient.refetchQueries({ queryKey: ["getAllDesafios"] });
+      queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
       queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
