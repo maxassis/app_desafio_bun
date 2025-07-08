@@ -68,7 +68,9 @@
     "@stripe/stripe-react-native": "0.45.0",
     "zustand": "^4.5.7",
     "react-native-edge-to-edge": "1.6.0",
-    "expo-navigation-bar": "~4.2.7"
+    "expo-navigation-bar": "~4.2.7",
+    "react-native-view-shot": "4.0.3",
+    "expo-sharing": "~13.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
