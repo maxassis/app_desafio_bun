@@ -164,6 +164,7 @@ export default function Buy() {
           <TouchableOpacity
             onPress={() => setShow(true)}
             className="h-[52px] bg-bondis-green mt-[45px] mb-8 rounded-full justify-center mx-5"
+            style={{ marginBottom: insets.bottom + 20 }}
           >
             <Text className="text-center font-inter-bold text-base">
               Quero escolher meu kit

@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserData } from "@/utils/api-service";
+import { useRouter } from "expo-router";
 
 const AceitarDesafioButton = ({
   desafioId,
@@ -13,11 +14,11 @@ const AceitarDesafioButton = ({
 }) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const valor = price;
   const valorFloat = parseFloat(valor.replace(",", "."));
   const valorCentavos = Math.round(valorFloat * 100);
-  // console.log(valorCentavos); // Saída: 5000
 
   const { data: userData } = useQuery({
     queryKey: ["userData"],
@@ -25,7 +26,6 @@ const AceitarDesafioButton = ({
     staleTime: 45 * 60 * 1000,
   });
 
-  
   const mutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(
@@ -41,13 +41,10 @@ const AceitarDesafioButton = ({
           }),
         }
       );
-
       const data = await response.json();
-
       if (!data.clientSecret) {
         throw new Error("Resposta inválida do servidor");
       }
-
       return data.clientSecret;
     },
     onSuccess: async (clientSecret) => {
@@ -58,24 +55,34 @@ const AceitarDesafioButton = ({
       });
 
       if (init.error) {
-        console.error("Erro ao inicializar PaymentSheet:", init.error.message);
-        return;
+        throw new Error("Erro ao inicializar PaymentSheet: " + init.error.message);
       }
 
       const paymentResult = await presentPaymentSheet();
 
       if (paymentResult.error) {
-        alert("Pagamento foi cancelado");
+        throw new Error("Pagamento foi cancelado");
       } else {
-        alert("Pagamento realizado com sucesso!");
-        // Ação após pagamento aqui
-        queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
-        queryClient.invalidateQueries({ queryKey: ["desafios"] });
-        queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
-        queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
+        // 1. Atualizar o cache manualmente para uma UI instantânea
+        queryClient.setQueryData(["getAllDesafios"], (oldData: any) => {
+          if (!oldData) return [];
+          return oldData.map((desafio: any) =>
+            desafio.id === desafioId
+              ? { ...desafio, isRegistered: true }
+              : desafio
+          );
+        });
+
+        // 2. Redirecionar o usuário. Ele verá a dashboard com o estado correto.
+        router.replace("/(app)/dashboard");
+
+        // 3. Invalidar em segundo plano para garantir consistência com o servidor.
+        // await queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
+        await queryClient.invalidateQueries({ queryKey: ["desafios"] });
+        await queryClient.invalidateQueries({ queryKey: ["purchaseData", desafioId] });
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Erro no pagamento:", error);
       alert("Erro ao processar o pagamento. Tente novamente.");
     },
