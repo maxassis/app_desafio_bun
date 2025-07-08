@@ -18,6 +18,7 @@ import Facebook from "../../assets/facebook.svg";
 import Apple from "../../assets/apple.svg";
 import useAuthStore from "../../store/auth-store";
 import { Link, useRouter } from "expo-router";
+import { Button } from "../../components/Button";
 import { URL } from '@env'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -155,26 +156,11 @@ export default function Login() {
             </Link>
           </Text>
 
-          <TouchableOpacity
+          <Button
+            title="Entrar"
             onPress={handleSubmit(onSubmit)}
-            className={`h-[52px] bg-bondis-green mt-8 rounded-full justify-center items-center ${
-              mutation.isPending ? "opacity-50" : ""
-            }`}
-            disabled={mutation.isPending}
-          >
-            <View className="flex-row items-center">
-              <Text className="font-inter-bold text-base">
-                {mutation.isPending ? "Entrando..." : "Entrar"}
-              </Text>
-              {mutation.isPending && (
-                <ActivityIndicator
-                  size="small"
-                  color="#000000"
-                  style={{ marginLeft: 8 }}
-                />
-              )}
-            </View>
-          </TouchableOpacity>
+            isLoading={mutation.isPending}
+          />
 
           <Text className="text-center mt-8 text-base text-bondis-gray-dark">
             Ou entre em sua conta:
