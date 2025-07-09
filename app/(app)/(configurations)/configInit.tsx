@@ -36,7 +36,7 @@ export default function MenuConfigurations() {
   return (
     <View className="flex-1 bg-white "  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }} >
       <View className="px-5 pb-4 pt-[28px] flex-1">
-      <TouchableOpacity onPress={() => router.push("/dashboard")} className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
+      <TouchableOpacity onPress={() => router.replace("/dashboard")} className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
         <Left  />
       </TouchableOpacity>
 
