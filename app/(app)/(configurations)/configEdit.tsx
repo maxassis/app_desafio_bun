@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   Text,
   SafeAreaView,
@@ -12,6 +12,7 @@ import {
   BackHandler,
   Modal,
   TouchableWithoutFeedback,
+  Button,
 } from "react-native";
 import { Image } from "expo-image";
 import Left from "../../../assets/arrow-left.svg";
@@ -21,19 +22,20 @@ import * as ImagePicker from "expo-image-picker";
 import tokenExists from "../../../store/auth-store";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import DropDownPicker from "react-native-dropdown-picker";
 import { cva } from "class-variance-authority";
 import { fetchUserData } from "@/utils/api-service";
 import { SystemBars } from "react-native-edge-to-edge";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import Success from "../../../assets/green-check.svg";
+import LottieView from "lottie-react-native";
 
 interface uploadAvatarResponse {
   avatar_url: string;
   avatar_filename: string;
 }
 
-// Alterado de 3MB para 10MB
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const getFileSize = async (uri: string) => {
   try {
@@ -51,11 +53,27 @@ export default function ProfileEdit() {
   const [bioValue, setBioValue] = useState("");
   const [nameValue, setNameValue] = useState("");
   const [unMaskedValue, setUnmaskedValue] = useState("");
-  const [isModalVisible, setModalVisible] = useState(false);
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [bottomSheetContent, setBottomSheetContent] = useState<
+    "gender" | "sports" | null
+  >(null);
+  const lottieRef = useRef<any>(null);
+  const [isBottomSheetRefOpen, setIsBottomSheetRefOpen] = useState(false);
+  const [isBottomSheetAvatarRefOpen, setIsBottomSheetAvatarRefOpen] = useState(false);
+  const [isBottomSheetSuccessRefOpen, setIsBottomSheetSuccessRefOpen] = useState(false);
 
-  const [genderOpen, setGenderOpen] = useState(false);
+  const snapPoints = useMemo(() => {
+    if (bottomSheetContent === "gender") return ["30%"];
+    if (bottomSheetContent === "sports") return ["30%"]; // Alterado para 30% para consistência
+    return ["1%"];
+  }, [bottomSheetContent]);
+  const bottomSheetAvatarRef = useRef<BottomSheet>(null);
+  const snapAvatarPoints = useMemo(() => ["20%"], []);
+  const bottomSheetSuccessRef = useRef<BottomSheet>(null);
+  const snapSuccessPoints = useMemo(() => ["35%"], []);
+
   const [genderValue, setGenderValue] = useState("");
   const [genderItems, setGenderItems] = useState([
     { label: "Homem", value: "homem" },
@@ -64,7 +82,6 @@ export default function ProfileEdit() {
     { label: "Prefiro não responder", value: "prefiro_nao_responder" },
   ]);
 
-  const [sportsOpen, setSportsOpen] = useState(false);
   const [sportsValue, setSportsValue] = useState("");
   const [sportsItems, setSportsItems] = useState([
     { label: "Corrida", value: "corrida" },
@@ -93,16 +110,19 @@ export default function ProfileEdit() {
     mutationFn: async (formData: FormData): Promise<uploadAvatarResponse> => {
       setLoadingUpload(true);
 
-      const response = await fetch("https://bondis-app-backend.onrender.com/users/upload-avatar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-          authorization: "Bearer " + token,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        "https://bondis-app-backend.onrender.com/users/upload-avatar",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "multipart/form-data",
+            authorization: "Bearer " + token,
+          },
+          body: formData,
+        }
+      );
 
-      setModalVisible(false);
+      bottomSheetAvatarRef.current?.close();
       setLoadingUpload(false);
 
       if (!response.ok) {
@@ -126,17 +146,20 @@ export default function ProfileEdit() {
     mutationFn: async () => {
       setLoadingUpload(true);
 
-      const result = await fetch(`https://bondis-app-backend.onrender.com/users/delete-avatar`, {
-        method: "DELETE",
-        headers: {
-          authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({
-          filename: userConfig?.avatar_filename,
-        }),
-      });
+      const result = await fetch(
+        `https://bondis-app-backend.onrender.com/users/delete-avatar`,
+        {
+          method: "DELETE",
+          headers: {
+            authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({
+            filename: userConfig?.avatar_filename,
+          }),
+        }
+      );
 
-      setModalVisible(false);
+      bottomSheetAvatarRef.current?.close();
       setLoadingUpload(false);
 
       if (!result.ok) {
@@ -199,20 +222,23 @@ export default function ProfileEdit() {
 
   const profileUpdateMutation = useMutation({
     mutationFn: async () => {
-      const result = await fetch("https://bondis-app-backend.onrender.com/users/edit-userdata", {
-        method: "PATCH",
-        headers: {
-          "Content-type": "application/json",
-          authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          full_name: nameValue || null,
-          bio: bioValue || null,
-          gender: genderValue || null,
-          sport: sportsValue || null,
-          birthDate: unMaskedValue || null,
-        }),
-      });
+      const result = await fetch(
+        "https://bondis-app-backend.onrender.com/users/edit-userdata",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            full_name: nameValue || null,
+            bio: bioValue || null,
+            gender: genderValue || null,
+            sport: sportsValue || null,
+            birthDate: unMaskedValue || null,
+          }),
+        }
+      );
 
       if (!result.ok) {
         const data = await result.json();
@@ -224,8 +250,10 @@ export default function ProfileEdit() {
     },
     onSuccess: (data) => {
       // console.log("Alterações salvas com sucesso", data);
-      Alert.alert("Sucesso", "Alterações salvas com sucesso!");
-
+      bottomSheetAvatarRef.current?.close();
+      bottomSheetRef.current?.close();
+      bottomSheetSuccessRef.current?.expand();
+      lottieRef.current?.play();
       queryClient.invalidateQueries({ queryKey: ["userData"] });
     },
     onError: (error) => {
@@ -234,25 +262,37 @@ export default function ProfileEdit() {
     },
   });
 
+  const handleGoBack = useCallback(() => {
+    if (isBottomSheetRefOpen) {
+      bottomSheetRef.current?.close();
+      return true; // Evento tratado
+    }
+    if (isBottomSheetAvatarRefOpen) {
+      bottomSheetAvatarRef.current?.close();
+      return true; // Evento tratado
+    }
+    if (isBottomSheetSuccessRefOpen) {
+      bottomSheetSuccessRef.current?.close();
+      return true; // Evento tratado
+    }
+    router.push("/configInit");
+    return false; // Permitir navegação padrão se nenhum bottom sheet estiver aberto
+  }, [isBottomSheetRefOpen, isBottomSheetAvatarRefOpen, isBottomSheetSuccessRefOpen]);
+
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
-      if (isModalVisible) {
-        setModalVisible(false);
-        return true;
-      }
-      if (genderOpen || sportsOpen) {
-        setGenderOpen(false);
-        setSportsOpen(false);
-        return true; 
-      }
-      return false; 
-    });
-  
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleGoBack
+    );
+
     return () => backHandler.remove();
-  }, [genderOpen, sportsOpen, isModalVisible]);
+  }, [handleGoBack]);
 
   return (
-    <View className="flex-1 bg-white" style={{paddingTop: insets.top, paddingBottom: insets.bottom}}>
+    <View
+      className="flex-1 bg-white"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       <FlatList
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
@@ -262,14 +302,18 @@ export default function ProfileEdit() {
         ListHeaderComponent={
           <View className="px-5 pb-8 pt-[28px] flex-1">
             <View className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
-              <Left onPress={() => router.push("/configInit")} />
+              <Left onPress={handleGoBack} />
             </View>
             <Text className="font-inter-bold text-2xl mt-7">
               Mantenha seu perfil atualizado
             </Text>
 
             <TouchableOpacity
-              onPress={() => setModalVisible(true)}
+              onPress={() => {
+                bottomSheetRef.current?.close();
+                bottomSheetSuccessRef.current?.close();
+                bottomSheetAvatarRef.current?.expand();
+              }}
               className="h-[94px] w-[94px] mt-8 relative"
               disabled={loadingUpload}
             >
@@ -327,38 +371,44 @@ export default function ProfileEdit() {
             <Text className="font-inter-bold text-base mt-[23px]">
               Como você se identifica?
             </Text>
-            <View style={{ zIndex: 2000 }}>
-              <DropDownPicker
-                placeholder="Selecione"
-                open={genderOpen}
-                value={genderValue}
-                items={genderItems}
-                setOpen={setGenderOpen}
-                setValue={setGenderValue}
-                setItems={setGenderItems}
-                style={styles.picker}
-                dropDownDirection="BOTTOM"
-                dropDownContainerStyle={styles.drop}
-              />
-            </View>
+            <TouchableOpacity
+              onPress={() => {
+                bottomSheetAvatarRef.current?.close();
+                bottomSheetSuccessRef.current?.close();
+                setBottomSheetContent("gender");
+                bottomSheetRef.current?.expand();
+              }}
+            >
+              <View className="bg-bondis-text-gray rounded-[4px] h-[52px] mt-2 pl-4 justify-center">
+                <Text>
+                  {genderValue
+                    ? genderItems.find((item) => item.value === genderValue)
+                        ?.label
+                    : "Selecione"}
+                </Text>
+              </View>
+            </TouchableOpacity>
 
             <Text className="font-inter-bold text-base mt-[23px]">
               Esportes
             </Text>
-            <View style={{ zIndex: 1000 }}>
-              <DropDownPicker
-                placeholder="Selecione"
-                open={sportsOpen}
-                value={sportsValue}
-                items={sportsItems}
-                setOpen={setSportsOpen}
-                setValue={setSportsValue}
-                setItems={setSportsItems}
-                style={styles.picker}
-                dropDownDirection="BOTTOM"
-                dropDownContainerStyle={styles.drop}
-              />
-            </View>
+            <TouchableOpacity
+              onPress={() => {
+                bottomSheetAvatarRef.current?.close();
+                bottomSheetSuccessRef.current?.close();
+                setBottomSheetContent("sports");
+                bottomSheetRef.current?.expand();
+              }}
+            >
+              <View className="bg-bondis-text-gray rounded-[4px] h-[52px] mt-2 pl-4 justify-center">
+                <Text>
+                  {sportsValue
+                    ? sportsItems.find((item) => item.value === sportsValue)
+                        ?.label
+                    : "Selecione"}
+                </Text>
+              </View>
+            </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => profileUpdateMutation.mutate()}
@@ -375,93 +425,152 @@ export default function ProfileEdit() {
         }
       />
 
-      {/* Native Modal replacing react-native-modal */}
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
+      <BottomSheet
+        ref={bottomSheetAvatarRef}
+        snapPoints={snapAvatarPoints}
+        index={-1}
+        enablePanDownToClose
+        backgroundStyle={{
+          borderRadius: 20,
+        }}
+        onChange={(index) => setIsBottomSheetAvatarRefOpen(index !== -1)}
       >
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={() => {}}>
-              <View style={styles.modalContent}>
-                {!loadingUpload ? (
-                  <>
-                    <TouchableOpacity
-                      className="w-full pb-4"
-                      onPress={pickImage}
-                    >
-                      <Text className="text-center text-base ">
-                        Escolher uma foto na galeria
-                      </Text>
-                    </TouchableOpacity>
+        <BottomSheetView className="flex-1 z-50">
+          <View className="mx-5">
+            {!loadingUpload ? (
+              <>
+                <TouchableOpacity
+                  className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
+                  onPress={pickImage}
+                >
+                  <Text className="text-center text-base ">
+                    Escolher uma foto na galeria
+                  </Text>
+                </TouchableOpacity>
 
-                    <View className="border-b-[0.2px] mb-4 bg-bondis-text-gray w-full" />
-
-                    <TouchableOpacity
-                      className="w-full"
-                      onPress={() => deleteAvatarMutation.mutate()}
-                      disabled={userConfig?.avatar_url ? false : true}
-                    >
-                      <Text
-                        className={disabledDeleteBtn({
-                          intent: !userConfig?.avatar_url ? "disabled" : null,
-                        })}
-                      >
-                        Remover foto
-                      </Text>
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <View className="flex-row justify-center items-center">
-                    <Text className="font-inter-bold text-base mr-3">
-                      Carregando...
-                    </Text>
-                    <ActivityIndicator size="large" color="#12FF55" />
-                  </View>
-                )}
+                <TouchableOpacity
+                  className="h-[51px] justify-center items-center"
+                  onPress={() => deleteAvatarMutation.mutate()}
+                  disabled={userConfig?.avatar_url ? false : true}
+                >
+                  <Text
+                    className={disabledDeleteBtn({
+                      intent: !userConfig?.avatar_url ? "disabled" : null,
+                    })}
+                  >
+                    Remover foto
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <View
+                className="flex-row justify-center items-center h-full"
+                style={{ paddingBottom: insets.bottom }}
+              >
+                <Text className="font-inter-bold text-base mr-3">
+                  Carregando...
+                </Text>
+                <ActivityIndicator size="large" color="#12FF55" />
               </View>
-            </TouchableWithoutFeedback>
+            )}
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+        </BottomSheetView>
+      </BottomSheet>
+
+      <BottomSheet
+        ref={bottomSheetRef}
+        snapPoints={snapPoints}
+        index={-1}
+        enablePanDownToClose
+        backgroundStyle={{
+          borderRadius: 20,
+        }}
+        onChange={(index) => setIsBottomSheetRefOpen(index !== -1)}
+      >
+        <BottomSheetView className="flex-1 z-50">
+          {bottomSheetContent === "gender" && (
+            <View className="mx-5">
+              {genderItems.map((item, index) => (
+                <TouchableOpacity
+                  key={item.value}
+                  onPress={() => {
+                    setGenderValue(item.value);
+                    bottomSheetRef.current?.close();
+                  }}
+                  className={`h-[51px] justify-center items-center ${
+                    index === genderItems.length - 1
+                      ? ""
+                      : "border-b-[0.2px] border-b-gray-400"
+                  }`}
+                >
+                  <Text className="text-base">{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+          {bottomSheetContent === "sports" && (
+            <View className="mx-5">
+              {sportsItems.map((item, index) => (
+                <TouchableOpacity
+                  key={item.value}
+                  onPress={() => {
+                    setSportsValue(item.value);
+                    bottomSheetRef.current?.close();
+                  }}
+                  className={`h-[51px] justify-center items-center ${
+                    index === sportsItems.length - 1
+                      ? ""
+                      : "border-b-[0.2px] border-b-gray-400"
+                  }`}
+                >
+                  <Text className="text-base">{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </BottomSheetView>
+      </BottomSheet>
+
+      <BottomSheet
+        ref={bottomSheetSuccessRef}
+        snapPoints={snapSuccessPoints}
+        index={-1}
+        enablePanDownToClose
+        backgroundStyle={{
+          borderRadius: 20,
+        }}
+        onChange={(index) => setIsBottomSheetSuccessRefOpen(index !== -1)}
+      >
+        <BottomSheetView className="flex-1 z-50">
+          <View className="justify-center items-center pt-[20px] px-5">
+            <LottieView
+              ref={lottieRef}
+              source={require("../../../assets/lottie/check-lottie.json")}
+              loop={false}
+              style={{
+                width: 80,
+                height: 80,
+                alignSelf: "center",
+              }}
+            />
+            <Text className="font-anton-regular text-lg mt-3 text-center">
+              Perfil atualizado com sucesso!
+            </Text>
+
+            <TouchableOpacity
+              className="w-full items-center justify-center h-[52px] rounded-[31px] text-black border mt-[26px] border-[#D9D9D9]"
+              onPress={() => bottomSheetSuccessRef.current?.close()}
+            >
+              <Text>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </BottomSheetView>
+      </BottomSheet>
 
       <SystemBars style="dark" />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  picker: {
-    backgroundColor: "#EEEEEE",
-    marginTop: 8,
-    borderColor: "transparent",
-    zIndex: 1000,
-  },
-  drop: {
-    borderColor: "transparent",
-    borderWidth: 0,
-    backgroundColor: "#EEEEEE",
-    marginTop: 9,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  modalContent: {
-    width: "100%",
-    height: 128,
-    backgroundColor: "white",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-});
 
 const disabledDeleteBtn = cva("text-center text-base pt-4 text-[#EB4335]", {
   variants: {
