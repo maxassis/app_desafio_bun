@@ -275,7 +275,7 @@ export default function ProfileEdit() {
       bottomSheetSuccessRef.current?.close();
       return true; // Evento tratado
     }
-        router.navigate("/(app)/(configurations)/configInit");
+        router.replace("configInit");
     return false; // Permitir navegação padrão se nenhum bottom sheet estiver aberto
   }, [isBottomSheetRefOpen, isBottomSheetAvatarRefOpen, isBottomSheetSuccessRefOpen]);
 
