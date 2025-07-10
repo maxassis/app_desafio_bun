@@ -303,7 +303,7 @@ export default function Profile() {
           )}
         </View>
 
-        <View className="h-full pb-8">
+        <View className="h-full pb-8" style={{ paddingBottom: insets.bottom + 10 }}>
           {/* Desafios em Curso */}
           {desafiosEmCurso.length > 0 && (
             <>

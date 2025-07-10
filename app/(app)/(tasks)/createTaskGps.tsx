@@ -359,10 +359,9 @@
 //   }
 // );
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { router } from "expo-router";
 import {
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   View,
@@ -383,7 +382,8 @@ import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 interface DadosTarefaGps {
   name: string;
@@ -410,6 +410,8 @@ export default function CreateTaskGps() {
   const { inscriptionId, desafioId } = useLocalSearchParams();
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
   const insets = useSafeAreaInsets();
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ["33%"], []);
 
   function converterKmParaString(km: number): string {
     const kmAbsoluto: number = Math.abs(km);
@@ -560,26 +562,7 @@ export default function CreateTaskGps() {
   }, []);
 
   function confirmarDescarte() {
-    Alert.alert(
-      "Descartar atividade",
-      "Tem certeza que deseja descartar sua atividade?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Sim",
-          style: "destructive",
-          onPress: () => {
-            // Limpa toda a stack de navegação antes de ir para o dashboard
-            router.dismissAll();
-            router.replace("/dashboard");
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+    bottomSheetRef.current?.expand();
   }
 
   function criarTarefa() {
@@ -610,14 +593,14 @@ export default function CreateTaskGps() {
   }
 
   return (
-    <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-white" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
       <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
         <Text className="text-2xl font-anton-regular mt-[38px] mx-5">
           Como foi a sua atividade?
         </Text>
 
         <Text className="font-inter-bold text-base mt-7 mx-5">
-          Nome da atividade {cityStore}
+          Nome da atividade
         </Text>
 
         <TextInput
@@ -711,6 +694,48 @@ export default function CreateTaskGps() {
           )}
         </Pressable>
       </ScrollView>
+
+      <BottomSheet
+        ref={bottomSheetRef}
+        snapPoints={snapPoints}
+        index={-1}
+        enablePanDownToClose
+        backgroundStyle={{
+          borderRadius: 20,
+        }}
+        // onChange={handleSheetChanges}
+      >
+        <BottomSheetView className="flex-1 z-50">
+          <Text className="font-inter-bold text-base mx-5 mb-4 text-center mt-[26px]">
+            Deseja descartar esta atividade?
+          </Text>
+          <Text className="text-center">
+            Todo o progresso será perdido e não poderá ser recuperado.
+          </Text>
+
+          <TouchableOpacity
+            className="mt-4"
+            onPress={() => {
+              bottomSheetRef.current?.close();
+              router.dismissAll();
+              router.replace("/dashboard");
+            }}
+          >
+            <View className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400 mx-5">
+              <Text className="text-bondis-alert-red text-base font-inter-bold ">
+                Descartar atividade
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => bottomSheetRef.current?.close()}>
+            <View className="h-[51px] justify-center items-center">
+              <Text className="text-base mx-auto font-inter-bold">
+                Voltar
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </BottomSheetView>
+      </BottomSheet>
     </View>
   );
 }

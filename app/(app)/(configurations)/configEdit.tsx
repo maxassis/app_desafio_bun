@@ -1,18 +1,13 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   Text,
-  SafeAreaView,
   View,
   TouchableOpacity,
   TextInput,
   Alert,
   FlatList,
-  StyleSheet,
   ActivityIndicator,
   BackHandler,
-  Modal,
-  TouchableWithoutFeedback,
-  Button,
 } from "react-native";
 import { Image } from "expo-image";
 import Left from "../../../assets/arrow-left.svg";
@@ -27,7 +22,6 @@ import { fetchUserData } from "@/utils/api-service";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import Success from "../../../assets/green-check.svg";
 import LottieView from "lottie-react-native";
 
 interface uploadAvatarResponse {
@@ -185,7 +179,7 @@ export default function ProfileEdit() {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 4],
-      quality: 0.3, // Reduzido de 0.5 para 0.3 para diminuir mais a qualidade
+      quality: 0.3, 
       base64: true,
       allowsMultipleSelection: false,
     });
@@ -196,7 +190,7 @@ export default function ProfileEdit() {
       if (fileSize > MAX_FILE_SIZE) {
         Alert.alert(
           "Erro",
-          "O arquivo é muito grande. O tamanho máximo permitido é 10 MB." // Atualizada a mensagem
+          "O arquivo é muito grande. O tamanho máximo permitido é 5 MB."
         );
         return;
       }

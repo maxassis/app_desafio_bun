@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,13 +13,16 @@ import Left from "../../assets/arrow-left.svg";
 import tokenExists from "../../store/auth-store";
 import useDesafioStore from "../../store/desafio-store";
 import { AllDesafios, fetchAllDesafios } from "../../utils/api-service";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 export default function DesafioSelect() {
   const token = tokenExists((state) => state.token);
   const setDesafioData = useDesafioStore((state) => state.setDesafioData);
   const { gps } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ["33%"], []);
 
   const {
     data: desafios,
@@ -39,14 +42,19 @@ export default function DesafioSelect() {
 
   // 🔙 Corrige o problema de "voltar nativo" não funcionar
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
-      if (!gps) {
-        router.push("/dashboard");
+    const backAction = () => {
+      if (gps) {
+        bottomSheetRef.current?.expand();
       } else {
-        router.back(); // Voltar normalmente
+        router.push("/dashboard");
       }
       return true;
-    });
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
 
     return () => backHandler.remove();
   }, [gps]);
@@ -74,7 +82,10 @@ export default function DesafioSelect() {
   };
 
   return (
-    <View className="bg-white flex-1"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}  >
+    <View
+      className="bg-white flex-1"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       <SystemBars style="dark" />
       <View className="pt-[28px] px-5 flex-1">
         {!gps && (
@@ -137,9 +148,7 @@ export default function DesafioSelect() {
               style={{ width: 80, height: 80, borderRadius: 6 }}
             />
             <View className="ml-5">
-              <Text className="font-inter-bold text-base">
-                {item.name}
-              </Text>
+              <Text className="font-inter-bold text-base">{item.name}</Text>
               <Text className="font-inter-bold mt-[6.44px]">
                 {(item.progressPercentage || 0).toFixed(2)}km
               </Text>
@@ -147,6 +156,44 @@ export default function DesafioSelect() {
           </TouchableOpacity>
         ))}
       </View>
+      <BottomSheet
+        ref={bottomSheetRef}
+        snapPoints={snapPoints}
+        index={-1}
+        enablePanDownToClose
+        backgroundStyle={{
+          borderRadius: 20,
+        }}
+      >
+        <BottomSheetView className="flex-1 z-50">
+          <Text className="font-inter-bold text-base mx-5 mb-4 text-center mt-[26px]">
+            Deseja descartar esta atividade?
+          </Text>
+          <Text className="text-center">
+            Todo o progresso será perdido e não poderá ser recuperado.
+          </Text>
+
+          <TouchableOpacity
+            className="mt-4"
+            onPress={() => {
+              bottomSheetRef.current?.close();
+              router.dismissAll();
+              router.replace("/dashboard");
+            }}
+          >
+            <View className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400 mx-5">
+              <Text className="text-bondis-alert-red text-base font-inter-bold ">
+                Descartar atividade
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => bottomSheetRef.current?.close()}>
+            <View className="h-[51px] justify-center items-center">
+              <Text className="text-base mx-auto font-inter-bold">Voltar</Text>
+            </View>
+          </TouchableOpacity>
+        </BottomSheetView>
+      </BottomSheet>
     </View>
   );
 }
