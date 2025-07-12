@@ -185,7 +185,7 @@ export default function TaskList() {
             <View className="flex-row mt-[29.5] px-5">
               <TouchableOpacity
                 className="w-[30px] h-[30px]"
-                onPress={() => router.replace("/map")}
+                onPress={() => router.replace("/dashboard")}
               >
                 <Left />
               </TouchableOpacity>

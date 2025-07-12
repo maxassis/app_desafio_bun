@@ -14,7 +14,6 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
-import { useLocalSearchParams } from "expo-router";
 import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
@@ -60,6 +59,8 @@ export default function CreateTaskGps() {
   const snapPoints = useMemo(() => ["33%"], []);
   const snapPointsSuccess = useMemo(() => ["33%"], []);
   const { desafioName, inscriptionId, desafioId } = useDesafioStore();
+
+  const [isSuccessSheetOpen, setIsSuccessSheetOpen] = useState(false);
 
   function converterKmParaString(km: number): string {
     const kmAbsoluto: number = Math.abs(km);
@@ -123,15 +124,9 @@ export default function CreateTaskGps() {
       queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
 
       if (metaAtingida) {
-        // Limpa toda a stack de navegação e vai para o dashboard
-        // router.dismissAll();
         router.replace("/dashboard");
       } else {
-        // Limpa toda a stack de navegação e vai para taskCreatedSuccess
-        // router.dismissAll();
-
-        router.replace({pathname: "/taskCreatedSuccess", params: {inscriptionId: inscriptionId}});
-        // router.replace("/taskCreatedSuccess");
+        router.replace("/taskCreatedSuccess");
       }
     },
     onError: (erro) => {
@@ -183,6 +178,10 @@ export default function CreateTaskGps() {
 
   useEffect(() => {
     const backAction = () => {
+      if (isSuccessSheetOpen) {
+        bottomSheetSuccessRef.current?.close();
+        return true;
+      }
       confirmarDescarte();
       return true;
     };
@@ -193,7 +192,7 @@ export default function CreateTaskGps() {
     );
 
     return () => backHandler.remove();
-  }, []);
+  }, [isSuccessSheetOpen]);
 
   function confirmarDescarte() {
     bottomSheetRef.current?.expand();
@@ -378,6 +377,7 @@ export default function CreateTaskGps() {
         backgroundStyle={{
           borderRadius: 20,
         }}
+        onChange={(index) => setIsSuccessSheetOpen(index !== -1)}
       >
         <BottomSheetView className="flex-1 z-50">
           <View className="mx-5">
