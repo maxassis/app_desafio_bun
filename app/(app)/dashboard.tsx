@@ -519,10 +519,10 @@ export default function Profile() {
               }}
               className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
             >
-              <Text>Iniciar agora</Text>
+              <Text className="text-base">Iniciar agora</Text>
             </TouchableOpacity>
             <View className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400">
-              <Text>Sincronizar via Strava</Text>
+              <Text className="text-base">Sincronizar via Strava</Text>
             </View>
             <TouchableOpacity
               onPress={() => {
@@ -531,7 +531,7 @@ export default function Profile() {
               }}
               className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
             >
-              <Text>Cadastrar manualmente</Text>
+              <Text className="text-base">Cadastrar manualmente</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>

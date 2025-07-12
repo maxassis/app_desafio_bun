@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   BackHandler,
+  ActivityIndicator,
 } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import Left from "../../../assets/Icon-left.svg";
@@ -76,9 +77,11 @@ export default function TaskList() {
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [sheetContent, setSheetContent] = useState<'edit' | 'confirmDelete'>('edit');
+  
 
-  const snapPoints = useMemo(() => ["30%"], []);
-  const snapPointsEdit = useMemo(() => ["20%"], []);
+  const snapPoints = useMemo(() => ["33%"], []);
+  const snapPointsEdit = useMemo(() => ["30%"], []);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["tasks", inscriptionId],
@@ -106,40 +109,36 @@ export default function TaskList() {
   const closeAllSheets = () => {
     bottomSheetRef.current?.close();
     bottomSheetEditRef.current?.close();
-    setIsBottomSheetOpen(false);
-    setIsEditSheetOpen(false);
   };
 
   useEffect(() => {
     const backAction = () => {
-      if (isBottomSheetOpen || isEditSheetOpen) {
-        closeAllSheets();
+      if (isEditSheetOpen) {
+        if (sheetContent === 'confirmDelete') {
+          setSheetContent('edit');
+        } else {
+          bottomSheetEditRef.current?.close();
+        }
         return true;
       }
+
+      if (isBottomSheetOpen) {
+        bottomSheetRef.current?.close();
+        return true;
+      }
+
       return false;
     };
+
     const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
+      'hardwareBackPress',
       backAction
     );
-    return () => backHandler.remove();
-  }, [isBottomSheetOpen, isEditSheetOpen]);
 
-  const handleDelete = (id: number) => {
-    Alert.alert(
-      "Confirmação de Exclusão",
-      "Tem certeza que deseja excluir esta atividade?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: () => deleteMutation.mutate(id),
-        },
-      ],
-      { cancelable: true }
-    );
-  };
+    return () => backHandler.remove();
+  }, [isBottomSheetOpen, isEditSheetOpen, sheetContent]);
+
+  
 
   const handleEdit = (taskData: Data) => {
     setTask(taskData);
@@ -248,7 +247,7 @@ export default function TaskList() {
                 key={idx}
                 className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
               >
-                <Text>{title}</Text>
+                <Text className="text-base">{title}</Text>
               </View>
             ))}
             <TouchableOpacity
@@ -259,7 +258,7 @@ export default function TaskList() {
               }}
               className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
             >
-              <Text>Cadastrar manualmente</Text>
+              <Text className="text-base">Cadastrar manualmente</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>
@@ -271,32 +270,70 @@ export default function TaskList() {
         snapPoints={snapPointsEdit}
         index={-1}
         enablePanDownToClose
-        onChange={(index) => setIsEditSheetOpen(index !== -1)}
+        onChange={(index) => {
+          setIsEditSheetOpen(index !== -1);
+          if (index === -1) {
+            setSheetContent('edit');
+          }
+        }}
         backgroundStyle={{ borderRadius: 20 }}
       >
         <BottomSheetView className="flex-1">
-          <View className="mx-5">
-            <TouchableOpacity
-              onPress={() => {
-                if (task) {
-                  setTaskData(task);
-                  bottomSheetEditRef.current?.close();
-                  router.push(task.gpsTask ? "/taskEditGps" : "/taskEdit");
-                }
-              }}
-              className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
-            >
-              <Text>Editar atividade</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleDelete(task!.id)}
-              className="h-[51px] justify-center items-center"
-            >
-              <Text className="text-bondis-alert-red">Excluir atividade</Text>
-            </TouchableOpacity>
-          </View>
+          {sheetContent === 'edit' ? (
+            <View className="mx-5">
+              <TouchableOpacity
+                onPress={() => {
+                  if (task) {
+                    setTaskData(task);
+                    bottomSheetEditRef.current?.close();
+                    router.push(task.gpsTask ? "/taskEditGps" : "/taskEdit");
+                  }
+                }}
+                className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
+              >
+                <Text className="text-base">Editar atividade</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setSheetContent('confirmDelete');
+                }}
+                className="h-[51px] justify-center items-center"
+              >
+                <Text className="text-bondis-alert-red text-base">Excluir atividade</Text>
+              </TouchableOpacity>
+            </View>
+          ) : deleteMutation.isPending ? (
+            <View className="flex-1 justify-center items-center">
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          ) : (
+            <View className="mx-5">
+              <Text className="font-inter-bold mt-[10px] text-base text-center">Tem certeza que deseja excluir esta atividade?</Text>
+              <Text className="text-center text-base mt-2">Esta ação não podera ser desfeita</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  if (task) {
+                    deleteMutation.mutate(task.id);
+                  }
+                }}
+                className="h-[51px] mt-6 justify-center items-center border-b-[0.2px] border-b-gray-400"
+              >
+                <Text className="text-bondis-alert-red text-base">Excluir atividade</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setSheetContent('edit');
+                }}
+                className="h-[51px] justify-center items-center"
+              >
+                <Text className="text-black text-base">Voltar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </BottomSheetView>
       </BottomSheet>
+
+      
 
       <SystemBars style="dark" />
     </View>
