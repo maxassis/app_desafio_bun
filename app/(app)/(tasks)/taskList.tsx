@@ -303,8 +303,9 @@ export default function TaskList() {
               </TouchableOpacity>
             </View>
           ) : deleteMutation.isPending ? (
-            <View className="flex-1 justify-center items-center">
-              <ActivityIndicator size="large" color="#0000ff" />
+            <View className="flex-1 flex-row justify-center items-center gap-2">
+              <Text className="text-base">Excluindo atividade...</Text>
+              <ActivityIndicator size="small" color="#12FF55" />
             </View>
           ) : (
             <View className="mx-5">
