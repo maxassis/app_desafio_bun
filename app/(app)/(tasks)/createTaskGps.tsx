@@ -12,7 +12,6 @@ import {
   BackHandler,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Close from "../../../assets/Close.svg";
 import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
 import { useLocalSearchParams } from "expo-router";
@@ -23,6 +22,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { Button } from "@/components/Button";
+import useDesafioStore from "../../../store/desafio-store";
 
 interface DadosTarefaGps {
   name: string;
@@ -38,6 +39,7 @@ interface DadosTarefaGps {
 
 interface CheckCompletion {
   willCompleteChallenge: boolean
+  inscriptionId: number
 }
 
 interface CreateTaskApiResponse {
@@ -47,14 +49,17 @@ interface CreateTaskApiResponse {
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); 
   const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
-  const { inscriptionId, desafioId } = useLocalSearchParams();
+  // const { inscriptionId, desafioId } = useLocalSearchParams();
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
   const insets = useSafeAreaInsets();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetSuccessRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["33%"], []);
+  const snapPointsSuccess = useMemo(() => ["33%"], []);
+  const { desafioName, inscriptionId, desafioId } = useDesafioStore();
 
   function converterKmParaString(km: number): string {
     const kmAbsoluto: number = Math.abs(km);
@@ -124,7 +129,9 @@ export default function CreateTaskGps() {
       } else {
         // Limpa toda a stack de navegação e vai para taskCreatedSuccess
         // router.dismissAll();
-        router.replace("/taskCreatedSuccess");
+
+        router.replace({pathname: "/taskCreatedSuccess", params: {inscriptionId: inscriptionId}});
+        // router.replace("/taskCreatedSuccess");
       }
     },
     onError: (erro) => {
@@ -144,7 +151,7 @@ export default function CreateTaskGps() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            inscriptionId: +inscriptionId,
+            inscriptionId: inscriptionId,
             distance: +distanceStore,
           }),
         }
@@ -159,24 +166,7 @@ export default function CreateTaskGps() {
     onSuccess: (data: CheckCompletion) => {
       if (data.willCompleteChallenge) {
         setIsLoading(false);
-        Alert.alert(
-          "Atenção",
-          "Ao adicionar esta tarefa, você concluirá o desafio. Uma vez concluído, não será mais possível adicionar nem alterar mais tarefas.",
-          [
-            {
-              text: "Cancelar",
-              style: "cancel",
-            },
-            {
-              text: "Concluir",
-              onPress: () => {
-                setIsLoading(true);
-                criarTarefa(true);
-              },
-            },
-          ],
-          { cancelable: true }
-        );
+        bottomSheetSuccessRef.current?.expand();
       } else {
         criarTarefa(false);
       }
@@ -220,7 +210,7 @@ export default function CreateTaskGps() {
       distance: distanceFormated(+distanceStore),
       environment: "livre",
       calories: 200,
-      inscriptionId: +inscriptionId,
+      inscriptionId: inscriptionId as number,
       date: getFormattedCurrentUtcDate(),
       duration: +elapsedStore,
       gpsTask: true,
@@ -377,6 +367,32 @@ export default function CreateTaskGps() {
               </Text>
             </View>
           </TouchableOpacity>
+        </BottomSheetView>
+      </BottomSheet>
+
+      <BottomSheet
+        ref={bottomSheetSuccessRef}
+        snapPoints={snapPointsSuccess}
+        index={-1}
+        enablePanDownToClose
+        backgroundStyle={{
+          borderRadius: 20,
+        }}
+      >
+        <BottomSheetView className="flex-1 z-50">
+          <View className="mx-5">
+            <Text className="font-inter-bold text-center text-base mt-4">Deseja concluir seu desafio?</Text>
+
+            <Text className="mt-2 text-center">Esta atividade completa o desafio <Text className="font-inter-bold">{desafioName}</Text>. Após concluir, não será mais possível editar ou adicionar 
+              novas atividades. 
+            </Text>
+
+            <Button title="Sim, concluir atividade" onPress={() => criarTarefa(true)} />
+
+            <TouchableOpacity  className="items-center justify-center h-[52px]" onPress={() => bottomSheetSuccessRef.current?.close()}>
+              <Text className="text-center font-inter-bold">Voltar</Text>
+            </TouchableOpacity>
+          </View>
         </BottomSheetView>
       </BottomSheet>
     </View>

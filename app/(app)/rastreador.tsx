@@ -89,12 +89,9 @@ export default function Rastreador() {
 
     if (incomplete.length === 1) {
       const desafio = incomplete[0];
-      setDesafioData(desafio.id, desafio.name, 0, 0, desafio.id);
+      setDesafioData(desafio.inscriptionId, desafio.name, 0, 0, desafio.id);
 
-      router.push({
-        pathname: "/createTaskGps",
-        params: { desafioId: desafio.id, inscriptionId: desafio.inscriptionId },
-      });
+      router.push("/createTaskGps");
     } else if (incomplete.length > 1) {
       router.push({ pathname: "/desafios", params: { gps: "true" } });
     }
