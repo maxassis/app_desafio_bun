@@ -46,7 +46,7 @@ export default function DesafioSelect() {
       if (gps) {
         bottomSheetRef.current?.expand();
       } else {
-        router.push("/dashboard");
+        router.back();
       }
       return true;
     };

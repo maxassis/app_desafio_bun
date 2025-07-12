@@ -513,7 +513,10 @@ export default function Profile() {
           </Text>
           <View className="mx-5">
             <TouchableOpacity
-              onPress={() => router.push("/rastreador")}
+              onPress={() => {
+                bottomSheetRef.current?.close();
+                router.push("/rastreador");
+              }}
               className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
             >
               <Text>Iniciar agora</Text>
@@ -522,7 +525,10 @@ export default function Profile() {
               <Text>Sincronizar via Strava</Text>
             </View>
             <TouchableOpacity
-              onPress={() => router.push("/desafios")}
+              onPress={() => {
+                bottomSheetRef.current?.close();
+                router.push("/desafios");
+              }}
               className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
             >
               <Text>Cadastrar manualmente</Text>
