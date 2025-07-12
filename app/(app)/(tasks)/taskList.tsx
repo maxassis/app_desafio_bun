@@ -1,10 +1,9 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import tokenExists from "../../../store/auth-store";
 import {
-  SafeAreaView,
   View,
   Text,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   Alert,
   BackHandler,
@@ -175,30 +174,51 @@ export default function TaskList() {
 
   return (
     <View className="flex-1 bg-[#F1F1F1]"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
-      <ScrollView overScrollMode="never">
-        <View className="bg-white mb-7">
-          <View className="flex-row mt-[29.5] px-5">
-            <TouchableOpacity
-              className="w-[30px] h-[30px]"
-              onPress={() => router.replace("/map")}
-            >
-              <Left />
-            </TouchableOpacity>
-            <Text className="text-base font-inter-bold mx-auto">
-              Atividades recentes
-            </Text>
-          </View>
+      <FlatList
+        data={data}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <TaskItem key={item.id} task={item} openModalEdit={handleEdit} />
+        )}
+        ListHeaderComponent={(
+          <View className="bg-white mb-7">
+            <View className="flex-row mt-[29.5] px-5">
+              <TouchableOpacity
+                className="w-[30px] h-[30px]"
+                onPress={() => router.replace("/map")}
+              >
+                <Left />
+              </TouchableOpacity>
+              <Text className="text-base font-inter-bold mx-auto">
+                Atividades recentes
+              </Text>
+            </View>
 
-          <View className="h-[60px] mt-4 pt-2 px-5 mb-7">
-            <Text className="text-sm text-bondis-gray-secondary">Desafio</Text>
-            <Text className="text-base font-inter-bold mt-2">
-              {desafioName}
-            </Text>
+            <View className="h-[60px] mt-4 pt-2 px-5 mb-7">
+              <Text className="text-sm text-bondis-gray-secondary">Desafio</Text>
+              <Text className="text-base font-inter-bold mt-2">
+                {desafioName}
+              </Text>
+            </View>
           </View>
-        </View>
-
-        {renderTasks()}
-      </ScrollView>
+        )}
+        ListEmptyComponent={(
+          isLoading ? (
+            <View>
+              {[...Array(3)].map((_, index) => <TaskItemSkeleton key={index} />)}
+            </View>
+          ) : error ? (
+            <View className="flex-1 justify-center items-center py-10">
+              <Text>Erro ao carregar tarefas</Text>
+            </View>
+          ) : (
+            <View className="flex-1 justify-center items-center py-10">
+              <Text>Nenhuma atividade criada</Text>
+            </View>
+          )
+        )}
+        overScrollMode="never"
+      />
 
       {/* Botão flutuante */}
       <TouchableOpacity
