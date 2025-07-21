@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { configureReanimatedLogger } from 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -12,6 +13,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as NavigationBar from 'expo-navigation-bar';
 
 SplashScreen.preventAutoHideAsync();
+
+configureReanimatedLogger({
+  strict: false,
+});
 
 const queryClient = new QueryClient();
 
