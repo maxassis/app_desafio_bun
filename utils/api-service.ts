@@ -1,4 +1,5 @@
 import useAuthStore from "../store/auth-store";
+import { URL } from '@env'
 
 type Coordinate = {
   latitude: number;
@@ -102,17 +103,14 @@ interface BuyData {
   distance: string
 }
 
-// API base URL
-const API_BASE_URL = "https://bondis-app-backend.onrender.com";
-// const API_BASE_URL = "http://10.0.2.2:3000"
 
-// Get auth token from store
+const API_BASE_URL = URL
+
 const getToken = () => {
   return useAuthStore.getState().token;
 };
 
 
-// pegas os dados do usuário
 export const fetchUserData = async (): Promise<UserData> => {
   const token = getToken();
   const response = await fetch(`${API_BASE_URL}/users/get-user-data`, {

@@ -2,11 +2,9 @@ import {
   Text,
   View,
   TextInput,
-  SafeAreaView,
   TouchableOpacity,
   Alert,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from 'expo-status-bar';
 import { useForm, Controller } from "react-hook-form";

@@ -26,6 +26,7 @@ import { fetchAllDesafios } from "../../utils/api-service";
 import useDesafioStore from "../../store/desafio-store";
 import { HoldProgressButton } from "@/components/buttonAnime";
 import { SystemBars } from "react-native-edge-to-edge";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const fundoCinza = require("../../assets/fundo-cinza.png");
 const fundoVerde = require("../../assets/fundo-verde.png");
@@ -43,6 +44,8 @@ export default function Rastreador() {
     stopTracking,
   } = useTracker();
   const lottieRef = useRef<any>(null);
+  const insets = useSafeAreaInsets();
+
 
   const [showCountdown, setShowCountdown] = useState(true);
   const [countdownNumber, setCountdownNumber] = useState(3);
@@ -190,10 +193,11 @@ export default function Rastreador() {
     </SafeAreaView>
   ) : (
     <SafeAreaView className="flex-1 text-white">
-      <View className="bg-bondis-green flex-1">
+      <View className="bg-bondis-green flex-1" >
         <ImageBackground
           source={backgroundImage}
-          className="flex-1 pt-[60px] px-5"
+          className="flex-1 px-5"
+          style={{ paddingTop: insets.top + 60 }}
         >
           <LottieView
             ref={lottieRef}

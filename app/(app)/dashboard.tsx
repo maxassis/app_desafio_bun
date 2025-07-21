@@ -362,7 +362,7 @@ export default function Profile() {
             !isDesafiosError &&
             desafiosDisponiveis.length > 0 && (
               <>
-                <View className="mb-4 pl-5 mt-4">
+                <View className="mb-4 pl-5 mt-8">
                   <Text className="font-anton-regular text-xl my-auto">
                     Desafios Disponíveis
                   </Text>
