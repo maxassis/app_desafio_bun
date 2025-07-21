@@ -18,7 +18,7 @@ import Plus from "../../../assets/plus.svg";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type TasksData = Data[];
 export interface Data {
@@ -37,7 +37,7 @@ export interface Data {
 
 const fetchTasks = async (
   inscriptionId: number,
-  token: string
+  token: string,
 ): Promise<TasksData> => {
   const res = await fetch(
     `https://bondis-app-backend.onrender.com/tasks/get-tasks/${inscriptionId}`,
@@ -46,7 +46,7 @@ const fetchTasks = async (
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   return res.json();
 };
@@ -57,7 +57,7 @@ const deleteTaskApi = async (id: number, token: string) => {
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
   );
   if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
   return res.json();
@@ -77,10 +77,11 @@ export default function TaskList() {
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
-  const [sheetContent, setSheetContent] = useState<'edit' | 'confirmDelete'>('edit');
-  
+  const [sheetContent, setSheetContent] = useState<"edit" | "confirmDelete">(
+    "edit",
+  );
 
-  const snapPoints = useMemo(() => ["33%"], []);
+  const snapPoints = useMemo(() => ["30%"], []);
   const snapPointsEdit = useMemo(() => ["30%"], []);
 
   const { data, isLoading, error } = useQuery({
@@ -114,8 +115,8 @@ export default function TaskList() {
   useEffect(() => {
     const backAction = () => {
       if (isEditSheetOpen) {
-        if (sheetContent === 'confirmDelete') {
-          setSheetContent('edit');
+        if (sheetContent === "confirmDelete") {
+          setSheetContent("edit");
         } else {
           bottomSheetEditRef.current?.close();
         }
@@ -131,14 +132,12 @@ export default function TaskList() {
     };
 
     const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction
+      "hardwareBackPress",
+      backAction,
     );
 
     return () => backHandler.remove();
   }, [isBottomSheetOpen, isEditSheetOpen, sheetContent]);
-
-  
 
   const handleEdit = (taskData: Data) => {
     setTask(taskData);
@@ -172,14 +171,17 @@ export default function TaskList() {
   };
 
   return (
-    <View className="flex-1 bg-[#F1F1F1]"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+    <View
+      className="flex-1 bg-[#F1F1F1]"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TaskItem key={item.id} task={item} openModalEdit={handleEdit} />
         )}
-        ListHeaderComponent={(
+        ListHeaderComponent={
           <View className="bg-white mb-7">
             <View className="flex-row mt-[29.5] px-5">
               <TouchableOpacity
@@ -194,17 +196,21 @@ export default function TaskList() {
             </View>
 
             <View className="h-[60px] mt-4 pt-2 px-5 mb-7">
-              <Text className="text-sm text-bondis-gray-secondary">Desafio</Text>
+              <Text className="text-sm text-bondis-gray-secondary">
+                Desafio
+              </Text>
               <Text className="text-base font-inter-bold mt-2">
                 {desafioName}
               </Text>
             </View>
           </View>
-        )}
-        ListEmptyComponent={(
+        }
+        ListEmptyComponent={
           isLoading ? (
             <View>
-              {[...Array(3)].map((_, index) => <TaskItemSkeleton key={index} />)}
+              {[...Array(3)].map((_, index) => (
+                <TaskItemSkeleton key={index} />
+              ))}
             </View>
           ) : error ? (
             <View className="flex-1 justify-center items-center py-10">
@@ -215,7 +221,7 @@ export default function TaskList() {
               <Text>Nenhuma atividade criada</Text>
             </View>
           )
-        )}
+        }
         overScrollMode="never"
       />
 
@@ -242,14 +248,17 @@ export default function TaskList() {
             Adicione uma atividade
           </Text>
           <View className="mx-5">
-            {["Via Strava", "Via Apple Saúde"].map((title, idx) => (
-              <View
-                key={idx}
-                className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
-              >
-                <Text className="text-base">{title}</Text>
-              </View>
-            ))}
+            <TouchableOpacity
+              onPress={() => {
+                if (task) setTaskData(task);
+                bottomSheetRef.current?.close();
+                router.push("/rastreador");
+              }}
+              className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
+            >
+              <Text className="text-base">Iniciar agora</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               onPress={() => {
                 if (task) setTaskData(task);
@@ -273,13 +282,13 @@ export default function TaskList() {
         onChange={(index) => {
           setIsEditSheetOpen(index !== -1);
           if (index === -1) {
-            setSheetContent('edit');
+            setSheetContent("edit");
           }
         }}
         backgroundStyle={{ borderRadius: 20 }}
       >
         <BottomSheetView className="flex-1">
-          {sheetContent === 'edit' ? (
+          {sheetContent === "edit" ? (
             <View className="mx-5">
               <TouchableOpacity
                 onPress={() => {
@@ -295,11 +304,13 @@ export default function TaskList() {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  setSheetContent('confirmDelete');
+                  setSheetContent("confirmDelete");
                 }}
                 className="h-[51px] justify-center items-center"
               >
-                <Text className="text-bondis-alert-red text-base">Excluir atividade</Text>
+                <Text className="text-bondis-alert-red text-base">
+                  Excluir atividade
+                </Text>
               </TouchableOpacity>
             </View>
           ) : deleteMutation.isPending ? (
@@ -309,8 +320,12 @@ export default function TaskList() {
             </View>
           ) : (
             <View className="mx-5">
-              <Text className="font-inter-bold mt-[10px] text-base text-center">Tem certeza que deseja excluir esta atividade?</Text>
-              <Text className="text-center text-base mt-2">Esta ação não podera ser desfeita</Text>
+              <Text className="font-inter-bold mt-[10px] text-base text-center">
+                Tem certeza que deseja excluir esta atividade?
+              </Text>
+              <Text className="text-center text-base mt-2">
+                Esta ação não podera ser desfeita
+              </Text>
               <TouchableOpacity
                 onPress={() => {
                   if (task) {
@@ -319,11 +334,13 @@ export default function TaskList() {
                 }}
                 className="h-[51px] mt-6 justify-center items-center border-b-[0.2px] border-b-gray-400"
               >
-                <Text className="text-bondis-alert-red text-base">Excluir atividade</Text>
+                <Text className="text-bondis-alert-red text-base">
+                  Excluir atividade
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  setSheetContent('edit');
+                  setSheetContent("edit");
                 }}
                 className="h-[51px] justify-center items-center"
               >
@@ -333,8 +350,6 @@ export default function TaskList() {
           )}
         </BottomSheetView>
       </BottomSheet>
-
-      
 
       <SystemBars style="dark" />
     </View>
