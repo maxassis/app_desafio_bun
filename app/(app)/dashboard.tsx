@@ -521,9 +521,6 @@ export default function Profile() {
             >
               <Text className="text-base">Iniciar agora</Text>
             </TouchableOpacity>
-            <View className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400">
-              <Text className="text-base">Sincronizar via Strava</Text>
-            </View>
             <TouchableOpacity
               onPress={() => {
                 bottomSheetRef.current?.close();

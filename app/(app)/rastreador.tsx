@@ -88,14 +88,14 @@ export default function Rastreador() {
   }
 
   function longPressStop() {
-    const incomplete = desafios?.filter((desafio) => !desafio.completed) ?? [];
+    const incomplete = desafios?.filter((desafio) => !desafio.completed && desafio.isRegistered) ?? [];
 
-    if (incomplete.length === 1) {
+    if (incomplete.length === 1 && incomplete[0].isRegistered) {
       const desafio = incomplete[0];
       setDesafioData(desafio.inscriptionId, desafio.name, 0, 0, desafio.id);
 
       router.push("/createTaskGps");
-    } else if (incomplete.length > 1) {
+    } else {
       router.push({ pathname: "/desafios", params: { gps: "true" } });
     }
   }
@@ -216,14 +216,14 @@ export default function Rastreador() {
             {formatTime(elapsed)}
           </Text>
           <Text className="text-center font-inter-regular text-xs text-[#00000099] relative top-[-10px]">
-            Tempo de Atividade
+            Activity Time
           </Text>
 
           <Text className="text-[64px] text-center font-anton-regular leading-[78px] mt-[28px]">
             {distance.toFixed(2)}
           </Text>
           <Text className="text-center font-inter-regular text-xs text-[#00000099]">
-            Distancia (Km)
+            Distance (Km)
           </Text>
 
           <View className="flex-row justify-between mt-[28px] mx-3">
@@ -232,7 +232,7 @@ export default function Rastreador() {
                 {isPaused ? paceMedio : paceAtual}
               </Text>
               <Text className="text-xs text-[#00000099]">
-                {isPaused ? "Pace Médio" : "Pace (min/km)"}
+                {isPaused ? "Average Pace" : "Pace (min/km)"}
               </Text>
             </View>
             <View className="justify-center items-center">
