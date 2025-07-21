@@ -88,6 +88,7 @@ export default function Rastreador() {
   }
 
   function longPressStop() {
+    stopTracking();
     const incomplete = desafios?.filter((desafio) => !desafio.completed && desafio.isRegistered) ?? [];
 
     if (incomplete.length === 1 && incomplete[0].isRegistered) {
