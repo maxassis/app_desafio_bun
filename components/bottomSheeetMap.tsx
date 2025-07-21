@@ -32,7 +32,7 @@ const RankingBottomSheet = ({
 }: BottomSheetProps) => {
   const bottomSheetRef = useRef(null);
   const snapPoints = useMemo(() => ["21%", "85%", "100%"], []);
-  const { desafioId } = useDesafioStore();
+  const { desafioId, progress } = useDesafioStore();
 
   const { data: rankData, isLoading } = useQuery<
     RankData[],
@@ -97,7 +97,11 @@ const RankingBottomSheet = ({
           </Text>
 
           <View className="flex-row justify-between mt-6">
-            <TouchableOpacity onPress={() => router.push({ pathname: "/taskList", params: { origin: "map" }} )} className="h-[88px] w-3/12 border-[0.8px] border-[#D9D9D9] rounded justify-center items-center">
+            <TouchableOpacity
+              onPress={() => router.push({ pathname: "/taskList", params: { origin: "map" } })}
+              className={`h-[88px] w-3/12 border-[0.8px] border-[#D9D9D9] rounded justify-center items-center ${(currentDesafio?.progressPercentage ?? 0) >= 100 ? "opacity-50" : ""}`}
+              disabled={(currentDesafio?.progressPercentage ?? 0) >= 100}
+            >
               <Text className="font-inter-bold text-2xl">{currentDesafio?.tasksCount}</Text>
               <Text className="text-[10px] font-inter-bold">ATIVIDADE&gt; </Text>
             </TouchableOpacity>

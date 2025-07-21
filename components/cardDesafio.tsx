@@ -11,9 +11,6 @@ interface desafioProps {
   completed?: boolean;
   desafioId: number; 
   photo: string;
-  // totalDuration: number;
-  // taskCount: number; 
-  // progressPercentage: number;
   inscriptionId: number;
 }
 
@@ -25,18 +22,19 @@ export default function CardDesafio({
   completed,
   desafioId,
   photo,
-  // totalDuration,
-  // taskCount,
-  // progressPercentage,
   inscriptionId
 }: desafioProps) {
   const router = useRouter();
   const { setMapData, setDesafioData } = useDesafioStore();
   
   const handleCardPress = () => {
-    if (completed) return;
+    // if (completed) {
+    //  setMapData( desafioId, inscriptionId);
+    //  setDesafioData(inscriptionId, desafioName, +progress, +distance, desafioId);
+    //   router.push({ pathname: "/map"});
+    // };
 
-    if (isRegistered) {
+    if (isRegistered || completed) {
       setMapData( desafioId, inscriptionId);
       setDesafioData(inscriptionId, desafioName, +progress, +distance, desafioId);
       router.push({ pathname: "/map"});
