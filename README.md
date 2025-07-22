@@ -80,18 +80,6 @@ npx react-native run-ios
 
 ---
 
-## Contribuições
-
-Contribuições são bem-vindas! Siga os passos abaixo para colaborar:
-
-1. Faça um fork do repositório.
-2. Crie um branch para sua feature ou bugfix: `git checkout -b minha-feature`.
-3. Faça os commits e adicione uma descrição clara: `git commit -m "Minha nova feature"`.
-4. Envie seu código: `git push origin minha-feature`.
-5. Abra um Pull Request.
-
----
-
 ## Contato
 
 - **Desenvolvedor**: Max Assis
