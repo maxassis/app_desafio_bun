@@ -140,12 +140,13 @@ export default function Map2() {
     return path;
   }, [routeCoordinates, userDistance]);
 
-  const userMarkers = useMemo(() => (
-    usersParticipants.map((user, index) => (
+  const userMarkers = useMemo(() => {
+    if (!routeData) return null;
+    return usersParticipants.map((user, index) => (
       <Marker
         key={user.userId}
         onPress={() => {}}
-        coordinate={user.distance > +routeData!.distance ? routeCoordinates[routeCoordinates.length - 1] : user.location}
+        coordinate={user.distance > +routeData.distance ? routeCoordinates[routeCoordinates.length - 1] : user.location}
         style={{ zIndex: user.userId === userConfig?.usersId ? 50 : index, elevation: user.userId === userConfig?.usersId ? 50 : index }}
         tracksViewChanges={!markersReady}
         title={`${user.name} - ${user.distance} Km`}
@@ -158,8 +159,8 @@ export default function Map2() {
           )}
         </View>
       </Marker>
-    ))
-  ), [usersParticipants, userConfig, routeData, routeCoordinates, markersReady]);
+    ));
+  }, [usersParticipants, userConfig, routeData, routeCoordinates, markersReady]);
 
   const toggleMapType = () => setMapType(prev => prev === "standard" ? "satellite" : prev === "satellite" ? "hybrid" : "standard");
 

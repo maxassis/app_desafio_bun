@@ -62,5 +62,13 @@ export const mapStyle = [
                 "color": "#99D6EC"
             }
         ]
+    },
+    {
+        "featureType": "poi",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
     }
   ]
