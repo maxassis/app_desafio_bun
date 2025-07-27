@@ -1,6 +1,5 @@
 import { useRef, useMemo, useEffect } from "react";
 import {
-  SafeAreaView,
   Text,
   View,
   TouchableOpacity,
@@ -217,7 +216,7 @@ export default function Profile() {
   const hasActiveDesafios = desafiosEmCurso.length > 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1">
       <ScrollView className="flex-1" overScrollMode="never">
         <View className="mb-[10px] pb-4 bg-bondis-black" style={{ paddingTop: insets.top }}>
           <View className="flex-row h-[92px] justify-between mx-4 mt-4 ">
@@ -536,6 +535,6 @@ export default function Profile() {
 
       <SystemBars style="light" />
       
-    </SafeAreaView>
+    </View>
   );
 }
