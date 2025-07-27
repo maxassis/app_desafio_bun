@@ -8,7 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import ContentLoader, { Rect, Circle } from "react-content-loader/native";
 import Plus from "../../assets/plus.svg";
@@ -22,7 +22,7 @@ import { fetchUserData, fetchAllDesafios } from "@/utils/api-service";
 
 // Skeleton Components using React Content Loader
 const AvatarSkeleton = () => (
-  <ContentLoader 
+  <ContentLoader
     speed={2}
     width={72}
     height={72}
@@ -36,7 +36,7 @@ const AvatarSkeleton = () => (
 
 const UserInfoSkeleton = () => (
   <View className="mt-[29px] items-center">
-    <ContentLoader 
+    <ContentLoader
       speed={2}
       width={200}
       height={80}
@@ -56,7 +56,7 @@ const UserInfoSkeleton = () => (
 const StatsSkeleton = () => (
   <View className="flex-row justify-between h-[51px] mt-[10px] mx-4">
     <View className="items-center">
-      <ContentLoader 
+      <ContentLoader
         speed={2}
         width={60}
         height={51}
@@ -70,7 +70,7 @@ const StatsSkeleton = () => (
       </ContentLoader>
     </View>
     <View className="items-center">
-      <ContentLoader 
+      <ContentLoader
         speed={2}
         width={60}
         height={51}
@@ -84,7 +84,7 @@ const StatsSkeleton = () => (
       </ContentLoader>
     </View>
     <View className="items-center">
-      <ContentLoader 
+      <ContentLoader
         speed={2}
         width={60}
         height={51}
@@ -101,7 +101,7 @@ const StatsSkeleton = () => (
 
 const CardDesafioSkeleton = ({ width = 216 }) => (
   <View className={`w-[${width}px] px-2`}>
-    <ContentLoader 
+    <ContentLoader
       speed={2}
       width={width - 16}
       height={182}
@@ -154,7 +154,7 @@ export default function Profile() {
 
   const desafiosEmCurso =
     allDesafios?.filter(
-      (desafio) => desafio.isRegistered && !desafio.completed
+      (desafio) => desafio.isRegistered && !desafio.completed,
     ) || [];
   const desafiosDisponiveis =
     allDesafios?.filter((desafio) => !desafio.isRegistered) || [];
@@ -201,7 +201,7 @@ export default function Profile() {
 
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction
+      backAction,
     );
 
     return () => backHandler.remove();
@@ -217,8 +217,11 @@ export default function Profile() {
 
   return (
     <View className="flex-1">
-      <ScrollView className="flex-1" overScrollMode="never">
-        <View className="mb-[10px] pb-4 bg-bondis-black" style={{ paddingTop: insets.top }}>
+      <ScrollView className="flex-1 bg-white" overScrollMode="never">
+        <View
+          className="mb-[10px] pb-4 bg-bondis-black"
+          style={{ paddingTop: insets.top }}
+        >
           <View className="flex-row h-[92px] justify-between mx-4 mt-4 ">
             <Logo />
             {isUserLoading ? (
@@ -302,7 +305,10 @@ export default function Profile() {
           )}
         </View>
 
-        <View className="h-full pb-8" style={{ paddingBottom: insets.bottom + 10 }}>
+        <View
+          className="h-full pb-8"
+          style={{ paddingBottom: insets.bottom + 10 }}
+        >
           {/* Desafios em Curso */}
           {desafiosEmCurso.length > 0 && (
             <>
@@ -398,7 +404,7 @@ export default function Profile() {
           {isDesafiosLoading && desafiosEmCurso.length === 0 && (
             <>
               <View className="mb-4 pl-5 mt-4">
-                <ContentLoader 
+                <ContentLoader
                   speed={2}
                   width={200}
                   height={24}
@@ -534,7 +540,6 @@ export default function Profile() {
       </BottomSheet>
 
       <SystemBars style="light" />
-      
     </View>
   );
 }

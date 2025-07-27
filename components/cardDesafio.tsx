@@ -9,7 +9,7 @@ interface desafioProps {
   progress: string;
   isRegistered?: boolean;
   completed?: boolean;
-  desafioId: number; 
+  desafioId: string; 
   photo: string;
   inscriptionId: number;
 }

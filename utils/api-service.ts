@@ -20,7 +20,7 @@ export interface UserData {
 }
 
 export interface AllDesafios {
-  id: number;
+  id: string;
   name: string;
   description: string;
   distance: string;
@@ -73,7 +73,7 @@ export interface RankData {
 export type DesafioData = Data[];
 
 export interface Data {
-  id: number;
+  id: string;
   userId: string;
   desafioId: number;
   progress: string;
@@ -91,7 +91,7 @@ export interface Desafio {
 }
 
 interface BuyData {
-  userId: number; 
+  userId: string; 
   name: string;
   price: string;
   rules: string[];

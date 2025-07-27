@@ -20,13 +20,13 @@ interface DesafioStore {
   taskData: Task | null;
   distanceTotal: number;
   progress: number;
-  desafioId: number | null;
-  setDesafioData: (participationId: number, desafioName: string, progress: number, distanceTotal: number, desafioId: number) => void;
+  desafioId: string | null;
+  setDesafioData: (participationId: number, desafioName: string, progress: number, distanceTotal: number, desafioId: string) => void;
   setTaskData: (taskData: Task) => void;
   clearDesafioData: () => void;
   clearTaskData: () => void;
   setMapData: (
-    desafioId: number,
+    desafioId: string,
     inscriptionId: number,
   ) => void;
   totalDuration: number;
