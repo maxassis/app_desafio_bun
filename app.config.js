@@ -56,6 +56,17 @@ export default {
     },
     plugins: [
       [
+        "expo-build-properties",
+        {
+          android: {
+            newArchEnabled: true
+          },
+          ios: {
+            newArchEnabled: true
+          }
+        }
+      ],
+      [
         "expo-image-picker",
         {
           photosPermission: "The app accesses your photos to let you share them with your friends."
