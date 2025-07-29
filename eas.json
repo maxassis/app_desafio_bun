@@ -8,6 +8,9 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_ENABLE_NEW_ARCHITECTURE": "1"
       }
     },
     "development": {
@@ -15,18 +18,18 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      }
-    },
-    "internal": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_ENABLE_NEW_ARCHITECTURE": "1"
       }
     },
     "production": {
       "distribution": "store",
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_ENABLE_NEW_ARCHITECTURE": "1"
       }
     }
   }

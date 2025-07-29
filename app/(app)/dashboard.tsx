@@ -217,7 +217,7 @@ export default function Profile() {
 
   return (
     <View className="flex-1">
-      <ScrollView className="flex-1 bg-white" overScrollMode="never">
+      <ScrollView className="flex-1 bg-white" overScrollMode="never" showsVerticalScrollIndicator={false}>
         <View
           className="mb-[10px] pb-4 bg-bondis-black"
           style={{ paddingTop: insets.top }}
