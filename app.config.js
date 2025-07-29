@@ -48,6 +48,12 @@ export default {
     web: {
       favicon: "./assets/favicon.png"
     },
+    updates: {
+      url: "https://u.expo.dev/230cd5ae-e636-4f24-a992-74172495dd48"
+    },
+    runtimeVersion: {
+      "policy": "appVersion"
+    },
     plugins: [
       [
         "expo-image-picker",

@@ -70,7 +70,8 @@
     "react-native-edge-to-edge": "1.6.0",
     "expo-navigation-bar": "~4.2.7",
     "react-native-view-shot": "4.0.3",
-    "expo-sharing": "~13.1.5"
+    "expo-sharing": "~13.1.5",
+    "expo-updates": "~0.28.17"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
