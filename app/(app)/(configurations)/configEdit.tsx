@@ -12,6 +12,7 @@ import {
 import { Image } from "expo-image";
 import Left from "../../../assets/arrow-left.svg";
 import User from "../../../assets/user.svg";
+import Cam from "../../../assets/camera.svg";
 import { MaskedTextInput } from "react-native-mask-text";
 import * as ImagePicker from "expo-image-picker";
 import tokenExists from "../../../store/auth-store";
@@ -326,6 +327,10 @@ export default function ProfileEdit() {
                 className="absolute bottom-[-15px] right-[-10px]"
                 contentFit="contain"
               />
+
+              <View className="absolute bottom-[-10px] right-[-8px] bg-bondis-text-gray h-[36px] w-[36px] rounded-full justify-center items-center">
+                <Cam />
+              </View>
             </TouchableOpacity>
 
             <Text className="font-inter-bold text-base mt-[23px]">Nome</Text>
