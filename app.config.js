@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 export default {
   expo: {
@@ -12,82 +12,78 @@ export default {
     splash: {
       image: "./assets/gpt.png",
       resizeMode: "cover",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#ffffff",
     },
     assetBundlePatterns: ["**/*"],
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.maxassis.bondis-app",
       config: {
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
       },
       infoPlist: {
-        NSLocationWhenInUseUsageDescription: "Este app precisa da sua localização para mostrar sua posição no mapa",
-        NSLocationAlwaysAndWhenInUseUsageDescription: "Este app precisa da sua localização para mostrar sua posição no mapa"
-      }
+        NSLocationWhenInUseUsageDescription:
+          "Este app precisa da sua localização para mostrar sua posição no mapa",
+        NSLocationAlwaysAndWhenInUseUsageDescription:
+          "Este app precisa da sua localização para mostrar sua posição no mapa",
+      },
     },
     android: {
       edgeToEdgeEnabled: true,
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        backgroundColor: "#ffffff",
       },
       permissions: [
         "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_BACKGROUND_LOCATION"
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
       ],
       package: "com.maxassis.meudesafio2",
       config: {
         googleMaps: {
-          apiKey: process.env.GOOGLE_MAPS_API_KEY
-        }
-      }
+          apiKey: process.env.GOOGLE_MAPS_API_KEY,
+        },
+      },
     },
     web: {
-      favicon: "./assets/favicon.png"
+      favicon: "./assets/favicon.png",
     },
     updates: {
-      url: "https://u.expo.dev/230cd5ae-e636-4f24-a992-74172495dd48"
+      url: "https://u.expo.dev/230cd5ae-e636-4f24-a992-74172495dd48",
     },
     runtimeVersion: {
-      "policy": "appVersion"
+      policy: "appVersion",
     },
+    newArchEnabled: true,
     plugins: [
-      [
-        "expo-build-properties",
-        {
-          android: {
-            newArchEnabled: true
-          },
-          ios: {
-            newArchEnabled: true
-          }
-        }
-      ],
       [
         "expo-image-picker",
         {
-          photosPermission: "The app accesses your photos to let you share them with your friends."
-        }
+          photosPermission:
+            "The app accesses your photos to let you share them with your friends.",
+        },
       ],
       [
         "expo-location",
         {
-          locationAlwaysAndWhenInUsePermission: "Este app precisa da sua localização para mostrar sua posição no mapa.",
-          locationAlwaysPermission: "Este app precisa da sua localização para mostrar sua posição no mapa.",
-          locationWhenInUsePermission: "Este app precisa da sua localização para mostrar sua posição no mapa."
-        }
+          locationAlwaysAndWhenInUsePermission:
+            "Este app precisa da sua localização para mostrar sua posição no mapa.",
+          locationAlwaysPermission:
+            "Este app precisa da sua localização para mostrar sua posição no mapa.",
+          locationWhenInUsePermission:
+            "Este app precisa da sua localização para mostrar sua posição no mapa.",
+        },
       ],
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
     ],
     extra: {
       eas: {
-        projectId: "230cd5ae-e636-4f24-a992-74172495dd48"
+        projectId: "230cd5ae-e636-4f24-a992-74172495dd48",
       },
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
-    }
-  }
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+    },
+  },
 };
