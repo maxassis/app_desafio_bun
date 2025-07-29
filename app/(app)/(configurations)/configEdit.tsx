@@ -322,12 +322,6 @@ export default function ProfileEdit() {
                 <User />
               )}
 
-              <Image
-                source={require("../../../assets/cam.png")}
-                className="absolute bottom-[-15px] right-[-10px]"
-                contentFit="contain"
-              />
-
               <View className="absolute bottom-[-10px] right-[-8px] bg-bondis-text-gray h-[36px] w-[36px] rounded-full justify-center items-center">
                 <Cam />
               </View>
