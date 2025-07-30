@@ -1,4 +1,14 @@
-export const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+export interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
+
+export const haversine = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
   const toRad = (x: number) => (x * Math.PI) / 180;
   const R = 6371; // km
   const dLat = toRad(lat2 - lat1);
@@ -13,9 +23,8 @@ export const haversine = (lat1: number, lon1: number, lat2: number, lon2: number
   return R * c;
 };
 
-
 type KalmanOptions = {
-  R: number; // variância do ruído do processo
+  R: number;
 };
 
 export class KalmanLatitudeLongitude {
@@ -32,7 +41,10 @@ export class KalmanLatitudeLongitude {
     this.P = null;
   }
 
-  filtrar(latitude: number, longitude: number): { latitude: number; longitude: number } {
+  filtrar(
+    latitude: number,
+    longitude: number
+  ): { latitude: number; longitude: number } {
     const z = [latitude, longitude];
 
     if (!this.x) {
@@ -77,3 +89,57 @@ export class KalmanLatitudeLongitude {
     return { latitude: this.x[0], longitude: this.x[1] };
   }
 }
+
+export const findPointAtDistance = (
+  coordinates: Coordinate[],
+  distance: number
+): Coordinate => {
+  let traveled = 0;
+
+  for (let i = 0; i < coordinates.length - 1; i++) {
+    const start = coordinates[i];
+    const end = coordinates[i + 1];
+    const segmentDistance = haversine(
+      start.latitude,
+      start.longitude,
+      end.latitude,
+      end.longitude
+    );
+
+    if (traveled + segmentDistance >= distance) {
+      const ratio = (distance - traveled) / segmentDistance;
+      return {
+        latitude: start.latitude + (end.latitude - start.latitude) * ratio,
+        longitude: start.longitude + (end.longitude - start.longitude) * ratio,
+      };
+    }
+    traveled += segmentDistance;
+  }
+
+  return coordinates[coordinates.length - 1];
+};
+
+export const calculateUserDistance = (
+  coordinates: Coordinate[],
+  progress: number
+): number => {
+  let traveled = 0;
+
+  for (let i = 0; i < coordinates.length - 1; i++) {
+    const start = coordinates[i];
+    const end = coordinates[i + 1];
+    const segmentDistance = haversine(
+      start.latitude,
+      start.longitude,
+      end.latitude,
+      end.longitude
+    );
+
+    if (traveled + segmentDistance >= progress) {
+      return traveled + (progress - traveled);
+    }
+    traveled += segmentDistance;
+  }
+
+  return traveled;
+};

@@ -21,14 +21,8 @@ import Left from "../../assets/arrow-left.svg";
 // Utils & Services
 import { fetchUserData, fetchRouteData } from "@/utils/api-service";
 import useDesafioStore from "@/store/desafio-store";
-import { haversine } from "@/utils/gpsFunctions";
+import { haversine, findPointAtDistance, calculateUserDistance, type Coordinate } from "@/utils/gpsFunctions";
 import { mapStyle } from "../../styles/mapStyles";
-
-// Types
-interface Coordinate {
-  latitude: number;
-  longitude: number;
-}
 
 interface UserParticipation {
   avatar: string;
@@ -62,44 +56,6 @@ const photoUser = cva("h-[30px] w-[30px] rounded-full", {
 });
 
 // Utility Functions
-const findPointAtDistance = (coordinates: Coordinate[], distance: number): Coordinate => {
-  let traveled = 0;
-  
-  for (let i = 0; i < coordinates.length - 1; i++) {
-    const start = coordinates[i];
-    const end = coordinates[i + 1];
-    const segmentDistance = haversine(start.latitude, start.longitude, end.latitude, end.longitude);
-    
-    if (traveled + segmentDistance >= distance) {
-      const ratio = (distance - traveled) / segmentDistance;
-      return {
-        latitude: start.latitude + (end.latitude - start.latitude) * ratio,
-        longitude: start.longitude + (end.longitude - start.longitude) * ratio
-      };
-    }
-    traveled += segmentDistance;
-  }
-  
-  return coordinates[coordinates.length - 1];
-};
-
-const calculateUserDistance = (coordinates: Coordinate[], progress: number): number => {
-  let traveled = 0;
-  
-  for (let i = 0; i < coordinates.length - 1; i++) {
-    const start = coordinates[i];
-    const end = coordinates[i + 1];
-    const segmentDistance = haversine(start.latitude, start.longitude, end.latitude, end.longitude);
-    
-    if (traveled + segmentDistance >= progress) {
-      return traveled + (progress - traveled);
-    }
-    traveled += segmentDistance;
-  }
-  
-  return traveled;
-};
-
 const formatPercentage = (progress: number): string => {
   return progress.toLocaleString("en-US", { 
     minimumIntegerDigits: 2, 
