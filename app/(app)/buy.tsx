@@ -241,16 +241,8 @@ export default function Buy() {
               ))}
             </View>
 
-            {/* BUTTON ACCEPT */}
-            <AceitarDesafioButton desafioId={+desafioId} price={purchaseData?.price as string} />
-            {/* <TouchableOpacity
-              onPress={() => Linking.openURL("https://www.google.com")}
-              className="h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5"
-            >
-              <Text className="text-center font-inter-bold text-base">
-                Aceito o desafio 💪
-              </Text>
-            </TouchableOpacity> */}
+            {/* Botao comprar desafio*/}
+            <AceitarDesafioButton desafioId={desafioId as string} price={purchaseData?.price as string} />
           </View>
         )}
       </ScrollView>

@@ -9,7 +9,7 @@ const AceitarDesafioButton = ({
   desafioId,
   price,
 }: {
-  desafioId: number;
+  desafioId: string;
   price: string;
 }) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -37,7 +37,7 @@ const AceitarDesafioButton = ({
             amount: valorCentavos,
             currency: "brl",
             userId: userData?.usersId,
-            desafioId: String(desafioId),
+            desafioId: desafioId,
           }),
         }
       );
