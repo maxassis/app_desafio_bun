@@ -63,23 +63,9 @@ const AceitarDesafioButton = ({
       if (paymentResult.error) {
         throw new Error("Pagamento foi cancelado");
       } else {
-        // 1. Atualizar o cache manualmente para uma UI instantânea
-        queryClient.setQueryData(["getAllDesafios"], (oldData: any) => {
-          if (!oldData) return [];
-          return oldData.map((desafio: any) =>
-            desafio.id === desafioId
-              ? { ...desafio, isRegistered: true }
-              : desafio
-          );
-        });
-
-        // 2. Redirecionar o usuário. Ele verá a dashboard com o estado correto.
+              
+        queryClient.clear();
         router.replace("/(app)/dashboard");
-
-        // 3. Invalidar em segundo plano para garantir consistência com o servidor.
-        // await queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
-        await queryClient.invalidateQueries({ queryKey: ["desafios"] });
-        await queryClient.invalidateQueries({ queryKey: ["purchaseData", desafioId] });
       }
     },
     onError: (error: any) => {
