@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ const AceitarDesafioButton = ({
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const [showBtn, setShowBtn] = useState(false);
 
   const valor = price;
   const valorFloat = parseFloat(valor.replace(",", "."));
@@ -63,9 +64,9 @@ const AceitarDesafioButton = ({
       if (paymentResult.error) {
         throw new Error("Pagamento foi cancelado");
       } else {
-              
+        setShowBtn(true);
         queryClient.clear();
-        router.replace("/(app)/dashboard");
+        // router.replace("/(app)/dashboard");
       }
     },
     onError: (error: any) => {
@@ -77,8 +78,8 @@ const AceitarDesafioButton = ({
   return (
     <TouchableOpacity
       onPress={() => mutation.mutate()}
-      className="h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5"
-      disabled={mutation.isPending}
+      className={`h-[52px] bg-bondis-green mt-[45px] mb-4 rounded-full justify-center mx-5 ${showBtn ? "hidden" : ""}`}
+      disabled={mutation.isPending || showBtn}
     >
       {mutation.isPending ? (
         <ActivityIndicator color="black" />
