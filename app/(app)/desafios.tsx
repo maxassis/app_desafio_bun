@@ -35,6 +35,8 @@ export default function DesafioSelect() {
     enabled: !!token,
   });
 
+  console.log(desafios)
+
   const desafiosFiltrados =
     desafios?.filter(
       (item) => item.completed === false && item.isRegistered === true

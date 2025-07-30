@@ -1,28 +1,47 @@
 import { Text, View, Image } from "react-native";
 import Arrow from "../assets/arrow.svg";
 import { convertSecondsToTimeString } from "../utils/timeUtils";
+import { cva } from "class-variance-authority";
 
 interface UserTimeProps {
   position: number;
-    userId: string;
-    userName: string;
-    userAvatar: string;
-    totalDistance: number;
-    totalDuration: number;
-    avgSpeed: number;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  totalDistance: number;
+  totalDuration: number;
+  avgSpeed: number;
+  isCurrentUser?: boolean;
 }
 
-export default function UserTime(data : UserTimeProps) {
+export default function UserTime(data: UserTimeProps) {
   return (
-    <View className="w-full h-[50px] flex-row items-center justify-between border-b border-[#EEEEEE]">
-      <Image source={require("../assets/user1.png")} />
-      <Text className="text-xs font-inter-regular">{data.userName}</Text>
-      <Text className="text-xs font-inter-regular">{convertSecondsToTimeString(data.totalDuration)}</Text>
-      <Text className="text-xs font-inter-regular">{data.totalDistance}km</Text>
-      <View className="bg-black  h-[22px] px-2 py-1 rounded-xl justify-center items-center ">
+    <View className={userTimeVariants({ isCurrentUser: data.isCurrentUser })}>
+      <Image
+        source={data.userAvatar ? { uri: data.userAvatar } : require("../assets/user2.png")}
+        className="w-[32px] h-[32px] rounded-full"
+        style={{ marginRight: 10 }}
+      />
+      <Text className="text-xs font-inter-regular flex-1">{data.userName}</Text>
+      <Text className="text-xs font-inter-regular mx-2">
+        {convertSecondsToTimeString(data.totalDuration)}
+      </Text>
+      <Text className="text-xs font-inter-regular mx-2">{data.totalDistance.toFixed(2)}km</Text>
+      <View className="bg-black h-[22px] px-2 py-1 rounded-xl justify-center items-center">
         <Text className="text-white font-inter-bold text-xs">{data.position}º</Text>
       </View>
       <Arrow />
     </View>
   );
 }
+
+const userTimeVariants = cva(
+  "w-full h-[50px] flex-row items-center justify-between border-b border-[#EEEEEE] px-2",
+  {
+    variants: {
+      isCurrentUser: {
+        true: "bg-bondis-green rounded-md",
+      },
+    },
+  }
+);
