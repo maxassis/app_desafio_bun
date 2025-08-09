@@ -1,5 +1,5 @@
 import useAuthStore from "../store/auth-store";
-import { URL } from '@env'
+import { URL } from "@env";
 
 type Coordinate = {
   latitude: number;
@@ -16,7 +16,7 @@ export interface UserData {
   createdAt: Date;
   usersId: string;
   username: string;
-  birthDate: string | null
+  birthDate: string | null;
 }
 
 export interface AllDesafios {
@@ -30,9 +30,9 @@ export interface AllDesafios {
   progressPercentage: number;
   totalDistanceCompleted: number;
   photo: string;
-  tasksCount: number,
-  totalDuration: number
-  inscriptionId: number
+  tasksCount: number;
+  totalDuration: number;
+  inscriptionId: number;
 }
 
 export interface RouteResponse {
@@ -44,14 +44,13 @@ export interface RouteResponse {
   inscription: Inscription[];
 }
 
-
 export interface Inscription {
   lastTaskDate: Date;
   user: User;
   progress: number;
-  totalTasks: number,
-  totalCalories: number,
-  totalDistanceKm: number
+  totalTasks: number;
+  totalCalories: number;
+  totalDistanceKm: number;
 }
 
 export interface User {
@@ -79,7 +78,7 @@ export interface Data {
   progress: string;
   completed: boolean;
   desafio: Desafio;
-  isRegistered: boolean,
+  isRegistered: boolean;
 }
 
 export interface Desafio {
@@ -91,7 +90,7 @@ export interface Desafio {
 }
 
 interface BuyData {
-  userId: string; 
+  userId: string;
   name: string;
   price: string;
   rules: string[];
@@ -100,16 +99,60 @@ interface BuyData {
   description: string;
   howParticipate: string;
   shortDescription: string;
-  distance: string
+  distance: string;
 }
 
+interface UserProfile {
+  name: string;
+  avatarUrl: string;
+  fullName: string | null;
+  bio: string | null;
+  activeInscriptions: number;
+  completedChallengesCount: number;
+  completedChallenges: CompletedChallenge[];
+  totalDistance: number;
+  recentTasks: RecentTask[];
+  activeChallenges: ActiveChallenge[];
+}
 
-const API_BASE_URL = URL
+interface CompletedChallenge {
+  id: string;
+  name: string;
+  totalDistance: number;
+  completedAt: string;
+  photo: string;
+}
+
+interface RecentTask {
+  id: number;
+  name: string;
+  environment: string;
+  date: string;
+  duration: string;
+  calories: number;
+  local: string;
+  distanceKm: string;
+  inscriptionId: number;
+  usersId: string;
+  createdAt: string;
+  updatedAt: string;
+  gpsTask: boolean;
+}
+
+interface ActiveChallenge {
+  id: string;
+  name: string;
+  totalDistance: number;
+  distanceCovered: number;
+  completionPercentage: number;
+  photo: string;
+}
+
+const API_BASE_URL = URL;
 
 const getToken = () => {
   return useAuthStore.getState().token;
 };
-
 
 export const fetchUserData = async (): Promise<UserData> => {
   const token = getToken();
@@ -172,9 +215,10 @@ export const fetchRouteData = async (
   return data;
 };
 
-
 // Pega os dados do rank
-export const fetchRankData = async (desafioId: string | number): Promise<RankData[]> => {
+export const fetchRankData = async (
+  desafioId: string | number
+): Promise<RankData[]> => {
   const token = getToken();
   const response = await fetch(
     `${API_BASE_URL}/users/get-ranking/${desafioId}`,
@@ -193,8 +237,9 @@ export const fetchRankData = async (desafioId: string | number): Promise<RankDat
   return await response.json();
 };
 
-
-export const fetchPurchaseData = async (desafioId: string | number): Promise<BuyData> => {
+export const fetchPurchaseData = async (
+  desafioId: string | number
+): Promise<BuyData> => {
   const token = getToken();
   try {
     const response = await fetch(
@@ -218,6 +263,19 @@ export const fetchPurchaseData = async (desafioId: string | number): Promise<Buy
   }
 };
 
+export async function getProfile(id: string) {
+  const token = getToken();
+  const response = await fetch(`${API_BASE_URL}/users/get-user-profile/${id}`, {
+    headers: {
+      "Content-type": "application/json",
+      authorization: "Bearer " + token,
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return (await response.json()) as UserProfile;
+}
 
 // Pedos desafios de um usuario
 // export async function fetchDesafios(token: string): Promise<DesafioData> {
@@ -235,4 +293,3 @@ export const fetchPurchaseData = async (desafioId: string | number): Promise<Buy
 
 //   return response.json();
 // }
-

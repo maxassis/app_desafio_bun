@@ -9,7 +9,7 @@ interface desafioProps {
   progress: string;
   isRegistered?: boolean;
   completed?: boolean;
-  desafioId: string; 
+  desafioId: string;
   photo: string;
   inscriptionId: number;
 }
@@ -22,22 +22,22 @@ export default function CardDesafio({
   completed,
   desafioId,
   photo,
-  inscriptionId
+  inscriptionId,
 }: desafioProps) {
   const router = useRouter();
   const { setMapData, setDesafioData } = useDesafioStore();
-  
-  const handleCardPress = () => {
-    // if (completed) {
-    //  setMapData( desafioId, inscriptionId);
-    //  setDesafioData(inscriptionId, desafioName, +progress, +distance, desafioId);
-    //   router.push({ pathname: "/map"});
-    // };
 
+  const handleCardPress = () => {
     if (isRegistered || completed) {
-      setMapData( desafioId, inscriptionId);
-      setDesafioData(inscriptionId, desafioName, +progress, +distance, desafioId);
-      router.push({ pathname: "/map"});
+      setMapData(desafioId, inscriptionId);
+      setDesafioData(
+        inscriptionId,
+        desafioName,
+        +progress,
+        +distance,
+        desafioId
+      );
+      router.push({ pathname: "/profile" });
     } else {
       router.push({ pathname: "/buy", params: { desafioId } });
     }

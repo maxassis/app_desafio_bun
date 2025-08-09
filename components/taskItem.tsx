@@ -18,7 +18,7 @@ export interface TaskItemProps {
   id: number;
   name: string;
   environment: string;
-  date: Date;
+  date: string;
   duration: number;
   calories: number | null;
   local: string | null;
@@ -31,9 +31,10 @@ export interface TaskItemProps {
 export interface TaskListProps {
   task: TaskItemProps;
   openModalEdit: (taskData: TaskItemProps) => void;
+  edit?: boolean;
 }
 
-function tempoDecorrido(data: Date) {
+function tempoDecorrido(data: string) {
   if (!data) return "Data indisponível";
   const nowUTC = dayjs().utc();
   const dateUTC = dayjs(data).utc();
@@ -41,13 +42,13 @@ function tempoDecorrido(data: Date) {
   return dateUTC.from(nowUTC);
 }
 
-
 export default function TaskItem({
   task,
   openModalEdit,
+  edit = true,
 }: TaskListProps) {
   return (
-    <View className="h-[165px] p-5 bg-white mb-4">
+    <View className={`h-[165px] p-5 bg-white ${edit ? "mb-4" : "mb-0"}`}>
       <View className="flex-row w-full h-[42px]">
         <View className="h-[42px] flex-row">
           <Livre />
@@ -56,10 +57,10 @@ export default function TaskItem({
             <View className="flex-row">
               <View className="flex-row items-center justify-center">
                 <View className="flex-row items-center gap-1">
-                <Calendar />
-                <Text className="text-bondis-gray-dark text-xs">
-                  {tempoDecorrido(task.date)}
-                </Text>
+                  <Calendar />
+                  <Text className="text-bondis-gray-dark text-xs">
+                    {tempoDecorrido(task.date)}
+                  </Text>
                 </View>
 
                 {/* {task.gpsTask && (
@@ -68,7 +69,6 @@ export default function TaskItem({
                   <Text className="text-bondis-gray-dark text-xs ml-1">{task.local}</Text>     
                 </View>
                 )} */}
-            
               </View>
               <View className="flex-row gap-x-1 items-center justify-center ml-4">
                 {task.local && <Pin />}
@@ -80,9 +80,12 @@ export default function TaskItem({
           </View>
         </View>
 
-        <TouchableOpacity onPress={() => openModalEdit(task)} className="ml-auto w-[40px] h-[32px] items-end">
-          <Gear />
-        </TouchableOpacity>     
+        <TouchableOpacity
+          onPress={() => openModalEdit(task)}
+          className="ml-auto w-[40px] h-[32px] items-end"
+        >
+          {edit && <Gear />}
+        </TouchableOpacity>
       </View>
 
       <View className="flex-row items-center gap-x-1 mt-3 none">
@@ -94,9 +97,7 @@ export default function TaskItem({
 
       <View className="flex-row mt-3">
         <View className="w-[98px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
-          <Text className="text-[18px] font-inter-bold">
-            {task.distanceKm}
-          </Text>
+          <Text className="text-[18px] font-inter-bold">{task.distanceKm}</Text>
           <Text className="text-bondis-gray-dark text-[10px]">KM</Text>
         </View>
         <View className="w-[100px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
@@ -106,9 +107,7 @@ export default function TaskItem({
           <Text className="text-bondis-gray-dark text-[10px]">DURAÇÃO</Text>
         </View>
         <View className="w-[98px] h-[44px] border-l-2 border-[#D1D5DA] pl-2">
-          <Text className="text-[18px] font-inter-bold">
-            {task.calories}
-          </Text>
+          <Text className="text-[18px] font-inter-bold">{task.calories}</Text>
           <Text className="text-bondis-gray-dark text-[10px]">CAL</Text>
         </View>
       </View>

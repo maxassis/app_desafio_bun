@@ -37,7 +37,7 @@ export interface Data {
 
 const fetchTasks = async (
   inscriptionId: number,
-  token: string,
+  token: string
 ): Promise<TasksData> => {
   const res = await fetch(
     `https://bondis-app-backend.onrender.com/tasks/get-tasks/${inscriptionId}`,
@@ -46,7 +46,7 @@ const fetchTasks = async (
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    },
+    }
   );
   return res.json();
 };
@@ -57,7 +57,7 @@ const deleteTaskApi = async (id: number, token: string) => {
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
-    },
+    }
   );
   if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
   return res.json();
@@ -78,7 +78,7 @@ export default function TaskList() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [sheetContent, setSheetContent] = useState<"edit" | "confirmDelete">(
-    "edit",
+    "edit"
   );
 
   const snapPoints = useMemo(() => ["30%"], []);
@@ -133,7 +133,7 @@ export default function TaskList() {
 
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction,
+      backAction
     );
 
     return () => backHandler.remove();
@@ -144,31 +144,31 @@ export default function TaskList() {
     bottomSheetEditRef.current?.expand();
   };
 
-  const renderTasks = () => {
-    if (isLoading) {
-      return [...Array(3)].map((_, index) => <TaskItemSkeleton key={index} />);
-    }
+  // const renderTasks = () => {
+  //   if (isLoading) {
+  //     return [...Array(3)].map((_, index) => <TaskItemSkeleton key={index} />);
+  //   }
 
-    if (error) {
-      return (
-        <View className="flex-1 justify-center items-center py-10">
-          <Text>Erro ao carregar tarefas</Text>
-        </View>
-      );
-    }
+  //   if (error) {
+  //     return (
+  //       <View className="flex-1 justify-center items-center py-10">
+  //         <Text>Erro ao carregar tarefas</Text>
+  //       </View>
+  //     );
+  //   }
 
-    if (data?.length === 0) {
-      return (
-        <View className="flex-1 justify-center items-center py-10">
-          <Text>Nenhuma atividade criada</Text>
-        </View>
-      );
-    }
+  //   if (data?.length === 0) {
+  //     return (
+  //       <View className="flex-1 justify-center items-center py-10">
+  //         <Text>Nenhuma atividade criada</Text>
+  //       </View>
+  //     );
+  //   }
 
-    return data?.map((task) => (
-      <TaskItem key={task.id} task={task} openModalEdit={handleEdit} />
-    ));
-  };
+  //   return data?.map((task) => (
+  //     <TaskItem key={task.id} task={task} openModalEdit={handleEdit} />
+  //   ));
+  // };
 
   return (
     <View
