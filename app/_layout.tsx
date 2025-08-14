@@ -8,7 +8,7 @@ import useAuthStore from '../store/auth-store';
 import { Inter_700Bold, Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
 import { Anton_400Regular } from '@expo-google-fonts/anton';
 import { StripeProvider } from '@stripe/stripe-react-native'; // ✅ importe aqui
-import { STRIPE_PUBLIC_KEY } from '@env';
+import Constants from 'expo-constants';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as NavigationBar from 'expo-navigation-bar';
 
@@ -96,7 +96,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
     <StripeProvider
-      publishableKey={STRIPE_PUBLIC_KEY}
+      publishableKey={Constants.expoConfig?.extra?.stripePublicKey}
       // merchantIdentifier="merchant.com.seuapp.id"     // apenas necessário no iOS Apple Pay
     >
       <QueryClientProvider client={queryClient}>

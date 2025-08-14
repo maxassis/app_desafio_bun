@@ -1,5 +1,5 @@
 import useAuthStore from "../store/auth-store";
-import { URL } from "@env";
+import Constants from 'expo-constants';
 
 type Coordinate = {
   latitude: number;
@@ -148,7 +148,7 @@ interface ActiveChallenge {
   photo: string;
 }
 
-const API_BASE_URL = URL;
+const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl;
 
 const getToken = () => {
   return useAuthStore.getState().token;

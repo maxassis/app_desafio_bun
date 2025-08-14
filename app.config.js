@@ -84,6 +84,8 @@ export default {
         projectId: "230cd5ae-e636-4f24-a992-74172495dd48",
       },
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      apiUrl: process.env.URL,
+      stripePublicKey: process.env.STRIPE_PUBLIC_KEY,
     },
   },
 };

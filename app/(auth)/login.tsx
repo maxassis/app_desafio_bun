@@ -17,7 +17,7 @@ import Apple from "../../assets/apple.svg";
 import useAuthStore from "../../store/auth-store";
 import { Link, useRouter } from "expo-router";
 import { Button } from "../../components/Button";
-import { URL } from '@env'
+import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type FormData = {
@@ -33,7 +33,7 @@ const loginRequest = async ({
   email,
   password,
 }: FormData): Promise<TokenType> => {
-  const response = await fetch(`${URL}/signin`, {
+  const response = await fetch(`${Constants.expoConfig?.extra?.apiUrl}/signin`, {
     method: "POST",
     headers: { "Content-type": "application/json" },
     body: JSON.stringify({ email, password }),
