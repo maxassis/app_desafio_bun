@@ -1,6 +1,12 @@
 import { Feather } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  Dimensions,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { getProfile } from "@/utils/api-service";
@@ -9,13 +15,15 @@ import * as Progress from "react-native-progress";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
 import Rigth from "../../assets/gray-right.svg";
-import React from "react";
+import React, { useState } from "react";
 import TaskItem from "@/components/taskItem";
+import Carousel from "react-native-reanimated-carousel";
 import PinIcon from "../../assets/map-pin-black.svg";
-import { Button } from "@/components/Button";
 
 export default function Profile() {
+  const width = Dimensions.get("window").width;
   const insets = useSafeAreaInsets();
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const { data } = useQuery({
     queryKey: ["desafios"],
@@ -110,78 +118,133 @@ export default function Profile() {
         </View>
       </View>
 
-      <View className="p-4">
-        <Text className="font-anton-regular text-xl">Desafios ativos</Text>
+      {/* Título dos desafios ativos */}
+      <Text className="font-anton-regular text-xl ml-4 mb-2 mt-8">
+        Desafios ativos ({data?.activeChallenges?.length || 0})
+      </Text>
 
-        <View className="mt-[10px] rounded-lg px-2">
-          <View className="w-[316px] rounded-xl border border-bondis-text-gray mx-auto overflow-hidden">
-            <Image
-              source={require("../../assets/corredores.png")}
-              style={{
-                width: "100%",
-                height: 155,
-              }}
-              contentFit="cover"
-            />
+      {/* Carousel dos desafios ativos */}
+      {data && data.activeChallenges && (
+        <View style={{ height: 380 }}>
+          <Carousel
+            loop={false}
+            width={width}
+            height={410}
+            autoPlay={false}
+            data={data.activeChallenges}
+            scrollAnimationDuration={1000}
+            onSnapToItem={(index) => setCurrentIndex(index)}
+            mode="parallax"
+            modeConfig={{
+              parallaxScrollingScale: 0.95,
+              parallaxScrollingOffset: 30,
+            }}
+            panGestureHandlerProps={{
+              activeOffsetY: [-10, 10],
+            }}
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  width: width - 20,
+                  // height: 410,
+                  paddingHorizontal: 1,
+                }}
+              >
+                <View className="rounded-lg">
+                  <View className="w-full rounded-xl border border-bondis-text-gray overflow-hidden">
+                    <Image
+                      source={{ uri: item.photo }}
+                      style={{
+                        width: "100%",
+                        height: 155,
+                      }}
+                      contentFit="cover"
+                    />
 
-            <View className="p-4">
-              <View className="flex-row justify-between">
-                <Text className="font-bold">Cidade Maravilhosa</Text>
-                <View className="flex-row items-center bg-bondis-text-gray rounded-xl px-2">
-                  <PinIcon className="w-6 h-6" />
-                  <Text className="text-xs ml-1">150Km</Text>
+                    <View className="p-4">
+                      <View className="flex-row justify-between">
+                        <Text className="font-bold">{item.name}</Text>
+                        <View className="flex-row items-center bg-bondis-text-gray rounded-xl px-2">
+                          <PinIcon className="w-6 h-6" />
+                          <Text className="text-xs ml-1">
+                            {item.totalDistance}Km
+                          </Text>
+                        </View>
+                      </View>
+
+                      <Text className="text-xs mt-1 mb-4">
+                        Iniciado em {formatarDataComDayjs(item.createdAt)}
+                      </Text>
+
+                      <Progress.Bar
+                        progress={item.completionPercentage / 100}
+                        width={null}
+                        height={4}
+                        color="#12FF55"
+                        unfilledColor="#999"
+                        borderColor="transparent"
+                        borderWidth={0}
+                      />
+
+                      <View className="flex-row justify-between mt-[6px]">
+                        <Text className="text-xs font-bold">
+                          {item.completionPercentage}%
+                        </Text>
+                        <Text className="text-xs">
+                          {item.distanceCovered} de {item.totalDistance}km
+                        </Text>
+                      </View>
+
+                      <View className="border-b-[0.6px] border-b-[#D9D9D9] mt-4"></View>
+
+                      <View className="mt-5 flex-row items-center mx-auto ">
+                        <Image
+                          source={require("../../assets/frame.png")}
+                          style={{
+                            width: 66,
+                            height: 24,
+                            marginRight: 8,
+                          }}
+                          contentFit="cover"
+                        />
+
+                        <Text className="text-xs text-[#595959]">
+                          + 200 atletas participantes
+                        </Text>
+                      </View>
+
+                      <TouchableOpacity className="h-[30px] bg-bondis-green mt-5 rounded-full items-center justify-center">
+                        <Text className="font-inter-bold text-xs text-black">
+                          Ver desafio
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
               </View>
-
-              <Text className="text-xs mt-1 mb-4">
-                Iniciado em 5 de mai. 2025
-              </Text>
-
-              <Progress.Bar
-                progress={40 / 100}
-                width={null}
-                height={4}
-                color="#12FF55"
-                unfilledColor="#999"
-                borderColor="transparent"
-                borderWidth={0}
-              />
-
-              <View className="flex-row justify-between mt-[6px]">
-                <Text className="text-xs font-bold">30%</Text>
-                <Text className="text-xs">15,32 de 150,00km</Text>
-              </View>
-
-              <View className="border-b-[0.6px] border-b-[#D9D9D9] mt-4"></View>
-
-              <View className="mt-5 flex-row items-center mx-auto ">
-                <Image
-                  source={require("../../assets/frame.png")}
-                  style={{
-                    width: 66,
-                    height: 24,
-                    marginRight: 8,
-                  }}
-                  contentFit="cover"
-                />
-
-                <Text className="text-xs text-[#595959]">
-                  + 200 atletas participantes
-                </Text>
-              </View>
-
-              <TouchableOpacity className="h-[30px] bg-bondis-green mt-5 rounded-full items-center justify-center">
-                <Text className="font-inter-bold text-xs text-black">
-                  Ver desafio
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+            )}
+          />
         </View>
-      </View>
+      )}
 
-      <Text className="font-anton-regular text-xl mt-4 ml-4">
-        Desafios concluídos
+      {/* Indicador de posição */}
+      {data && data.activeChallenges && data.activeChallenges.length > 1 && (
+        <View className="flex-row justify-center items-center mt-2 mb-4">
+          {data.activeChallenges.map((_, index) => (
+            <View
+              key={index}
+              className={`mx-1 rounded-full ${
+                index === currentIndex
+                  ? "w-[10px] h-[10px] bg-bondis-green"
+                  : "w-[6px] h-[6px] bg-gray-300"
+              }`}
+            />
+          ))}
+        </View>
+      )}
+
+      <Text className="font-anton-regular text-xl mt-4 ml-4 mb-2">
+        Desafios concluídos ({data?.completedChallenges?.length || 0})
       </Text>
 
       <View className="bg-bondis-text-gray mt-[10px] rounded-lg mx-4 pl-2 pr-4">
@@ -212,7 +275,7 @@ export default function Profile() {
                 <Text className="">
                   Concluído em{" "}
                   {formatarDataComDayjs(
-                    data?.completedChallenges[index].completedAt
+                    data?.completedChallenges[index].completedAt,
                   )}
                 </Text>
               </View>
@@ -223,7 +286,7 @@ export default function Profile() {
         ))}
       </View>
 
-      <Text className="font-anton-regular text-xl ml-4 mt-8">
+      <Text className="font-anton-regular text-xl ml-4 mt-8 mb-2">
         Últimas atividades ({data?.recentTasks.length})
       </Text>
 
