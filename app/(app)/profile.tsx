@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +11,8 @@ import "dayjs/locale/pt-br";
 import Rigth from "../../assets/gray-right.svg";
 import React from "react";
 import TaskItem from "@/components/taskItem";
+import PinIcon from "../../assets/map-pin-black.svg";
+import { Button } from "@/components/Button";
 
 export default function Profile() {
   const insets = useSafeAreaInsets();
@@ -111,53 +113,70 @@ export default function Profile() {
       <View className="p-4">
         <Text className="font-anton-regular text-xl">Desafios ativos</Text>
 
-        <View className="bg-bondis-text-gray mt-[10px] rounded-lg px-2">
-          {data?.activeChallenges.map((challenge, index) => (
-            <View
-              className={`flex-row py-[10px] mx-auto  ${
-                index < data.activeChallenges.length - 1
-                  ? "border-b-[1px] border-b-[#D9D9D9]"
-                  : ""
-              }`}
-              key={index}
-            >
-              <Image
-                source={{ uri: data?.activeChallenges[index].photo }}
-                style={{
-                  width: 63,
-                  height: 63,
-                  borderRadius: 4,
-                  marginRight: 8,
-                }}
-                contentFit="cover"
-              />
+        <View className="mt-[10px] rounded-lg px-2">
+          <View className="w-[316px] rounded-xl border border-bondis-text-gray mx-auto overflow-hidden">
+            <Image
+              source={require("../../assets/corredores.png")}
+              style={{
+                width: "100%",
+                height: 155,
+              }}
+              contentFit="cover"
+            />
 
-              <View className="flex-1">
-                <Text className="font-bold text-sm mb-2">{challenge.name}</Text>
-
-                <Progress.Bar
-                  progress={challenge.completionPercentage / 100}
-                  width={null}
-                  height={8}
-                  color="#12FF55"
-                  unfilledColor="#565656"
-                  borderColor="transparent"
-                  borderWidth={0}
-                />
-
-                <View className="flex-row justify-between mt-2">
-                  <Text className="text-sm font-bold">
-                    {challenge.completionPercentage}%
-                  </Text>
-                  <Text className="text-sm">{`${
-                    challenge.distanceCovered > challenge.totalDistance
-                      ? challenge.totalDistance
-                      : challenge.distanceCovered
-                  } de ${challenge.totalDistance.toFixed(2)}Km`}</Text>
+            <View className="p-4">
+              <View className="flex-row justify-between">
+                <Text className="font-bold">Cidade Maravilhosa</Text>
+                <View className="flex-row items-center bg-bondis-text-gray rounded-xl px-2">
+                  <PinIcon className="w-6 h-6" />
+                  <Text className="text-xs ml-1">150Km</Text>
                 </View>
               </View>
+
+              <Text className="text-xs mt-1 mb-4">
+                Iniciado em 5 de mai. 2025
+              </Text>
+
+              <Progress.Bar
+                progress={40 / 100}
+                width={null}
+                height={4}
+                color="#12FF55"
+                unfilledColor="#999"
+                borderColor="transparent"
+                borderWidth={0}
+              />
+
+              <View className="flex-row justify-between mt-[6px]">
+                <Text className="text-xs font-bold">30%</Text>
+                <Text className="text-xs">15,32 de 150,00km</Text>
+              </View>
+
+              <View className="border-b-[0.6px] border-b-[#D9D9D9] mt-4"></View>
+
+              <View className="mt-5 flex-row items-center mx-auto ">
+                <Image
+                  source={require("../../assets/frame.png")}
+                  style={{
+                    width: 66,
+                    height: 24,
+                    marginRight: 8,
+                  }}
+                  contentFit="cover"
+                />
+
+                <Text className="text-xs text-[#595959]">
+                  + 200 atletas participantes
+                </Text>
+              </View>
+
+              <TouchableOpacity className="h-[30px] bg-bondis-green mt-5 rounded-full items-center justify-center">
+                <Text className="font-inter-bold text-xs text-black">
+                  Ver desafio
+                </Text>
+              </TouchableOpacity>
             </View>
-          ))}
+          </View>
         </View>
       </View>
 
@@ -216,7 +235,7 @@ export default function Profile() {
               openModalEdit={() => null}
               edit={false}
             />
-            <View className="border-b-[1px] border-b-[#D9D9D9] mx-4"></View>
+            <View className="border-b-[0.6px] border-b-[#D9D9D9] mx-4"></View>
           </View>
         ))}
       </View>
