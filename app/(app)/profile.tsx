@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import { getProfile } from "@/utils/api-service";
+import { getProfile, fetchAllDesafios } from "@/utils/api-service";
 import { Image } from "expo-image";
 import * as Progress from "react-native-progress";
 import dayjs from "dayjs";
@@ -19,17 +19,47 @@ import React, { useState } from "react";
 import TaskItem from "@/components/taskItem";
 import Carousel from "react-native-reanimated-carousel";
 import PinIcon from "../../assets/map-pin-black.svg";
+import useDesafioStore from "@/store/desafio-store";
 
 export default function Profile() {
   const width = Dimensions.get("window").width;
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { setMapData, setDesafioData } = useDesafioStore();
 
   const { data } = useQuery({
     queryKey: ["desafios"],
-    queryFn: () => getProfile("cmdq23mjp0000i23bkhfed2gv"),
+    queryFn: () => getProfile("cmdq6xg2w0002hf3bf75al3kf"),
     staleTime: 5 * 60 * 1000,
   });
+
+  const {
+    data: allDesafios,
+    isLoading: isDesafiosLoading,
+    isError: isDesafiosError,
+  } = useQuery({
+    queryKey: ["getAllDesafios"],
+    queryFn: fetchAllDesafios,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  function handleChallengePress(id: string) {
+    allDesafios?.forEach((desafio) => {
+      if (desafio.id === id && desafio.isRegistered) {
+        setMapData(desafio.id, desafio.inscriptionId);
+        setDesafioData(
+          desafio.inscriptionId,
+          desafio.name,
+          desafio.progressPercentage,
+          +desafio.distance,
+          desafio.id
+        );
+        router.push({ pathname: "/map" });
+        return;
+      }
+      router.push({ pathname: "/buy", params: { desafioId: id } });
+    });
+  }
 
   function formatarDataComDayjs(dataString: string) {
     dayjs.locale("pt-br");
@@ -124,7 +154,7 @@ export default function Profile() {
       </Text>
 
       {/* Carousel dos desafios ativos */}
-      {data && data.activeChallenges && (
+      {data && data.activeChallenges && data.activeChallenges.length > 0 && (
         <View style={{ height: 380 }}>
           <Carousel
             loop={false}
@@ -138,9 +168,6 @@ export default function Profile() {
             modeConfig={{
               parallaxScrollingScale: 0.95,
               parallaxScrollingOffset: 30,
-            }}
-            panGestureHandlerProps={{
-              activeOffsetY: [-10, 10],
             }}
             renderItem={({ item }) => (
               <View
@@ -167,7 +194,7 @@ export default function Profile() {
                         <View className="flex-row items-center bg-bondis-text-gray rounded-xl px-2">
                           <PinIcon className="w-6 h-6" />
                           <Text className="text-xs ml-1">
-                            {item.totalDistance}Km
+                            {item.totalDistance.toFixed(2)}Km
                           </Text>
                         </View>
                       </View>
@@ -191,7 +218,8 @@ export default function Profile() {
                           {item.completionPercentage}%
                         </Text>
                         <Text className="text-xs">
-                          {item.distanceCovered} de {item.totalDistance}km
+                          {item.distanceCovered} de{" "}
+                          {item.totalDistance.toFixed(2)}km
                         </Text>
                       </View>
 
@@ -213,7 +241,10 @@ export default function Profile() {
                         </Text>
                       </View>
 
-                      <TouchableOpacity className="h-[30px] bg-bondis-green mt-5 rounded-full items-center justify-center">
+                      <TouchableOpacity
+                        onPress={() => handleChallengePress(item.id)}
+                        className="h-[30px] bg-bondis-green mt-5 rounded-full items-center justify-center"
+                      >
                         <Text className="font-inter-bold text-xs text-black">
                           Ver desafio
                         </Text>
@@ -247,46 +278,50 @@ export default function Profile() {
         Desafios concluídos ({data?.completedChallenges?.length || 0})
       </Text>
 
-      <View className="bg-bondis-text-gray mt-[10px] rounded-lg mx-4 pl-2 pr-4">
+      <View className="mt-[10px] rounded-lg mx-4 pl-2 pr-4 ">
         {data?.completedChallenges.map((challenge, index) => (
           <View
-            className={`flex-row py-[10px] mx-auto  ${
-              index < data.completedChallenges.length - 1
-                ? "border-b-[1px] border-b-[#D9D9D9]"
-                : ""
-            }`}
+            className="flex-row py-[10px] mx-auto border-b-[1px] border-b-[#D9D9D9]"
             key={index}
           >
             <Image
               source={{ uri: challenge.photo }}
               style={{
-                width: 63,
-                height: 63,
+                width: 76,
+                height: 76,
                 borderRadius: 4,
                 marginRight: 8,
               }}
               contentFit="cover"
             />
 
-            <View className="flex-1 flex-row justify-between items-center">
-              <View>
-                <Text className="font-bold text-sm mb-2">{challenge.name}</Text>
+            <View className="flex-1 flex-row h-[76px] justify-between items-center">
+              <View className="justify-between h-full">
+                <Text className="font-bold  text-base">{challenge.name}</Text>
 
-                <Text className="">
+                <Text className="text-[#595959]">
                   Concluído em{" "}
                   {formatarDataComDayjs(
-                    data?.completedChallenges[index].completedAt,
+                    data?.completedChallenges[index].completedAt
                   )}
                 </Text>
+
+                <View className="flex-row self-start min-w-fit items-center bg-bondis-text-gray mt-2 rounded-xl px-2 justify-self-start ">
+                  <PinIcon className="w-6 h-6" />
+                  <Text className="text-xs ml-1">
+                    {data?.completedChallenges[index].totalDistance.toFixed(2)}
+                    KM
+                  </Text>
+                </View>
               </View>
 
-              <Rigth className="" />
+              <Rigth />
             </View>
           </View>
         ))}
       </View>
 
-      <Text className="font-anton-regular text-xl ml-4 mt-8 mb-2">
+      <Text className="font-anton-regular text-xl ml-4 mt-4 mb-2">
         Últimas atividades ({data?.recentTasks.length})
       </Text>
 
