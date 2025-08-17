@@ -37,7 +37,7 @@ export default function CardDesafio({
         +distance,
         desafioId
       );
-      router.push({ pathname: "/profile" });
+      router.push({ pathname: "/map" });
     } else {
       router.push({ pathname: "/buy", params: { desafioId } });
     }

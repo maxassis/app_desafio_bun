@@ -21,22 +21,25 @@ import TaskItemSkeleton from "@/components/taskItemSkeleton";
 import Carousel from "react-native-reanimated-carousel";
 import PinIcon from "../../assets/map-pin-black.svg";
 import useDesafioStore from "@/store/desafio-store";
-import { 
-  AvatarSkeleton, 
-  UserInfoSkeleton, 
+import { useLocalSearchParams } from "expo-router";
+import {
+  AvatarSkeleton,
+  UserInfoSkeleton,
   StatsSkeleton,
-  SectionTitleSkeleton
+  SectionTitleSkeleton,
 } from "@/components/skeletons";
+import { SystemBars } from "react-native-edge-to-edge";
 
 export default function Profile() {
   const width = Dimensions.get("window").width;
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
   const { setMapData, setDesafioData } = useDesafioStore();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
 
   const { data } = useQuery({
-    queryKey: ["desafios"],
-    queryFn: () => getProfile("cmdq6xg2w0002hf3bf75al3kf"),
+    queryKey: ["desafios", userId],
+    queryFn: () => getProfile(userId),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -51,8 +54,10 @@ export default function Profile() {
   });
 
   function handleChallengePress(id: string) {
-    allDesafios?.forEach((desafio) => {
-      if (desafio.id === id && desafio.isRegistered) {
+    const desafio = allDesafios?.find((d) => d.id === id);
+
+    if (desafio) {
+      if (desafio.isRegistered) {
         setMapData(desafio.id, desafio.inscriptionId);
         setDesafioData(
           desafio.inscriptionId,
@@ -62,10 +67,10 @@ export default function Profile() {
           desafio.id
         );
         router.push({ pathname: "/map" });
-        return;
+      } else {
+        router.push({ pathname: "/buy", params: { desafioId: id } });
       }
-      router.push({ pathname: "/buy", params: { desafioId: id } });
-    });
+    }
   }
 
   function formatarDataComDayjs(dataString: string) {
@@ -182,7 +187,8 @@ export default function Profile() {
 
       {/* Carousel dos desafios ativos */}
       {data ? (
-        data.activeChallenges && data.activeChallenges.length > 0 && (
+        data.activeChallenges &&
+        data.activeChallenges.length > 0 && (
           <View style={{ height: 380 }}>
             <Carousel
               loop={false}
@@ -287,7 +293,13 @@ export default function Profile() {
         )
       ) : (
         // Skeleton para carousel de desafios ativos
-        <View style={{ height: 380, alignItems: "center", justifyContent: "center" }}>
+        <View
+          style={{
+            height: 380,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <View
             style={{
               width: width - 40,
@@ -326,11 +338,11 @@ export default function Profile() {
         </View>
       )}
 
-      <View className="mt-[10px] rounded-lg mx-4 pl-2 pr-4 ">
+      <View className="mt-[10px] rounded-lg mx-4 pl-2 pr-4 mb-4">
         {data ? (
           data?.completedChallenges.map((challenge, index) => (
             <View
-              className="flex-row py-[10px] mx-auto border-b-[1px] border-b-[#D9D9D9]"
+              className="flex-row py-[10px] mx-auto border-b-[0.6px] border-b-[#D9D9D9]"
               key={index}
             >
               <Image
@@ -358,7 +370,9 @@ export default function Profile() {
                   <View className="flex-row self-start min-w-fit items-center bg-bondis-text-gray mt-2 rounded-xl px-2 justify-self-start ">
                     <PinIcon className="w-6 h-6" />
                     <Text className="text-xs ml-1">
-                      {data?.completedChallenges[index].totalDistance.toFixed(2)}
+                      {data?.completedChallenges[index].totalDistance.toFixed(
+                        2
+                      )}
                       KM
                     </Text>
                   </View>
@@ -485,6 +499,7 @@ export default function Profile() {
           </>
         )}
       </View>
+      <SystemBars style="light" />
     </ScrollView>
   );
 }

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -32,7 +31,7 @@ import TimePickerModal, {
 } from "../../../components/timePicker";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 dayjs.extend(utc);
 LocaleConfig.locales["pt-br"] = ptBR;
@@ -148,7 +147,7 @@ export default function TaskEdit() {
                   `${day.dateString} ${agora.format("HH:mm:ss")}`
                 ).toISOString(),
             duration: convertTimeToSeconds(selectedTime),
-            local: local
+            local: local,
           }),
         }
       );
@@ -269,7 +268,10 @@ export default function TaskEdit() {
   }
 
   return (
-    <View className="flex-1 bg-white px-5 pb-4"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+    <View
+      className="flex-1 bg-white px-5 pb-4"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
