@@ -1,8 +1,28 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { View, ActivityIndicator, TouchableOpacity, Image, Text, FlatList, Platform } from "react-native";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
+import {
+  View,
+  ActivityIndicator,
+  TouchableOpacity,
+  Image,
+  Text,
+  FlatList,
+  Platform,
+  Pressable,
+} from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import { Image as ExpoImage } from "expo-image";
-import MapView, { Polyline, PROVIDER_GOOGLE, Marker, Camera } from "react-native-maps";
+import MapView, {
+  Polyline,
+  PROVIDER_GOOGLE,
+  Marker,
+  Camera,
+} from "react-native-maps";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { cva } from "class-variance-authority";
@@ -12,7 +32,7 @@ import "dayjs/locale/pt-br";
 import relativeTime from "dayjs/plugin/relativeTime";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Components
 import RankingBottomSheet from "../../components/bottomSheeetMap";
@@ -21,7 +41,12 @@ import Left from "../../assets/arrow-left.svg";
 // Utils & Services
 import { fetchUserData, fetchRouteData } from "@/utils/api-service";
 import useDesafioStore from "@/store/desafio-store";
-import { haversine, findPointAtDistance, calculateUserDistance, type Coordinate } from "@/utils/gpsFunctions";
+import {
+  haversine,
+  findPointAtDistance,
+  calculateUserDistance,
+  type Coordinate,
+} from "@/utils/gpsFunctions";
 import { mapStyle } from "../../styles/mapStyles";
 
 interface UserParticipation {
@@ -47,19 +72,22 @@ const MAX_TILT = 60;
 const TILT_STEP = 15;
 
 // Styles
-const userPin = cva("h-[35px] w-[35px] rounded-full bg-black justify-center items-center", {
-  variants: { intent: { user: "bg-bondis-green h-[39px] w-[39px]" } }
-});
+const userPin = cva(
+  "h-[35px] w-[35px] rounded-full bg-black justify-center items-center",
+  {
+    variants: { intent: { user: "bg-bondis-green h-[39px] w-[39px]" } },
+  }
+);
 
 const photoUser = cva("h-[30px] w-[30px] rounded-full", {
-  variants: { intent: { user: "h-[34px] w-[34px]" } }
+  variants: { intent: { user: "h-[34px] w-[34px]" } },
 });
 
 // Utility Functions
 const formatPercentage = (progress: number): string => {
-  return progress.toLocaleString("en-US", { 
-    minimumIntegerDigits: 2, 
-    maximumFractionDigits: 1 
+  return progress.toLocaleString("en-US", {
+    minimumIntegerDigits: 2,
+    maximumFractionDigits: 1,
   });
 };
 
@@ -76,7 +104,7 @@ const useMapData = (desafioId: string) => {
   const routeQuery = useQuery({
     queryKey: ["routeData", desafioId],
     queryFn: () => fetchRouteData(desafioId),
-    enabled: !!desafioId
+    enabled: !!desafioId,
   });
 
   const userQuery = useQuery({
@@ -96,14 +124,20 @@ export default function Map2() {
   const [markersReady, setMarkersReady] = useState(false);
   const [userProgress, setUserProgress] = useState<number>(0);
   const [userDistance, setUserDistance] = useState<number>(0);
-  const [usersParticipants, setUsersParticipants] = useState<UserParticipation[]>([]);
+  const [usersParticipants, setUsersParticipants] = useState<
+    UserParticipation[]
+  >([]);
   const [mapType, setMapType] = useState<MapType>("standard");
   const [tilt, setTilt] = useState<number>(0);
+  const [selectedUser, setSelectedUser] = useState<UserParticipation | null>(
+    null
+  );
 
   // Refs & Store
   const mapRef = useRef<MapView>(null);
+  const flatListRef = useRef<FlatList>(null);
   const { desafioId } = useDesafioStore();
-  const insets = useSafeAreaInsets();
+  // const insets = useSafeAreaInsets();
 
   // Custom Hooks
   useDayjs();
@@ -123,7 +157,9 @@ export default function Map2() {
     const updatedParticipants = routeData.inscription.map((dta) => {
       const userLocation = findPointAtDistance(coordinates, dta.progress);
       const userDistance = calculateUserDistance(coordinates, dta.progress);
-      const progressPercentage = formatPercentage((userDistance / totalDistance) * 100);
+      const progressPercentage = formatPercentage(
+        (userDistance / totalDistance) * 100
+      );
 
       if (dta.user.id === userConfig?.usersId) {
         setUserProgress(Number(progressPercentage) / 100);
@@ -163,20 +199,26 @@ export default function Map2() {
   // Calculate user path
   const getUserPath = useMemo(() => {
     if (!routeCoordinates.length || userDistance === 0) return [];
-    
+
     const path: Coordinate[] = [];
     let traveled = 0;
 
     for (let i = 0; i < routeCoordinates.length - 1; i++) {
       const start = routeCoordinates[i];
       const end = routeCoordinates[i + 1];
-      const segmentDistance = haversine(start.latitude, start.longitude, end.latitude, end.longitude);
+      const segmentDistance = haversine(
+        start.latitude,
+        start.longitude,
+        end.latitude,
+        end.longitude
+      );
 
       if (traveled + segmentDistance >= userDistance) {
         const ratio = (userDistance - traveled) / segmentDistance;
         path.push(start, {
           latitude: start.latitude + (end.latitude - start.latitude) * ratio,
-          longitude: start.longitude + (end.longitude - start.longitude) * ratio,
+          longitude:
+            start.longitude + (end.longitude - start.longitude) * ratio,
         });
         break;
       } else {
@@ -184,69 +226,103 @@ export default function Map2() {
         traveled += segmentDistance;
       }
     }
-    
+
     return path;
   }, [routeCoordinates, userDistance]);
+
+  const handleMarkerPress = useCallback(
+    (user: UserParticipation) => {
+      setSelectedUser(user);
+      const userIndex = usersParticipants.findIndex(
+        (p) => p.userId === user.userId
+      );
+      if (userIndex !== -1 && flatListRef.current) {
+        flatListRef.current.scrollToIndex({
+          index: userIndex,
+          animated: true,
+          viewPosition: 0.5, // Center the item
+        });
+      }
+    },
+    [usersParticipants]
+  );
 
   // User markers
   const userMarkers = useMemo(() => {
     if (!routeData) return null;
-    
+
     return usersParticipants.map((user, index) => {
       const isCurrentUser = user.userId === userConfig?.usersId;
-      const coordinate = user.distance > +routeData.distance 
-        ? routeCoordinates[routeCoordinates.length - 1] 
-        : user.location;
-      
+      const coordinate =
+        user.distance > +routeData.distance
+          ? routeCoordinates[routeCoordinates.length - 1]
+          : user.location;
+
       return (
         <Marker
           key={user.userId}
           coordinate={coordinate}
-          style={{ 
-            zIndex: isCurrentUser ? 50 : index, 
-            elevation: isCurrentUser ? 50 : index 
+          style={{
+            zIndex: isCurrentUser ? 50 : index,
+            elevation: isCurrentUser ? 50 : index,
           }}
           tracksViewChanges={!markersReady}
           title={`${user.name} - ${user.distance} Km`}
+          onPress={() => handleMarkerPress(user)}
         >
           <View className={userPin({ intent: isCurrentUser ? "user" : null })}>
             {user.avatar ? (
-              <Image 
-                source={{ uri: user.avatar }} 
-                className={photoUser({ intent: isCurrentUser ? "user" : null })} 
+              <Image
+                source={{ uri: user.avatar }}
+                className={photoUser({ intent: isCurrentUser ? "user" : null })}
               />
             ) : (
-              <Image 
-                source={require("../../assets/user2.png")} 
-                className="h-[32px] w-[32px] rounded-full" 
+              <Image
+                source={require("../../assets/user2.png")}
+                className="h-[32px] w-[32px] rounded-full"
               />
             )}
           </View>
         </Marker>
       );
     });
-  }, [usersParticipants, userConfig, routeData, routeCoordinates, markersReady]);
+  }, [
+    usersParticipants,
+    userConfig,
+    routeData,
+    routeCoordinates,
+    markersReady,
+    handleMarkerPress,
+  ]);
 
   // Map Controls
   const toggleMapType = useCallback(() => {
-    setMapType(prev => {
+    setMapType((prev) => {
       switch (prev) {
-        case "standard": return "satellite";
-        case "satellite": return "hybrid";
-        default: return "standard";
+        case "standard":
+          return "satellite";
+        case "satellite":
+          return "hybrid";
+        default:
+          return "standard";
       }
     });
   }, []);
 
   const animateCamera = useCallback((cameraParams: Partial<Camera>) => {
-    mapRef.current?.animateCamera(cameraParams, { duration: ANIMATION_DURATION });
+    mapRef.current?.animateCamera(cameraParams, {
+      duration: ANIMATION_DURATION,
+    });
   }, []);
 
-  const adjustTilt = useCallback((delta: number) => {
-    const newTilt = Math.max(0, Math.min(tilt + delta, MAX_TILT));
-    setTilt(newTilt);
-    animateCamera({ pitch: newTilt });
-  }, [tilt, animateCamera]);
+  const adjustTilt = useCallback(
+    (delta: number) => {
+      const newTilt = Math.max(0, Math.min(tilt + delta, MAX_TILT));
+      setTilt(newTilt);
+      animateCamera({ pitch: newTilt });
+    },
+    [tilt, animateCamera]
+  );
 
   const resetCamera = useCallback(() => {
     setTilt(0);
@@ -257,57 +333,86 @@ export default function Map2() {
     });
   }, [animateCamera, routeCoordinates]);
 
-  const focusOnUser = useCallback((user: UserParticipation) => {
-    animateCamera({ center: user.location, pitch: 60, zoom: 16 });
-  }, [animateCamera]);
+  const focusOnUser = useCallback(
+    (user: UserParticipation) => {
+      setSelectedUser(user);
+      animateCamera({ center: user.location, pitch: 60, zoom: 16 });
+    },
+    [animateCamera]
+  );
 
   const navigateBack = useCallback(() => {
     router.push("/dashboard");
   }, []);
 
   // Render user card
-  const renderUserCard = useCallback(({ item }: { item: UserParticipation }) => (
-    <TouchableOpacity 
-      onPress={() => focusOnUser(item)} 
-      className="p-4 w-[311px] rounded-2xl bg-white" 
-      activeOpacity={0.7}
-    >
-      <View className="flex-row items-start justify-between">
-        <View className="flex-row items-start">
-          {item.avatar ? (
-            <ExpoImage 
-              source={{ uri: item.avatar }} 
-              style={{ width: 43, height: 43, borderRadius: 100 }} 
-            />
-          ) : (
-            <Image 
-              source={require("../../assets/user2.png")} 
-              className="h-[43px] w-[43px] rounded-full" 
-            />
-          )}
-          <Text className="text-base font-inter-bold ml-2">{item.name}</Text>
-        </View>
-        <Text className="text-[#707271] text-[12px]">
-          {dayjs(item.lastTaskDate).utc().local().fromNow()}
-        </Text>
-      </View>
+  const renderUserCard = useCallback(
+    ({ item }: { item: UserParticipation }) => {
+      // const isSelected = selectedUser?.userId === item.userId;
+      return (
+        <TouchableOpacity
+          onPress={() => focusOnUser(item)}
+          className="p-4 w-[311px] rounded-2xl bg-white"
+          activeOpacity={0.7}
+        >
+          <View className="flex-row items-start justify-between">
+            <Pressable
+              onPress={() => {
+                if (item.userId === userConfig?.usersId) {
+                  router.push("/dashboard");
+                } else {
+                  router.push({
+                    pathname: "/profile",
+                    params: { userId: item.userId },
+                  });
+                }
+              }}
+              className="flex-row items-start"
+              pointerEvents="box-only"
+            >
+              {item.avatar ? (
+                <ExpoImage
+                  source={{ uri: item.avatar }}
+                  style={{ width: 43, height: 43, borderRadius: 100 }}
+                />
+              ) : (
+                <Image
+                  source={require("../../assets/user2.png")}
+                  className="h-[43px] w-[43px] rounded-full"
+                />
+              )}
+              <Text className="text-base font-inter-bold ml-2">
+                {item.name}
+              </Text>
+            </Pressable>
+            <Text className="text-[#707271] text-[12px]">
+              {dayjs(item.lastTaskDate).utc().local().fromNow()}
+            </Text>
+          </View>
 
-      <View className="flex-row w-1/3 h-[37px] items-center justify-between mt-3">
-        <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-          <Text className="font-inter-bold">{item.percentage}</Text>
-          <Text className="text-[10px] text-bondis-gray-secondary">km</Text>
-        </View>
-        <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-          <Text className="font-inter-bold">{item.totalTasks}</Text>
-          <Text className="text-[10px] text-bondis-gray-secondary">ATIVIDADES</Text>
-        </View>
-        <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-          <Text className="font-inter-bold">{item.totalCalories}</Text>
-          <Text className="text-[10px] text-bondis-gray-secondary">CAL. TOTAIS</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  ), [focusOnUser]);
+          <View className="flex-row w-1/3 h-[37px] items-center justify-between mt-3">
+            <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
+              <Text className="font-inter-bold">{item.percentage}</Text>
+              <Text className="text-[10px] text-bondis-gray-secondary">km</Text>
+            </View>
+            <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
+              <Text className="font-inter-bold">{item.totalTasks}</Text>
+              <Text className="text-[10px] text-bondis-gray-secondary">
+                ATIVIDADES
+              </Text>
+            </View>
+            <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
+              <Text className="font-inter-bold">{item.totalCalories}</Text>
+              <Text className="text-[10px] text-bondis-gray-secondary">
+                CAL. TOTAIS
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    },
+    [focusOnUser, selectedUser, userConfig]
+  );
 
   // Loading state
   if (isLoading) {
@@ -338,18 +443,28 @@ export default function Map2() {
               key={`route-polyline-${routeCoordinates.length}`}
               coordinates={routeCoordinates}
               strokeWidth={4}
-              strokeColor={Platform.OS === 'ios' ? 'rgba(0, 0, 0, 1)' : '#000000'}
-              fillColor={Platform.OS === 'ios' ? 'rgba(0, 0, 0, 1)' : undefined}
-              strokeColors={Platform.OS === 'ios' ? ['rgba(0, 0, 0, 1)'] : undefined}
+              strokeColor={
+                Platform.OS === "ios" ? "rgba(0, 0, 0, 1)" : "#000000"
+              }
+              fillColor={Platform.OS === "ios" ? "rgba(0, 0, 0, 1)" : undefined}
+              strokeColors={
+                Platform.OS === "ios" ? ["rgba(0, 0, 0, 1)"] : undefined
+              }
               zIndex={1}
             />
             <Polyline
               key={`user-path-${getUserPath.length}`}
               coordinates={getUserPath}
               strokeWidth={2}
-              strokeColor={Platform.OS === 'ios' ? 'rgba(18, 255, 85, 1)' : '#12FF55'}
-              fillColor={Platform.OS === 'ios' ? 'rgba(18, 255, 85, 1)' : undefined}
-              strokeColors={Platform.OS === 'ios' ? ['rgba(18, 255, 85, 1)'] : undefined}
+              strokeColor={
+                Platform.OS === "ios" ? "rgba(18, 255, 85, 1)" : "#12FF55"
+              }
+              fillColor={
+                Platform.OS === "ios" ? "rgba(18, 255, 85, 1)" : undefined
+              }
+              strokeColors={
+                Platform.OS === "ios" ? ["rgba(18, 255, 85, 1)"] : undefined
+              }
               zIndex={2}
             />
           </>
@@ -367,24 +482,24 @@ export default function Map2() {
             title="Final"
             tracksViewChanges={!markersReady}
           >
-            <Image 
-              source={require("../../assets/final-pin.png")} 
-              className="h-[40px] w-[40px] rounded-full" 
+            <Image
+              source={require("../../assets/final-pin.png")}
+              className="h-[40px] w-[40px] rounded-full"
             />
           </Marker>
         )}
       </MapView>
 
       {/* Control Buttons */}
-      <TouchableOpacity 
-        onPress={navigateBack} 
+      <TouchableOpacity
+        onPress={navigateBack}
         className="absolute top-[40px] left-[13px] h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
       >
         <Left />
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        onPress={toggleMapType} 
+      <TouchableOpacity
+        onPress={toggleMapType}
         className="absolute top-[40px] right-[13px] h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center px-3"
       >
         <Octicons name="stack" size={16} color="black" />
@@ -392,20 +507,20 @@ export default function Map2() {
 
       {/* Camera Controls */}
       <View className="absolute right-[13px] top-[100px] bg-bondis-text-gray rounded-full overflow-hidden">
-        <TouchableOpacity 
-          onPress={() => adjustTilt(TILT_STEP)} 
+        <TouchableOpacity
+          onPress={() => adjustTilt(TILT_STEP)}
           className="h-[40px] w-[40px] justify-center items-center border-b border-gray-400"
         >
           <AntDesign name="arrowup" size={16} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={() => adjustTilt(-TILT_STEP)} 
+        <TouchableOpacity
+          onPress={() => adjustTilt(-TILT_STEP)}
           className="h-[40px] w-[40px] justify-center items-center border-b border-gray-400"
         >
           <AntDesign name="arrowdown" size={16} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={resetCamera} 
+        <TouchableOpacity
+          onPress={resetCamera}
           className="h-[40px] w-[40px] justify-center items-center"
         >
           <AntDesign name="reload1" size={16} color="black" />
@@ -415,6 +530,7 @@ export default function Map2() {
       {/* Users List */}
       <View className="absolute w-full bottom-[22.5%] items-center">
         <FlatList
+          ref={flatListRef}
           data={usersParticipants}
           keyExtractor={(item) => item.userId}
           renderItem={renderUserCard}
@@ -426,11 +542,11 @@ export default function Map2() {
       </View>
 
       {/* Bottom Sheet */}
-      <RankingBottomSheet 
-        routeData={routeData} 
-        userProgress={userProgress} 
-        userDistance={userDistance} 
-        userData={userConfig} 
+      <RankingBottomSheet
+        routeData={routeData}
+        userProgress={userProgress}
+        userDistance={userDistance}
+        userData={userConfig}
       />
 
       <SystemBars style="dark" />

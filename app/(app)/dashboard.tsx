@@ -10,7 +10,6 @@ import {
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import ContentLoader, { Rect, Circle } from "react-content-loader/native";
 import Plus from "../../assets/plus.svg";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useQuery } from "@tanstack/react-query";
@@ -19,109 +18,13 @@ import Settings from "../../assets/settings.svg";
 import { useRouter } from "expo-router";
 import CardDesafio from "@/components/cardDesafio";
 import { fetchUserData, fetchAllDesafios } from "@/utils/api-service";
-
-// Skeleton Components using React Content Loader
-const AvatarSkeleton = () => (
-  <ContentLoader
-    speed={2}
-    width={72}
-    height={72}
-    viewBox="0 0 72 72"
-    backgroundColor="#e0e0e0"
-    foregroundColor="#f0f0f0"
-  >
-    <Circle cx="36" cy="36" r="36" />
-  </ContentLoader>
-);
-
-const UserInfoSkeleton = () => (
-  <View className="mt-[29px] items-center">
-    <ContentLoader
-      speed={2}
-      width={200}
-      height={80}
-      viewBox="0 0 200 80"
-      backgroundColor="#4a4a4a"
-      foregroundColor="#666666"
-    >
-      {/* Username skeleton */}
-      <Rect x="40" y="0" rx="4" ry="4" width="120" height="24" />
-      {/* Bio skeleton */}
-      <Rect x="20" y="35" rx="3" ry="3" width="160" height="16" />
-      <Rect x="60" y="55" rx="3" ry="3" width="80" height="16" />
-    </ContentLoader>
-  </View>
-);
-
-const StatsSkeleton = () => (
-  <View className="flex-row justify-between h-[51px] mt-[10px] mx-4">
-    <View className="items-center">
-      <ContentLoader
-        speed={2}
-        width={60}
-        height={51}
-        viewBox="0 0 60 51"
-        backgroundColor="#4a4a4a"
-        foregroundColor="#666666"
-      >
-        <Rect x="20" y="0" rx="3" ry="3" width="20" height="20" />
-        <Rect x="0" y="28" rx="2" ry="2" width="60" height="12" />
-        <Rect x="10" y="43" rx="2" ry="2" width="40" height="8" />
-      </ContentLoader>
-    </View>
-    <View className="items-center">
-      <ContentLoader
-        speed={2}
-        width={60}
-        height={51}
-        viewBox="0 0 60 51"
-        backgroundColor="#4a4a4a"
-        foregroundColor="#666666"
-      >
-        <Rect x="20" y="0" rx="3" ry="3" width="20" height="20" />
-        <Rect x="0" y="28" rx="2" ry="2" width="60" height="12" />
-        <Rect x="5" y="43" rx="2" ry="2" width="50" height="8" />
-      </ContentLoader>
-    </View>
-    <View className="items-center">
-      <ContentLoader
-        speed={2}
-        width={60}
-        height={51}
-        viewBox="0 0 60 51"
-        backgroundColor="#4a4a4a"
-        foregroundColor="#666666"
-      >
-        <Rect x="10" y="0" rx="3" ry="3" width="40" height="20" />
-        <Rect x="10" y="28" rx="2" ry="2" width="40" height="12" />
-      </ContentLoader>
-    </View>
-  </View>
-);
-
-const CardDesafioSkeleton = ({ width = 216 }) => (
-  <View className={`w-[${width}px] px-2`}>
-    <ContentLoader
-      speed={2}
-      width={width - 16}
-      height={182}
-      viewBox={`0 0 ${width - 16} 182`}
-      backgroundColor="#e0e0e0"
-      foregroundColor="#f0f0f0"
-    >
-      {/* Card background */}
-      <Rect x="0" y="0" rx="12" ry="12" width={width - 16} height="182" />
-      {/* Image area */}
-      <Rect x="12" y="12" rx="8" ry="8" width={width - 40} height="100" />
-      {/* Title */}
-      <Rect x="12" y="125" rx="4" ry="4" width={width - 60} height="16" />
-      {/* Distance */}
-      <Rect x="12" y="148" rx="3" ry="3" width="60" height="12" />
-      {/* Progress bar */}
-      <Rect x="12" y="167" rx="2" ry="2" width={width - 40} height="6" />
-    </ContentLoader>
-  </View>
-);
+import { 
+  AvatarSkeleton, 
+  UserInfoSkeleton, 
+  StatsSkeleton, 
+  CardDesafioSkeleton,
+  SectionTitleSkeleton
+} from "@/components/skeletons";
 
 export default function Profile() {
   const router = useRouter();
@@ -403,18 +306,7 @@ export default function Profile() {
           {/* Loading skeletons for Desafios Disponíveis */}
           {isDesafiosLoading && desafiosEmCurso.length === 0 && (
             <>
-              <View className="mb-4 pl-5 mt-4">
-                <ContentLoader
-                  speed={2}
-                  width={200}
-                  height={24}
-                  viewBox="0 0 200 24"
-                  backgroundColor="#e0e0e0"
-                  foregroundColor="#f0f0f0"
-                >
-                  <Rect x="0" y="0" rx="4" ry="4" width="180" height="24" />
-                </ContentLoader>
-              </View>
+              <SectionTitleSkeleton width={200} />
 
               <View className="h-[293px] w-full">
                 <FlatList

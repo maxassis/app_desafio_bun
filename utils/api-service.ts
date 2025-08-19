@@ -146,6 +146,7 @@ interface ActiveChallenge {
   distanceCovered: number;
   completionPercentage: number;
   photo: string;
+  createdAt: string;
 }
 
 const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl;

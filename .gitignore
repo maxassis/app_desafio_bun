@@ -64,3 +64,8 @@ yarn-error.*
 
 *.apk
 .apk
+
+node_modules
+.gradle
+android/build
+ios/build

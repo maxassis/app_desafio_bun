@@ -55,6 +55,14 @@ const RankingBottomSheet = ({
 
   const currentDesafio = allDesafios?.find((desafio) => desafio.id === desafioId);
   
+  const handleUserPress = (userId: string) => {
+    if (userData?.usersId === userId) {
+      router.push("/dashboard");
+    } else {
+      router.push({ pathname: "/profile", params: { userId } });
+    }
+  };
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -173,12 +181,12 @@ const RankingBottomSheet = ({
                     className="absolute inset-0 w-full h-full"
                   />
                   
-                  {/* Foto do usuário posicionada acima */}
-                  <View 
+                  <TouchableOpacity
+                    onPress={() => handleUserPress(rankData[2].userId)}
                     className="absolute bg-white rounded-full flex items-center justify-center w-[92px] h-[91px]"
-                    style={{ 
+                    style={{
                       top: -50,
-                      zIndex: 10
+                      zIndex: 10,
                     }}
                   >
                     <Image
@@ -189,7 +197,7 @@ const RankingBottomSheet = ({
                           : require("../assets/user2.png")
                       }
                     />
-                  </View>
+                  </TouchableOpacity>
                   
                   <Text
                     numberOfLines={2}
@@ -228,12 +236,12 @@ const RankingBottomSheet = ({
                     className="absolute inset-0 w-full h-full"
                   />
                   
-                  {/* Foto do usuário posicionada acima */}
-                  <View 
+                  <TouchableOpacity
+                    onPress={() => handleUserPress(rankData[0].userId)}
                     className="absolute bg-white rounded-full flex items-center justify-center w-[92px] h-[91px]"
-                    style={{ 
+                    style={{
                       top: -50,
-                      zIndex: 10
+                      zIndex: 10,
                     }}
                   >
                     <Image
@@ -244,7 +252,7 @@ const RankingBottomSheet = ({
                           : require("../assets/user2.png")
                       }
                     />
-                  </View>
+                  </TouchableOpacity>
                   
                   <Text
                     numberOfLines={2}
@@ -285,12 +293,12 @@ const RankingBottomSheet = ({
                     className="absolute inset-0 w-full h-full"
                   />
                   
-                  {/* Foto do usuário posicionada acima */}
-                  <View 
+                  <TouchableOpacity
+                    onPress={() => handleUserPress(rankData[1].userId)}
                     className="absolute bg-white rounded-full flex items-center justify-center w-[92px] h-[91px]"
-                    style={{ 
+                    style={{
                       top: -50,
-                      zIndex: 10
+                      zIndex: 10,
                     }}
                   >
                     <Image
@@ -301,7 +309,7 @@ const RankingBottomSheet = ({
                           : require("../assets/user2.png")
                       }
                     />
-                  </View>
+                  </TouchableOpacity>
                   
                   <Text
                     numberOfLines={2}
@@ -325,17 +333,21 @@ const RankingBottomSheet = ({
               rankData
                 .filter((user) => user.position >= 4)
                 .map((user) => (
-                  <UserTime
+                  <TouchableOpacity
                     key={user.userId}
-                    position={user.position}
-                    userId={user.userId}
-                    userName={user.userName}
-                    userAvatar={user.userAvatar}
-                    totalDistance={user.totalDistance}
-                    totalDuration={user.totalDurationSeconds}
-                    avgSpeed={user.avgSpeed}
-                    isCurrentUser={userData?.usersId === user.userId}
-                  />
+                    onPress={() => handleUserPress(user.userId)}
+                  >
+                    <UserTime
+                      position={user.position}
+                      userId={user.userId}
+                      userName={user.userName}
+                      userAvatar={user.userAvatar}
+                      totalDistance={user.totalDistance}
+                      totalDuration={user.totalDurationSeconds}
+                      avgSpeed={user.avgSpeed}
+                      isCurrentUser={userData?.usersId === user.userId}
+                    />
+                  </TouchableOpacity>
                 ))}
           </View>  
         </SafeAreaView>
