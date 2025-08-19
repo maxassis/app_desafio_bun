@@ -32,7 +32,7 @@ import "dayjs/locale/pt-br";
 import relativeTime from "dayjs/plugin/relativeTime";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+// import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Components
 import RankingBottomSheet from "../../components/bottomSheeetMap";
@@ -129,11 +129,15 @@ export default function Map2() {
   >([]);
   const [mapType, setMapType] = useState<MapType>("standard");
   const [tilt, setTilt] = useState<number>(0);
+  const [selectedUser, setSelectedUser] = useState<UserParticipation | null>(
+    null
+  );
 
   // Refs & Store
   const mapRef = useRef<MapView>(null);
+  const flatListRef = useRef<FlatList>(null);
   const { desafioId } = useDesafioStore();
-  const insets = useSafeAreaInsets();
+  // const insets = useSafeAreaInsets();
 
   // Custom Hooks
   useDayjs();
@@ -226,6 +230,23 @@ export default function Map2() {
     return path;
   }, [routeCoordinates, userDistance]);
 
+  const handleMarkerPress = useCallback(
+    (user: UserParticipation) => {
+      setSelectedUser(user);
+      const userIndex = usersParticipants.findIndex(
+        (p) => p.userId === user.userId
+      );
+      if (userIndex !== -1 && flatListRef.current) {
+        flatListRef.current.scrollToIndex({
+          index: userIndex,
+          animated: true,
+          viewPosition: 0.5, // Center the item
+        });
+      }
+    },
+    [usersParticipants]
+  );
+
   // User markers
   const userMarkers = useMemo(() => {
     if (!routeData) return null;
@@ -247,6 +268,7 @@ export default function Map2() {
           }}
           tracksViewChanges={!markersReady}
           title={`${user.name} - ${user.distance} Km`}
+          onPress={() => handleMarkerPress(user)}
         >
           <View className={userPin({ intent: isCurrentUser ? "user" : null })}>
             {user.avatar ? (
@@ -270,6 +292,7 @@ export default function Map2() {
     routeData,
     routeCoordinates,
     markersReady,
+    handleMarkerPress,
   ]);
 
   // Map Controls
@@ -312,6 +335,7 @@ export default function Map2() {
 
   const focusOnUser = useCallback(
     (user: UserParticipation) => {
+      setSelectedUser(user);
       animateCamera({ center: user.location, pitch: 60, zoom: 16 });
     },
     [animateCamera]
@@ -323,66 +347,71 @@ export default function Map2() {
 
   // Render user card
   const renderUserCard = useCallback(
-    ({ item }: { item: UserParticipation }) => (
-      <TouchableOpacity
-        onPress={() => focusOnUser(item)}
-        className="p-4 w-[311px] rounded-2xl bg-white"
-        activeOpacity={0.7}
-      >
-        <View className="flex-row items-start justify-between">
-          <Pressable
-            onPress={() => {
-              if (item.userId === userConfig?.usersId) {
-                router.push("/dashboard");
-              } else {
-                router.push({
-                  pathname: "/profile",
-                  params: { userId: item.userId },
-                });
-              }
-            }}
-            className="flex-row items-start"
-            pointerEvents="box-only"
-          >
-            {item.avatar ? (
-              <ExpoImage
-                source={{ uri: item.avatar }}
-                style={{ width: 43, height: 43, borderRadius: 100 }}
-              />
-            ) : (
-              <Image
-                source={require("../../assets/user2.png")}
-                className="h-[43px] w-[43px] rounded-full"
-              />
-            )}
-            <Text className="text-base font-inter-bold ml-2">{item.name}</Text>
-          </Pressable>
-          <Text className="text-[#707271] text-[12px]">
-            {dayjs(item.lastTaskDate).utc().local().fromNow()}
-          </Text>
-        </View>
+    ({ item }: { item: UserParticipation }) => {
+      // const isSelected = selectedUser?.userId === item.userId;
+      return (
+        <TouchableOpacity
+          onPress={() => focusOnUser(item)}
+          className="p-4 w-[311px] rounded-2xl bg-white"
+          activeOpacity={0.7}
+        >
+          <View className="flex-row items-start justify-between">
+            <Pressable
+              onPress={() => {
+                if (item.userId === userConfig?.usersId) {
+                  router.push("/dashboard");
+                } else {
+                  router.push({
+                    pathname: "/profile",
+                    params: { userId: item.userId },
+                  });
+                }
+              }}
+              className="flex-row items-start"
+              pointerEvents="box-only"
+            >
+              {item.avatar ? (
+                <ExpoImage
+                  source={{ uri: item.avatar }}
+                  style={{ width: 43, height: 43, borderRadius: 100 }}
+                />
+              ) : (
+                <Image
+                  source={require("../../assets/user2.png")}
+                  className="h-[43px] w-[43px] rounded-full"
+                />
+              )}
+              <Text className="text-base font-inter-bold ml-2">
+                {item.name}
+              </Text>
+            </Pressable>
+            <Text className="text-[#707271] text-[12px]">
+              {dayjs(item.lastTaskDate).utc().local().fromNow()}
+            </Text>
+          </View>
 
-        <View className="flex-row w-1/3 h-[37px] items-center justify-between mt-3">
-          <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-            <Text className="font-inter-bold">{item.percentage}</Text>
-            <Text className="text-[10px] text-bondis-gray-secondary">km</Text>
+          <View className="flex-row w-1/3 h-[37px] items-center justify-between mt-3">
+            <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
+              <Text className="font-inter-bold">{item.percentage}</Text>
+              <Text className="text-[10px] text-bondis-gray-secondary">km</Text>
+            </View>
+            <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
+              <Text className="font-inter-bold">{item.totalTasks}</Text>
+              <Text className="text-[10px] text-bondis-gray-secondary">
+                ATIVIDADES
+              </Text>
+            </View>
+            <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
+              <Text className="font-inter-bold">{item.totalCalories}</Text>
+              <Text className="text-[10px] text-bondis-gray-secondary">
+                CAL. TOTAIS
+              </Text>
+            </View>
           </View>
-          <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-            <Text className="font-inter-bold">{item.totalTasks}</Text>
-            <Text className="text-[10px] text-bondis-gray-secondary">
-              ATIVIDADES
-            </Text>
-          </View>
-          <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-            <Text className="font-inter-bold">{item.totalCalories}</Text>
-            <Text className="text-[10px] text-bondis-gray-secondary">
-              CAL. TOTAIS
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    ),
-    [focusOnUser]
+        </TouchableOpacity>
+      );
+    },
+    [focusOnUser, selectedUser, userConfig]
   );
 
   // Loading state
@@ -501,6 +530,7 @@ export default function Map2() {
       {/* Users List */}
       <View className="absolute w-full bottom-[22.5%] items-center">
         <FlatList
+          ref={flatListRef}
           data={usersParticipants}
           keyExtractor={(item) => item.userId}
           renderItem={renderUserCard}

@@ -1,5 +1,11 @@
 import React, { useRef, useMemo } from "react";
-import { View, Text, Image, SafeAreaView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  SafeAreaView,
+  TouchableOpacity,
+} from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as Progress from "react-native-progress";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,7 +22,7 @@ import { convertSecondsToTimeString } from "../utils/timeUtils";
 import useDesafioStore from "@/store/desafio-store";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface BottomSheetProps {
   routeData: RouteResponse | undefined;
@@ -33,28 +39,25 @@ const RankingBottomSheet = ({
 }: BottomSheetProps) => {
   const bottomSheetRef = useRef(null);
   const snapPoints = useMemo(() => ["21%", "85%", "100%"], []);
-  const { desafioId, progress } = useDesafioStore();
+  const { desafioId } = useDesafioStore();
   const insets = useSafeAreaInsets();
 
-  const { data: rankData, isLoading } = useQuery<
-    RankData[],
-    Error
-  >({
+  const { data: rankData, isLoading } = useQuery<RankData[], Error>({
     queryKey: ["rankData", desafioId],
     queryFn: () => fetchRankData(desafioId + ""),
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
   });
 
-  const {
-    data: allDesafios,
-  } = useQuery({
+  const { data: allDesafios } = useQuery({
     queryKey: ["getAllDesafios"],
     queryFn: fetchAllDesafios,
     staleTime: 5 * 60 * 1000,
   });
 
-  const currentDesafio = allDesafios?.find((desafio) => desafio.id === desafioId);
-  
+  const currentDesafio = allDesafios?.find(
+    (desafio) => desafio.id === desafioId
+  );
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -100,12 +103,25 @@ const RankingBottomSheet = ({
 
           <View className="flex-row justify-between mt-6">
             <TouchableOpacity
-              onPress={() => router.push({ pathname: "/taskList", params: { origin: "map" } })}
-              className={`h-[88px] w-3/12 border-[0.8px] border-[#D9D9D9] rounded justify-center items-center ${(currentDesafio?.progressPercentage ?? 0) >= 100 ? "opacity-50" : ""}`}
+              onPress={() =>
+                router.push({
+                  pathname: "/taskList",
+                  params: { origin: "map" },
+                })
+              }
+              className={`h-[88px] w-3/12 border-[0.8px] border-[#D9D9D9] rounded justify-center items-center ${
+                (currentDesafio?.progressPercentage ?? 0) >= 100
+                  ? "opacity-50"
+                  : ""
+              }`}
               disabled={(currentDesafio?.progressPercentage ?? 0) >= 100}
             >
-              <Text className="font-anton-regular text-2xl">{currentDesafio?.tasksCount}</Text>
-              <Text className="text-[10px] font-inter-bold">ATIVIDADE&gt; </Text>
+              <Text className="font-anton-regular text-2xl">
+                {currentDesafio?.tasksCount}
+              </Text>
+              <Text className="text-[10px] font-inter-bold">
+                ATIVIDADE&gt;{" "}
+              </Text>
             </TouchableOpacity>
             <View className="h-[88px] w-3/12 border-[0.8px] border-[#D9D9D9] rounded justify-center items-center">
               <Text className="font-anton-regular text-2xl">
@@ -142,43 +158,43 @@ const RankingBottomSheet = ({
           </Text>
 
           {/* Container principal do pódio com overflow visible */}
-          <View 
+          <View
             className="flex-row justify-between items-end"
-            style={{ 
-              overflow: 'visible',
+            style={{
+              overflow: "visible",
               paddingTop: 0,
-              marginTop: 24 
+              marginTop: 24,
             }}
           >
             {/* Terceira Posição */}
             {rankData && rankData.length > 2 && rankData[2]?.userId ? (
-              <View 
+              <View
                 className="w-[87px] h-[230px] items-center justify-between"
-                style={{ 
-                  overflow: 'visible'
+                style={{
+                  overflow: "visible",
                 }}
               >
                 <View className="rounded-full justify-center items-center w-[35.76px] h-[35.76px] bg-bondis-text-gray">
                   <Text className="text-sm font-inter-bold">3</Text>
                 </View>
 
-                <View 
+                <View
                   className="w-full h-[140px] relative justify-end items-center"
-                  style={{ 
-                    overflow: 'visible'
+                  style={{
+                    overflow: "visible",
                   }}
                 >
                   <LinearGradient
                     colors={["#12FF55", "white"]}
                     className="absolute inset-0 w-full h-full"
                   />
-                  
+
                   {/* Foto do usuário posicionada acima */}
-                  <View 
+                  <View
                     className="absolute bg-white rounded-full flex items-center justify-center w-[92px] h-[91px]"
-                    style={{ 
+                    style={{
                       top: -50,
-                      zIndex: 10
+                      zIndex: 10,
                     }}
                   >
                     <Image
@@ -190,7 +206,7 @@ const RankingBottomSheet = ({
                       }
                     />
                   </View>
-                  
+
                   <Text
                     numberOfLines={2}
                     className="font-inter-bold text-sm mb-[10px]"
@@ -199,7 +215,9 @@ const RankingBottomSheet = ({
                     {rankData[2].userName}
                   </Text>
                   <Text className="font-inter-regular text-xs text-[#757575] mb-[10px]">
-                    { convertSecondsToTimeString(rankData[2].totalDurationSeconds) }
+                    {convertSecondsToTimeString(
+                      rankData[2].totalDurationSeconds
+                    )}
                   </Text>
                 </View>
               </View>
@@ -209,31 +227,31 @@ const RankingBottomSheet = ({
 
             {/* Primeira Posição */}
             {rankData && rankData.length > 0 && rankData[0]?.userId ? (
-              <View 
+              <View
                 className="w-[87px] h-[287px] items-center justify-between"
-                style={{ 
-                  overflow: 'visible'
+                style={{
+                  overflow: "visible",
                 }}
               >
                 <Winner />
-                
-                <View 
+
+                <View
                   className="w-full h-[200px] relative items-center justify-end"
-                  style={{ 
-                    overflow: 'visible'
+                  style={{
+                    overflow: "visible",
                   }}
                 >
                   <LinearGradient
                     colors={["#12FF55", "white"]}
                     className="absolute inset-0 w-full h-full"
                   />
-                  
+
                   {/* Foto do usuário posicionada acima */}
-                  <View 
+                  <View
                     className="absolute bg-white rounded-full flex items-center justify-center w-[92px] h-[91px]"
-                    style={{ 
+                    style={{
                       top: -50,
-                      zIndex: 10
+                      zIndex: 10,
                     }}
                   >
                     <Image
@@ -245,7 +263,7 @@ const RankingBottomSheet = ({
                       }
                     />
                   </View>
-                  
+
                   <Text
                     numberOfLines={2}
                     className="font-inter-bold text-sm mb-[10px]"
@@ -254,7 +272,9 @@ const RankingBottomSheet = ({
                     {rankData[0].userName}
                   </Text>
                   <Text className="font-inter-regular text-xs text-[#757575] mb-[10px]">
-                    {convertSecondsToTimeString(rankData[0].totalDurationSeconds)}
+                    {convertSecondsToTimeString(
+                      rankData[0].totalDurationSeconds
+                    )}
                   </Text>
                 </View>
               </View>
@@ -264,33 +284,33 @@ const RankingBottomSheet = ({
 
             {/* Segunda Posição */}
             {rankData && rankData.length > 1 && rankData[1]?.userId ? (
-              <View 
+              <View
                 className="w-[87px] h-[260px] items-center justify-between"
-                style={{ 
-                  overflow: 'visible'
+                style={{
+                  overflow: "visible",
                 }}
               >
                 <View className="rounded-full mb-2 justify-center items-center w-[35.76px] h-[35.76px] bg-bondis-text-gray">
                   <Text className="text-sm font-inter-bold">2</Text>
                 </View>
 
-                <View 
+                <View
                   className="relative w-full h-[170px] justify-end items-center"
-                  style={{ 
-                    overflow: 'visible'
+                  style={{
+                    overflow: "visible",
                   }}
                 >
                   <LinearGradient
                     colors={["#12FF55", "white"]}
                     className="absolute inset-0 w-full h-full"
                   />
-                  
+
                   {/* Foto do usuário posicionada acima */}
-                  <View 
+                  <View
                     className="absolute bg-white rounded-full flex items-center justify-center w-[92px] h-[91px]"
-                    style={{ 
+                    style={{
                       top: -50,
-                      zIndex: 10
+                      zIndex: 10,
                     }}
                   >
                     <Image
@@ -302,7 +322,7 @@ const RankingBottomSheet = ({
                       }
                     />
                   </View>
-                  
+
                   <Text
                     numberOfLines={2}
                     className="font-inter-bold text-sm mb-[10px]"
@@ -311,7 +331,9 @@ const RankingBottomSheet = ({
                     {rankData[1].userName}
                   </Text>
                   <Text className="font-inter-regular text-xs text-[#757575] mb-[10px]">
-                    {convertSecondsToTimeString(rankData[1].totalDurationSeconds)}
+                    {convertSecondsToTimeString(
+                      rankData[1].totalDurationSeconds
+                    )}
                   </Text>
                 </View>
               </View>
@@ -337,7 +359,7 @@ const RankingBottomSheet = ({
                     isCurrentUser={userData?.usersId === user.userId}
                   />
                 ))}
-          </View>  
+          </View>
         </SafeAreaView>
       </BottomSheetScrollView>
     </BottomSheet>
