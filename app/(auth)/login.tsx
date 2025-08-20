@@ -3,10 +3,10 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Alert,
+  // Alert,
   ScrollView,
 } from "react-native";
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from "expo-status-bar";
 import { useForm, Controller } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import Close from "../../assets/Close.svg";
@@ -17,8 +17,9 @@ import Apple from "../../assets/apple.svg";
 import useAuthStore from "../../store/auth-store";
 import { Link, useRouter } from "expo-router";
 import { Button } from "../../components/Button";
-import Constants from 'expo-constants';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Constants from "expo-constants";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 type FormData = {
   email: string;
@@ -33,11 +34,14 @@ const loginRequest = async ({
   email,
   password,
 }: FormData): Promise<TokenType> => {
-  const response = await fetch(`${Constants.expoConfig?.extra?.apiUrl}/signin`, {
-    method: "POST",
-    headers: { "Content-type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
+  const response = await fetch(
+    `${Constants.expoConfig?.extra?.apiUrl}/signin`,
+    {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    }
+  );
 
   if (!response.ok) {
     if (response.status === 401) {
@@ -68,12 +72,12 @@ export default function Login() {
       // console.log("Login bem-sucedido:", data.access_token);
     },
     onError: (error: any) => {
-      Alert.alert(
-        "Erro de login",
-        error.message,
-        [{ text: "Fechar", style: "cancel" }],
-        { cancelable: false }
-      );
+      Toast.show({
+        type: "error",
+        text1: "Senha ou e-mail incorretos",
+        text2: "Por favor, verifique os dados digitados",
+        visibilityTime: 5000000000000,
+      });
       console.error("Erro ao fazer login:", error);
     },
   });
@@ -170,9 +174,7 @@ export default function Login() {
             <Apple />
           </View>
         </View>
-        <StatusBar
-          style="dark"
-        />
+        <StatusBar style="dark" />
       </ScrollView>
     </View>
   );
