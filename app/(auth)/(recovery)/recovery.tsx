@@ -1,11 +1,4 @@
-import {
-  Text,
-  View,
-  SafeAreaView,
-  TouchableOpacity,
-  TextInput,
-  StatusBar,
-} from "react-native";
+import { Text, View, TouchableOpacity, TextInput } from "react-native";
 import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import { useForm, Controller } from "react-hook-form";

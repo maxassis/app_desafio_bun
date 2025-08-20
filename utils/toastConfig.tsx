@@ -3,36 +3,39 @@ import { View, Text } from "react-native";
 import { BaseToast } from "react-native-toast-message";
 import { Feather } from "@expo/vector-icons";
 import Error from "../assets/error-toast.svg";
+import Ok from "../assets/ok-toast.svg";
 
-export const toastConfig = {
-  success: ({ text1, text2, ...rest }) => (
+export const toastConfig: any = {
+  success: ({ text1, text2, ...rest }: { text1: string; text2?: string }) => (
     <BaseToast
       {...rest}
-      style={{ borderLeftColor: "#69C779", backgroundColor: "#F0FFF0" }}
+      style={{
+        borderLeftWidth: 0,
+        backgroundColor: "#1A1A1A",
+        paddingHorizontal: 16,
+        height: 91,
+        width: "90%",
+        marginTop: 20,
+      }}
       contentContainerStyle={{ paddingHorizontal: 15 }}
       text1Style={{
         fontSize: 16,
         fontWeight: "bold",
-        color: "#2E8B57",
+        color: "#FFFFFF",
       }}
       text2Style={{
         fontSize: 14,
-        color: "#2E8B57",
+        color: "#FFFFFF",
       }}
       renderLeadingIcon={() => (
-        <Feather
-          name="check-circle"
-          size={24}
-          color="#2E8B57"
-          style={{ marginRight: 10 }}
-        />
+        <Ok style={{ marginRight: 5, marginVertical: "auto" }} />
       )}
       text1={text1}
       text2={text2}
     />
   ),
 
-  error: ({ text1, text2, ...rest }) => (
+  error: ({ text1, text2, ...rest }: { text1: string; text2?: string }) => (
     <BaseToast
       {...rest}
       style={{
@@ -61,7 +64,7 @@ export const toastConfig = {
     />
   ),
 
-  info: ({ text1, text2, ...rest }) => (
+  info: ({ text1, text2, ...rest }: { text1: string; text2?: string }) => (
     <BaseToast
       {...rest}
       style={{ borderLeftColor: "#1E90FF", backgroundColor: "#F0F8FF" }}
@@ -88,7 +91,7 @@ export const toastConfig = {
     />
   ),
 
-  custom: ({ text1, text2 }) => (
+  custom: ({ text1, text2 }: { text1: string; text2?: string }) => (
     <View
       style={{
         height: 60,

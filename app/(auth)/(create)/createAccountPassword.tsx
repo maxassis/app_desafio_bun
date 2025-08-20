@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  SafeAreaView,
   Text,
   View,
   TextInput,
@@ -8,14 +7,15 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Alert,
-  StatusBar
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useMutation } from '@tanstack/react-query'; 
+import { useMutation } from "@tanstack/react-query";
 import { cva } from "class-variance-authority";
 import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import CheckGreen from "../../../assets/check-green.svg";
+import { SystemBars } from "react-native-edge-to-edge";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Criteria {
   length: boolean;
@@ -26,10 +26,11 @@ interface Criteria {
 }
 
 export default function CreatePassword() {
-  const { name, email } = useLocalSearchParams();  
+  const { name, email } = useLocalSearchParams();
   const router = useRouter();
   const [password, setPassword] = useState<string>("");
   const [password2, setPassword2] = useState<string>("");
+  const insets = useSafeAreaInsets();
   const [criteria, setCriteria] = useState<Criteria>({
     length: false,
     uppercase: false,
@@ -57,11 +58,14 @@ export default function CreatePassword() {
   };
 
   const createUser = async (newPassword: string) => {
-    const response = await fetch("https://bondis-app-backend.onrender.com/users", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify({ name, email, password: newPassword }),
-    });
+    const response = await fetch(
+      "https://bondis-app-backend.onrender.com/users",
+      {
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify({ name, email, password: newPassword }),
+      }
+    );
 
     if (!response.ok) {
       if (response.statusText === "User already exists") {
@@ -80,10 +84,8 @@ export default function CreatePassword() {
       router.push("/createAccountDone");
     },
     onError: (error: Error) => {
-      Alert.alert("Erro", error.message, [
-        { text: "Ok", style: "cancel" },
-      ]);
-    }
+      Alert.alert("Erro", error.message, [{ text: "Ok", style: "cancel" }]);
+    },
   });
 
   const handleTextChange = (text: string) => {
@@ -92,16 +94,18 @@ export default function CreatePassword() {
 
   const handleSubmit = () => {
     if (password !== password2) {
-      Alert.alert("As senhas não coincidem", "", [{ text: "Ok", style: "cancel" }]);
+      Alert.alert("As senhas não coincidem", "", [
+        { text: "Ok", style: "cancel" },
+      ]);
       return;
     }
-    mutate(); 
+    mutate();
   };
 
   return (
     <KeyboardAvoidingView className="flex-1 bg-white" behavior="padding">
-      <ScrollView className="flex-1 bg-white" overScrollMode="never">
-        <SafeAreaView className="flex-1 bg-white ">
+      <ScrollView className="flex-1" overScrollMode="never">
+        <View className="flex-1 bg-white " style={{ paddingTop: insets.top }}>
           <View className="px-5 pt-[38px]">
             <View className="items-end mb-[10px]">
               <TouchableOpacity
@@ -114,7 +118,9 @@ export default function CreatePassword() {
 
             <Logo />
 
-            <Text className="font-inter-bold mt-4 text-2xl">Crie uma senha</Text>
+            <Text className="font-inter-bold mt-4 text-2xl">
+              Crie uma senha
+            </Text>
 
             <Text className="font-inter-bold text-base mt-8">Senha</Text>
             <TextInput
@@ -155,7 +161,7 @@ export default function CreatePassword() {
                 {criteria.length ? <CheckGreen /> : <Close />}
                 <Text
                   className={CriteriaStyles({
-                    intent: criteria.length == false ? "error" : null,
+                    intent: criteria.length === false ? "error" : null,
                   })}
                 >
                   Mínimo de 8 caracteres
@@ -229,7 +235,8 @@ export default function CreatePassword() {
               onPress={handleSubmit}
               disabled={password !== password2 || isPending}
               className={buttonDisabled({
-                intent: password === password2 && !isPending ? null : "disabled",
+                intent:
+                  password === password2 && !isPending ? null : "disabled",
               })}
             >
               <Text className="font-inter-bold text-base">
@@ -248,9 +255,9 @@ export default function CreatePassword() {
               </Text>
             </Text>
           </View>
-        </SafeAreaView>
+        </View>
       </ScrollView>
-      <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
+      <SystemBars style="dark" />
     </KeyboardAvoidingView>
   );
 }
@@ -271,10 +278,13 @@ const PassStrong = cva("mt-1 text-[#34A853] text-sm font-inter-bold", {
   },
 });
 
-const buttonDisabled = cva("h-[52px] flex-row bg-bondis-green mt-8 rounded-full justify-center items-center", {
-  variants: {
-    intent: {
-      disabled: "opacity-50",
+const buttonDisabled = cva(
+  "h-[52px] flex-row bg-bondis-green mt-8 rounded-full justify-center items-center",
+  {
+    variants: {
+      intent: {
+        disabled: "opacity-50",
+      },
     },
-  },
-});
+  }
+);
