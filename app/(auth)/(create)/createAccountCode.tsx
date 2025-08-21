@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import {
   View,
-  SafeAreaView,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   StatusBar,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
@@ -117,12 +115,11 @@ export default function CreateAccountGetCode() {
       // const data: { message: string } = await response.json();
 
       if (!response.ok) {
-        Alert.alert("Código invalido", "", [
-          {
-            text: "Ok",
-            style: "cancel",
-          },
-        ]);
+        Toast.show({
+          type: "error",
+          text1: "Código incorreto.",
+          text2: "Digite outra vez.",
+        });
 
         throw new Error(`Código inválido, status ${response.status}`);
       }
