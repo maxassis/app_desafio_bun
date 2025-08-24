@@ -1,9 +1,9 @@
 import {
   Text,
   View,
-  TouchableOpacity,
   TextInput,
   StatusBar,
+  TouchableOpacity,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import Close from "../../../assets/Close.svg";
@@ -14,6 +14,9 @@ import Logo from "../../../assets/logo2.svg";
 import Arrow from "../../../assets/arrow-right.svg";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import { Button } from "../../../components/Button";
+import { useMutation } from "@tanstack/react-query";
 
 type FormData = {
   name: string;
@@ -30,11 +33,54 @@ export default function CreateAccount() {
     formState: { errors },
   } = useForm<FormData>();
 
+  const checkEmailMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await fetch(
+        "https://bondis-app-backend.onrender.com/check-email",
+        {
+          method: "POST",
+          headers: { "Content-type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
+      return response;
+    },
+  });
+
   const onSubmit = async ({ name, email }: { name: string; email: string }) => {
-    router.push({
-      pathname: "/createAccountCode",
-      params: { name, email },
-    });
+    try {
+      const response = await checkEmailMutation.mutateAsync(email);
+
+      if (response.status === 204) {
+        console.log("Email is available");
+        router.push({
+          pathname: "/createAccountCode",
+          params: { name, email },
+        });
+      } else if (response.status === 409) {
+        console.log("Email already exists");
+        Toast.show({
+          type: "error",
+          text1: "E-mail já cadastrado.",
+          text2: "Toque em “entrar” para acessar a conta.",
+          visibilityTime: 5000,
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Erro inesperado.",
+          visibilityTime: 5000,
+        });
+      }
+    } catch (e) {
+      console.error("Erro ao verificar e-mail", e);
+      Toast.show({
+        type: "error",
+        text1: "Erro inesperado.",
+        text2: "Tente novamente mais tarde.",
+        visibilityTime: 5000,
+      });
+    }
   };
 
   return (
@@ -104,13 +150,12 @@ export default function CreateAccount() {
           </Text>
         )}
 
-        <TouchableOpacity
+        <Button
+          title="Proximo"
           onPress={handleSubmit(onSubmit)}
-          className="h-[52px] flex-row bg-bondis-green mt-8 rounded-full justify-center items-center"
-        >
-          <Text className="font-inter-bold text-base">Proximo </Text>
-          <Arrow />
-        </TouchableOpacity>
+          icon={<Arrow />}
+          isLoading={checkEmailMutation.isPending}
+        />
 
         <Text className="text-center mt-8 text-base text-bondis-gray-dark">
           Ou entre em sua conta:

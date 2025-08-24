@@ -5,9 +5,10 @@ interface ButtonProps {
   onPress: () => void;
   isLoading?: boolean;
   disabled?: boolean;
+  icon?: React.ReactNode;
 }
 
-export function Button({ title, onPress, isLoading = false, disabled = false }: ButtonProps) {
+export function Button({ title, onPress, isLoading = false, disabled = false, icon }: ButtonProps) {
   const isDisabled = isLoading || disabled;
 
   return (
@@ -22,6 +23,11 @@ export function Button({ title, onPress, isLoading = false, disabled = false }: 
         <Text className="font-inter-bold text-base text-black">
           {isLoading ? 'Carregando...' : title}
         </Text>
+        {icon && !isLoading && (
+          <View className="ml-2">
+            {icon}
+          </View>
+        )}
         {isLoading && (
           <ActivityIndicator
             size="small"

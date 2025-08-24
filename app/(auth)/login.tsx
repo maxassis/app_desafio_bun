@@ -44,11 +44,10 @@ const loginRequest = async ({
   );
 
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error("Usuário ou senha inválidos");
-    } else {
-      throw new Error("Erro ao fazer login");
-    }
+    // Lançar o status code junto com o erro para tratamento posterior
+    const error = new Error("Erro ao fazer login");
+    (error as any).status = response.status;
+    throw error;
   }
 
   return response.json();
@@ -72,12 +71,21 @@ export default function Login() {
       // console.log("Login bem-sucedido:", data.access_token);
     },
     onError: (error: any) => {
-      Toast.show({
-        type: "error",
-        text1: "Senha ou e-mail incorretos",
-        text2: "Por favor, verifique os dados digitados",
-        visibilityTime: 5000000000000,
-      });
+      if (error.status === 401) {
+        Toast.show({
+          type: "error",
+          text1: "Senha ou e-mail incorretos",
+          text2: "Por favor, verifique os dados digitados",
+          visibilityTime: 5000,
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Erro inesperado",
+          text2: "Tente novamente",
+          visibilityTime: 5000,
+        });
+      }
       console.error("Erro ao fazer login:", error);
     },
   });

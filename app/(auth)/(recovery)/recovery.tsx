@@ -1,4 +1,4 @@
-import { Text, View, TouchableOpacity, TextInput } from "react-native";
+import { Text, View, TextInput, TouchableOpacity } from "react-native";
 import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import { useForm, Controller } from "react-hook-form";
@@ -6,6 +6,8 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SystemBars } from "react-native-edge-to-edge";
 import Toast from "react-native-toast-message";
+import { Button } from "../../../components/Button";
+import { useMutation } from "@tanstack/react-query";
 
 export default function Recovery() {
   const router = useRouter();
@@ -17,32 +19,52 @@ export default function Recovery() {
     formState: { errors },
   } = useForm<{ email: string }>();
 
-  const onSubmit = async ({ email }: { email: string }) => {
-    try {
+  const checkEmailMutation = useMutation({
+    mutationFn: async (email: string) => {
       const response = await fetch(
         "https://bondis-app-backend.onrender.com/check-email",
         {
           method: "POST",
           headers: { "Content-type": "application/json" },
           body: JSON.stringify({ email }),
-        }
+        },
       );
+      return response;
+    },
+  });
 
-      if (!response.ok) {
+  const onSubmit = async ({ email }: { email: string }) => {
+    try {
+      const response = await checkEmailMutation.mutateAsync(email);
+
+      if (response.status === 409) {
+        // Email EXISTS, proceed with recovery
+        router.push({
+          pathname: "/recoveryCode",
+          params: { email },
+        });
+      } else if (response.status === 204) {
+        // Email does NOT exist, show error toast
         Toast.show({
           type: "error",
           text1: "E-mail não cadastrado.",
           visibilityTime: 5000,
         });
-        throw new Error(response.statusText);
+      } else {
+        // Handle other potential errors
+        Toast.show({
+          type: "error",
+          text1: "Erro inesperado.",
+          visibilityTime: 5000,
+        });
       }
-
-      router.push({
-        pathname: "/recoveryCode",
-        params: { email },
-      });
     } catch (e) {
-      console.error("Email nao cadastrado", e);
+      console.error("Erro ao verificar e-mail", e);
+      Toast.show({
+        type: "error",
+        text1: "Tente outra vez.",
+        visibilityTime: 5000,
+      });
     }
   };
 
@@ -97,12 +119,11 @@ export default function Recovery() {
             </Text>
           )}
 
-          <TouchableOpacity
+          <Button
+            title="Recuperar senha"
             onPress={handleSubmit(onSubmit)}
-            className="h-[52px] bg-bondis-green mt-8 rounded-full justify-center items-center"
-          >
-            <Text className="font-inter-bold text-base">Recuperar senha</Text>
-          </TouchableOpacity>
+            isLoading={checkEmailMutation.isPending}
+          />
         </View>
       </View>
       <SystemBars style="dark" />
