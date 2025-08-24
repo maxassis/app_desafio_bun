@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { configureReanimatedLogger } from 'react-native-reanimated';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Slot, useRouter, useSegments } from 'expo-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as SplashScreen from 'expo-splash-screen';
-import useAuthStore from '../store/auth-store';
-import { Inter_700Bold, Inter_400Regular, useFonts } from '@expo-google-fonts/inter';
-import { Anton_400Regular } from '@expo-google-fonts/anton';
-import { StripeProvider } from '@stripe/stripe-react-native'; // ✅ importe aqui
-import Constants from 'expo-constants';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import * as NavigationBar from 'expo-navigation-bar';
+import React, { useEffect, useState } from "react";
+import { configureReanimatedLogger } from "react-native-reanimated";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Slot, useRouter, useSegments } from "expo-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as SplashScreen from "expo-splash-screen";
+import useAuthStore from "../store/auth-store";
+import {
+  Inter_700Bold,
+  Inter_400Regular,
+  useFonts,
+} from "@expo-google-fonts/inter";
+import { Anton_400Regular } from "@expo-google-fonts/anton";
+import { StripeProvider } from "@stripe/stripe-react-native"; // ✅ importe aqui
+import Constants from "expo-constants";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+// import * as NavigationBar from "expo-navigation-bar";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "@/utils/toastConfig";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,7 +44,7 @@ export default function RootLayout() {
       try {
         await loadToken();
       } catch (e) {
-        console.warn('Erro ao carregar token:', e);
+        console.warn("Erro ao carregar token:", e);
       } finally {
         if (fontsLoaded) {
           setAppIsReady(true);
@@ -52,7 +58,6 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, loadToken]);
 
-  
   // useEffect(() => {
   //   if (appIsReady) {
   //     NavigationBar.setButtonStyleAsync('dark');
@@ -64,15 +69,15 @@ export default function RootLayout() {
   useEffect(() => {
     if (!appIsReady) return;
 
-    const currentGroup = segments[0]; 
+    const currentGroup = segments[0];
 
     if (!isAuthenticated) {
-      if (currentGroup !== '(auth)') {
-        router.replace('/(auth)/intro');
+      if (currentGroup !== "(auth)") {
+        router.replace("/(auth)/intro");
       }
     } else {
-      if (currentGroup !== '(app)') {
-        router.replace('/(app)/dashboard');
+      if (currentGroup !== "(app)") {
+        router.replace("/(app)/dashboard");
       }
     }
   }, [isAuthenticated, appIsReady, segments, router]);
@@ -84,7 +89,7 @@ export default function RootLayout() {
     const interval = setInterval(async () => {
       const isValid = await checkTokenExpiration();
       if (!isValid) {
-        console.log('Token expirou, deslogando...');
+        console.log("Token expirou, deslogando...");
       }
     }, 5 * 60 * 1000);
 
@@ -95,16 +100,17 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-    <StripeProvider
-      publishableKey={Constants.expoConfig?.extra?.stripePublicKey}
-      // merchantIdentifier="merchant.com.seuapp.id"     // apenas necessário no iOS Apple Pay
-    >
-      <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <Slot />
-        </GestureHandlerRootView>
-      </QueryClientProvider>
+      <StripeProvider
+        publishableKey={Constants.expoConfig?.extra?.stripePublicKey}
+        // merchantIdentifier="merchant.com.seuapp.id"     // apenas necessário no iOS Apple Pay
+      >
+        <QueryClientProvider client={queryClient}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Slot />
+          </GestureHandlerRootView>
+        </QueryClientProvider>
       </StripeProvider>
+      <Toast config={toastConfig} />
     </SafeAreaProvider>
   );
 }
