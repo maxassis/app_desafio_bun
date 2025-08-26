@@ -484,19 +484,25 @@ export default function useTracker() {
     if (!ok) return;
 
     if (status === "idle") {
-      console.log("Limpando dados de tracking anteriores do AsyncStorage...");
-      // Limpa os logs e o estado da tarefa anterior para um início limpo
+      console.log("Limpando dados de tracking anteriores...");
+      
+      // Limpa o estado global do Zustand
+      resetStore();
+
+      // Limpa os dados de persistência do background task
       await AsyncStorage.removeItem(DEBUG_LOG_KEY);
       await AsyncStorage.removeItem(LOCATION_TASK_NAME);
 
+      // Reseta o estado local do hook
       setElapsed(0);
       setDistance(0);
+
+      // Reseta os refs de controle
       kalman.current.reset();
       lastLocation.current = null;
       pausedTime.current = 0;
       pauseTimestamp.current = null;
       startTime.current = Date.now();
-      setCity(null);
     }
 
     setStatus("recording");
