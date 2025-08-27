@@ -22,10 +22,16 @@ export default {
         googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
       },
       infoPlist: {
+        // 🔹 Permissões de localização
         NSLocationWhenInUseUsageDescription:
-          "Este app precisa da sua localização para mostrar sua posição no mapa",
+          "Este app precisa da sua localização para rastrear suas atividades enquanto você o utiliza.",
         NSLocationAlwaysAndWhenInUseUsageDescription:
-          "Este app precisa da sua localização para mostrar sua posição no mapa",
+          "Este app precisa da sua localização mesmo em segundo plano para rastrear suas atividades.",
+        NSLocationAlwaysUsageDescription:
+          "Este app usa sua localização mesmo em segundo plano para rastrear suas atividades.",
+
+        // 🔹 Permite background mode no iOS
+        UIBackgroundModes: ["location"],
       },
     },
     android: {
@@ -39,6 +45,8 @@ export default {
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION",
       ],
       package: "com.maxassis.meudesafio2",
       config: {
@@ -68,12 +76,13 @@ export default {
       [
         "expo-location",
         {
+          // 🔹 Textos para os prompts de permissão
           locationAlwaysAndWhenInUsePermission:
-            "Este app precisa da sua localização para mostrar sua posição no mapa.",
+            "Este app precisa da sua localização mesmo em segundo plano para rastrear suas atividades.",
           locationAlwaysPermission:
-            "Este app precisa da sua localização para mostrar sua posição no mapa.",
+            "Este app precisa da sua localização mesmo em segundo plano para rastrear suas atividades.",
           locationWhenInUsePermission:
-            "Este app precisa da sua localização para mostrar sua posição no mapa.",
+            "Este app precisa da sua localização para rastrear suas atividades enquanto você o utiliza.",
         },
       ],
       "expo-router",
@@ -89,3 +98,4 @@ export default {
     },
   },
 };
+
