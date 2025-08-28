@@ -85,7 +85,7 @@ export default function TaskCreatedSuccess() {
           </Text>
 
           <Text className="text-bondis-gray-dark mt-10 mb-8 text-center px-1">
-            Você completou <Text className="font-inter-bold">{userDistance}km</Text> e com isso conquistou <Text className="font-inter-bold">{Math.trunc(userProgress ?? 0)}%</Text> do desafio: {desafioName}. Continue assim!
+            Você completou <Text className="font-inter-bold">{Number(userDistance ?? 0).toFixed(2)}km</Text> e com isso conquistou <Text className="font-inter-bold">{Math.trunc(userProgress ?? 0)}%</Text> do desafio: {desafioName}. Continue assim!
           </Text>
 
           <Progress.Bar
@@ -99,7 +99,7 @@ export default function TaskCreatedSuccess() {
           />
 
           <Text className="font-inter-bold text-base mt-2 mb-8 text-center">
-            {userDistance} de {Number(totalDistance ?? 0).toFixed(3)}km
+            {Number(userDistance ?? 0).toFixed(2)} de {Number(totalDistance ?? 0).toFixed(2)}km
           </Text>
         </ViewShot>
 
