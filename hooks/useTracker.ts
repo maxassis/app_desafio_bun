@@ -241,18 +241,18 @@ const kalman = new KalmanLatitudeLongitude({ R: 0.0001 });
 const DEBUG_LOG_KEY = "background_location_debug_log";
 
 // Define task para rodar em segundo plano
-console.log("TaskManager: Definindo a tarefa de localização em background.");
+// console.log("TaskManager: Definindo a tarefa de localização em background.");
 
 // Define task para rodar em segundo plano
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
-  console.log("--- TAREFA DE BACKGROUND EXECUTADA ---");
+  // console.log("--- TAREFA DE BACKGROUND EXECUTADA ---");
   if (error) {
-    console.error("Erro no background tracking:", error);
+    // console.error("Erro no background tracking:", error);
     return;
   }
   if (data) {
     const { locations } = data as any;
-    console.log("Recebido em segundo plano:", locations.length, "pontos");
+    // console.log("Recebido em segundo plano:", locations.length, "pontos");
 
     try {
       // 1. Obter dados salvos
@@ -314,9 +314,9 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       // Salvar o log de depuração
       await AsyncStorage.setItem(DEBUG_LOG_KEY, JSON.stringify(debugLog));
 
-      console.log(`Background: Distância atualizada: ${totalDistance.toFixed(3)} km`);
+      // console.log(`Background: Distância atualizada: ${totalDistance.toFixed(3)} km`);
     } catch (e) {
-      console.error("Falha ao processar localização em background", e);
+      // console.error("Falha ao processar localização em background", e);
     }
   }
 });
@@ -384,29 +384,29 @@ export default function useTracker() {
         setCity(detectedCity);
       }
     } catch (error) {
-      console.error("Erro ao obter cidade:", error);
+      // console.error("Erro ao obter cidade:", error);
     }
   }
 
   async function requestPermissions() {
-    console.log("1. Solicitando permissão de foreground...");
+    // console.log("1. Solicitando permissão de foreground...");
     const fg = await requestForegroundPermissionsAsync();
-    console.log("-> Status da permissão de foreground:", fg.status);
+    // console.log("-> Status da permissão de foreground:", fg.status);
     if (fg.status !== PermissionStatus.GRANTED) {
-      console.warn("Permissão de foreground negada. A tarefa não pode iniciar.");
+      // console.warn("Permissão de foreground negada. A tarefa não pode iniciar.");
       return false;
     }
 
-    console.log("2. Solicitando permissão de background...");
+    // console.log("2. Solicitando permissão de background...");
     const bg = await requestBackgroundPermissionsAsync();
-    console.log("-> Status da permissão de background:", bg.status);
+    // console.log("-> Status da permissão de background:", bg.status);
     if (bg.status !== PermissionStatus.GRANTED) {
-      console.warn(
-        "Permissão de background negada. O rastreamento pode não funcionar com a tela desligada."
-      );
+      // console.warn(
+      //   "Permissão de background negada. O rastreamento pode não funcionar com a tela desligada."
+      // );
     }
 
-    console.log("3. Verificação de permissões concluída.");
+    // console.log("3. Verificação de permissões concluída.");
     return true;
   }
 
@@ -450,10 +450,10 @@ export default function useTracker() {
   }
 
   async function startBackgroundTracking() {
-    console.log("4. Tentando iniciar o rastreamento em background...");
+    // console.log("4. Tentando iniciar o rastreamento em background...");
     try {
       const hasStarted = await hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
-      console.log("-> A tarefa de background já foi iniciada antes?", hasStarted);
+      // console.log("-> A tarefa de background já foi iniciada antes?", hasStarted);
       if (!hasStarted) {
         await startLocationUpdatesAsync(LOCATION_TASK_NAME, {
           accuracy: Accuracy.High,
@@ -465,17 +465,17 @@ export default function useTracker() {
             notificationBody: "Seu trajeto está sendo monitorado.",
           },
         });
-        console.log("5. Comando startLocationUpdatesAsync enviado com sucesso.");
+        // console.log("5. Comando startLocationUpdatesAsync enviado com sucesso.");
       } else {
-        console.log("5. Tarefa de background já estava em execução.");
+        // console.log("5. Tarefa de background já estava em execução.");
       }
     } catch (err) {
-      console.error("!!! ERRO ao iniciar o rastreamento em background:", err);
+      // console.error("!!! ERRO ao iniciar o rastreamento em background:", err);
     }
   }
 
   async function stopBackgroundTracking() {
-    console.log("Parando tarefa de background...");
+    // console.log("Parando tarefa de background...");
     await stopLocationUpdatesAsync(LOCATION_TASK_NAME);
   }
 
@@ -484,7 +484,7 @@ export default function useTracker() {
     if (!ok) return;
 
     if (status === "idle") {
-      console.log("Limpando dados de tracking anteriores...");
+      // console.log("Limpando dados de tracking anteriores...");
       
       // Limpa o estado global do Zustand
       resetStore();

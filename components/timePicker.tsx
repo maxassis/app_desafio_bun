@@ -78,7 +78,7 @@ const TimePickerModal = forwardRef<TimePickerModalRef, TimePickerModalProps>(
                   selectedIndex={selectedHours}
                   options={hours}
                   onChange={(index) => setSelectedHours(index)}
-                  containerStyle={{ width: 50 }}
+                  containerStyle={{ width: 55 }}
                 />
                 <Text className='font-inter-bold ml-[5px]'>h</Text>
               </View>
@@ -87,7 +87,7 @@ const TimePickerModal = forwardRef<TimePickerModalRef, TimePickerModalProps>(
                     selectedIndex={selectedMinutes}
                     options={minutesAndSeconds}
                     onChange={(index) => setSelectedMinutes(index)}
-                    containerStyle={{ width: 50 }}
+                    containerStyle={{ width: 55 }}
                   />
                   <Text className='font-inter-bold ml-[5px]'>min</Text>
                 </View>
@@ -97,7 +97,7 @@ const TimePickerModal = forwardRef<TimePickerModalRef, TimePickerModalProps>(
                     selectedIndex={selectedSeconds}
                     options={minutesAndSeconds}
                     onChange={(index) => setSelectedSeconds(index)}
-                    containerStyle={{ width: 50 }}
+                    containerStyle={{ width: 55 }}
                   />
                   <Text className='font-inter-bold ml-[5px]'>s</Text>
                 </View>
