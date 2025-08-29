@@ -30,7 +30,7 @@ const KilometerMeterPickerModal = forwardRef<KilometerMeterPickerModalRef, Kilom
   const [initialTens, setInitialTens] = useState<number>(0);
   const [initialUnits, setInitialUnits] = useState<number>(0);
 
-  const kilometers = [...Array(1000).keys()].map(String);
+  const kilometers = [...Array(51).keys()].map(String);
   const digitOptions = [...Array(10).keys()].map(String);
 
   useEffect(() => {
