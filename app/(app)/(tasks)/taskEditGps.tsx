@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import {
-  ScrollView,
   TouchableOpacity,
   View,
   Text,
@@ -10,6 +9,7 @@ import {
   ActivityIndicator,
   Pressable,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
@@ -113,7 +113,11 @@ export default function CreateTaskGps() {
 
   return (
     <View className="flex-1 bg-white"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
-      <ScrollView overScrollMode="never" keyboardShouldPersistTaps="handled">
+      <KeyboardAwareScrollView
+        overScrollMode="never"
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+      >
         <View className="flex-row h-[86px] pt-[28px] pb-[14px] px-5">
           <TouchableOpacity onPress={() => router.back()}>
             <Left />
@@ -210,7 +214,7 @@ export default function CreateTaskGps() {
             </Text>
           )}
         </Pressable>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

@@ -1,6 +1,5 @@
 import { useState, useRef, useMemo } from "react";
 import {
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -9,6 +8,7 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import KilometerMeterPicker, {
   KilometerMeterPickerModalRef,
 } from "../../../components/distancePicker";
@@ -263,10 +263,11 @@ export default function TaskCreate() {
 
   return (
     <View className="flex-1 bg-white px-5 pb-4" style={{paddingTop: insets.top, paddingBottom: insets.bottom}}>
-      <ScrollView
+      <KeyboardAwareScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
+        enableOnAndroid={true}
       >
         <View className="mb-[10px] pt-[28px]">
           <TouchableOpacity
@@ -475,7 +476,7 @@ export default function TaskCreate() {
             Erro ao cadastrar atividade. Tente novamente.
           </Text>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <BottomSheet
         ref={bottomSheetRef}
