@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  StatusBar
+  StatusBar,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import Close from "../../../assets/Close.svg";
@@ -15,9 +15,9 @@ import Refresh from "../../../assets/refresh.svg";
 import Arrow from "../../../assets/arrow-right.svg";
 import { cva } from "class-variance-authority";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SystemBars } from "react-native-edge-to-edge";
-
+import Toast from "react-native-toast-message";
 
 export default function RecoveryGetCode({ route }: any) {
   const [timeLeft, setTimeLeft] = useState<number>(0);
@@ -26,7 +26,6 @@ export default function RecoveryGetCode({ route }: any) {
   const router = useRouter();
   const { email } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
-
 
   const {
     handleSubmit,
@@ -49,7 +48,7 @@ export default function RecoveryGetCode({ route }: any) {
   }, [isActive, timeLeft, hasStarted]);
 
   useEffect(() => {
-    sendMail();
+    sendMail(false); // Send email when component mounts without showing toast
     setTimeLeft(15);
     setIsActive(true);
     setHasStarted(false);
@@ -59,6 +58,7 @@ export default function RecoveryGetCode({ route }: any) {
     setTimeLeft(20);
     setIsActive(true);
     setHasStarted(true);
+    sendMail(true); // Send email when user requests resend with toast
   };
 
   const formatTime = (seconds: number): string => {
@@ -69,26 +69,48 @@ export default function RecoveryGetCode({ route }: any) {
     }${remainingSeconds}`;
   };
 
-  function sendMail() {
+  function sendMail(showToast = true) {
     fetch("https://bondis-app-backend.onrender.com/send-mail-recovery", {
       method: "POST",
       headers: { "Content-type": "application/json" },
       body: JSON.stringify({ email }),
-    });
+    })
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error("Erro do servidor:", res.status, data);
+          return;
+        }
+
+        if (showToast) {
+          Toast.show({
+            type: "success",
+            text1: "Novo código enviado.",
+            text2: "Por favor, verifique seu e-mail.",
+            visibilityTime: 4000,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Erro na requisição:", error);
+      });
   }
 
   const onSubmit = async ({ code }: { code: string }) => {
     // console.log("teste");
 
     try {
-      const response = await fetch("https://bondis-app-backend.onrender.com/confirm-code/", {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify({ code, email }),
-      });
+      const response = await fetch(
+        "https://bondis-app-backend.onrender.com/confirm-code/",
+        {
+          method: "POST",
+          headers: { "Content-type": "application/json" },
+          body: JSON.stringify({ code, email }),
+        }
+      );
       const data: { message: string } = await response.json();
       console.log(data);
-
 
       if (!response.ok) {
         Alert.alert("Código invalido", "", [
@@ -102,10 +124,10 @@ export default function RecoveryGetCode({ route }: any) {
       }
 
       // console.log("codigo correto");
-    router.push({
-      pathname: "/recoveryPassword",
-      params: { email },
-    });
+      router.push({
+        pathname: "/recoveryPassword",
+        params: { email },
+      });
     } catch (error) {
       console.error(error);
     }
@@ -117,95 +139,95 @@ export default function RecoveryGetCode({ route }: any) {
   };
 
   return (
-    <View className="flex-1 bg-white"  style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+    <View
+      className="flex-1 bg-white"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       <View className="px-5 pt-[28px] pb-8 flex-1">
-      <View className="items-end mb-[10px]">
-        <TouchableOpacity
-          onPress={() => router.push("/intro")}
-          className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
-        >
-          <Close />
-        </TouchableOpacity>
-      </View>
+        <View className="items-end mb-[10px]">
+          <TouchableOpacity
+            onPress={() => router.push("/intro")}
+            className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
+          >
+            <Close />
+          </TouchableOpacity>
+        </View>
 
-      <Logo />
+        <Logo />
 
-      <Text className="text-2xl font-inter-bold mt-4">
-        Por favor, verifique seu e-mail
-      </Text>
-
-      <Text className="mt-4 text-bondis-gray-dark text-base">
-        Um código de verificação foi enviado para:
-      </Text>
-      <Text className="text-[#1977F3] text-base">{email}</Text>
-
-      <Text className="font-inter-bold text-base mt-8">Informe o código</Text>
-      <Controller
-        control={control}
-        name="code"
-        rules={{
-          required: "Código obrigatório",
-          minLength: {
-            value: 6,
-            message: "O código possui 6 digitos",
-          },
-        }}
-        render={({ field: { value, onChange } }) => (
-          <TextInput
-            placeholder="E-mail"
-            value={value}
-            autoCapitalize="none"
-            onChangeText={onChange}
-            className="bg-bondis-text-gray rounded-[4px] h-[52px] mt-2 pl-4"
-          />
-        )}
-      />
-      {errors.code && (
-        <Text className="mt-1 text-bondis-alert-red">
-          {String(errors?.code?.message)}
+        <Text className="text-2xl font-inter-bold mt-4">
+          Por favor, verifique seu e-mail
         </Text>
-      )}
 
-      {isActive && (
-        <Text className="font-inter-bold text-base mt-8">
-          Não recebeu o código?
+        <Text className="mt-4 text-bondis-gray-dark text-base">
+          Um código de verificação foi enviado para:
         </Text>
-      )}
+        <Text className="text-[#1977F3] text-base">{email}</Text>
 
-      {isActive ? (
-        <Text className="mt-2 text-base">
-          Aguarde{" "}
-          <Text className="text-[#1977F3] text-base">
-            {formatTime(timeLeft)}
-          </Text>{" "}
-          para reenviar
-        </Text>
-      ) : (
-        <TouchableOpacity
-          onPress={() => {
-            startTimer();
-            sendMail();
+        <Text className="font-inter-bold text-base mt-8">Informe o código</Text>
+        <Controller
+          control={control}
+          name="code"
+          rules={{
+            required: "Código obrigatório",
+            minLength: {
+              value: 6,
+              message: "O código possui 6 digitos",
+            },
           }}
-          disabled={isActive}
-          className="flex-row items-center mt-8 gap-x-2"
-        >
-          <Refresh />
-          <Text className="text-base underline font-inter-bold">
-            Reenviar código
+          render={({ field: { value, onChange } }) => (
+            <TextInput
+              placeholder="E-mail"
+              value={value}
+              autoCapitalize="none"
+              onChangeText={onChange}
+              className="bg-bondis-text-gray rounded-[4px] h-[52px] mt-2 pl-4"
+            />
+          )}
+        />
+        {errors.code && (
+          <Text className="mt-1 text-bondis-alert-red">
+            {String(errors?.code?.message)}
           </Text>
-        </TouchableOpacity>
-      )}
+        )}
 
-      <TouchableOpacity
-        onPress={handleSubmit(onSubmit)}
-        disabled={isActive}
-        className={buttonDisabled({
-          intent: isActive ? "disabled" : null,
-        })}
-      >
-        <Text className="font-inter-bold text-base">Proximo </Text>
-        <Arrow />
-      </TouchableOpacity>
+        {isActive && (
+          <Text className="font-inter-bold text-base mt-8">
+            Não recebeu o código?
+          </Text>
+        )}
+
+        {isActive ? (
+          <Text className="mt-2 text-base">
+            Aguarde{" "}
+            <Text className="text-[#1977F3] text-base">
+              {formatTime(timeLeft)}
+            </Text>{" "}
+            para reenviar
+          </Text>
+        ) : (
+          <TouchableOpacity
+            onPress={startTimer}
+            disabled={isActive}
+            className="flex-row items-center mt-8 gap-x-2"
+          >
+            <Refresh />
+            <Text className="text-base underline font-inter-bold">
+              Reenviar código
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity
+          onPress={handleSubmit(onSubmit)}
+          disabled={isActive}
+          className={buttonDisabled({
+            intent: isActive ? "disabled" : null,
+          })}
+        >
+          <Text className="font-inter-bold text-base">Proximo </Text>
+          <Arrow />
+        </TouchableOpacity>
       </View>
       <SystemBars style="dark" />
     </View>
@@ -213,12 +235,12 @@ export default function RecoveryGetCode({ route }: any) {
 }
 
 const buttonDisabled = cva(
-    "h-[52px] flex-row bg-bondis-green mt-auto rounded-full justify-center items-center",
-    {
-      variants: {
-        intent: {
-          disabled: "opacity-50",
-        },
+  "h-[52px] flex-row bg-bondis-green mt-auto rounded-full justify-center items-center",
+  {
+    variants: {
+      intent: {
+        disabled: "opacity-50",
       },
-    }
-  );
+    },
+  }
+);

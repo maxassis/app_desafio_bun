@@ -27,7 +27,7 @@ export default function Recovery() {
           method: "POST",
           headers: { "Content-type": "application/json" },
           body: JSON.stringify({ email }),
-        },
+        }
       );
       return response;
     },
@@ -48,14 +48,14 @@ export default function Recovery() {
         Toast.show({
           type: "error",
           text1: "E-mail não cadastrado.",
-          visibilityTime: 5000,
+          visibilityTime: 4000,
         });
       } else {
         // Handle other potential errors
         Toast.show({
           type: "error",
           text1: "Erro inesperado.",
-          visibilityTime: 5000,
+          visibilityTime: 4000,
         });
       }
     } catch (e) {
@@ -63,7 +63,7 @@ export default function Recovery() {
       Toast.show({
         type: "error",
         text1: "Tente outra vez.",
-        visibilityTime: 5000,
+        visibilityTime: 4000,
       });
     }
   };

@@ -58,12 +58,14 @@ export default function CreateAccountGetCode() {
     setTimeLeft(15);
     setIsActive(true);
     setHasStarted(false);
+    sendMail(false); // Send email when component mounts without showing toast
   }, []);
 
   const startTimer = () => {
     setTimeLeft(20);
     setIsActive(true);
     setHasStarted(true);
+    sendMail(true); // Send email when user requests resend with toast
   };
 
   const formatTime = (seconds: number): string => {
@@ -74,7 +76,7 @@ export default function CreateAccountGetCode() {
     }${remainingSeconds}`;
   };
 
-  function sendMail() {
+  function sendMail(showToast = true) {
     fetch("https://bondis-app-backend.onrender.com/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -88,12 +90,14 @@ export default function CreateAccountGetCode() {
           return;
         }
 
-        Toast.show({
-          type: "success",
-          text1: "Novo código enviado.",
-          text2: "Por favor, verifique seu e-mail.",
-          visibilityTime: 500000000,
-        });
+        if (showToast) {
+          Toast.show({
+            type: "success",
+            text1: "Novo código enviado.",
+            text2: "Por favor, verifique seu e-mail.",
+            visibilityTime: 4000,
+          });
+        }
 
         // console.log("Resposta do backend:", data);
       })
@@ -119,6 +123,7 @@ export default function CreateAccountGetCode() {
           type: "error",
           text1: "Código incorreto.",
           text2: "Digite outra vez.",
+          visibilityTime: 4000,
         });
 
         throw new Error(`Código inválido, status ${response.status}`);
@@ -198,10 +203,7 @@ export default function CreateAccountGetCode() {
           </Text>
         ) : (
           <TouchableOpacity
-            onPress={() => {
-              startTimer();
-              sendMail();
-            }}
+            onPress={startTimer}
             disabled={isActive}
             className="flex-row items-center mt-8 gap-x-2"
           >

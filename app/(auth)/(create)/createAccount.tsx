@@ -63,13 +63,13 @@ export default function CreateAccount() {
           type: "error",
           text1: "E-mail já cadastrado.",
           text2: "Toque em “entrar” para acessar a conta.",
-          visibilityTime: 5000,
+          visibilityTime: 4000,
         });
       } else {
         Toast.show({
           type: "error",
           text1: "Erro inesperado.",
-          visibilityTime: 5000,
+          visibilityTime: 4000,
         });
       }
     } catch (e) {
@@ -78,7 +78,7 @@ export default function CreateAccount() {
         type: "error",
         text1: "Erro inesperado.",
         text2: "Tente novamente mais tarde.",
-        visibilityTime: 5000,
+        visibilityTime: 4000,
       });
     }
   };

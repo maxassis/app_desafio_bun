@@ -76,14 +76,14 @@ export default function Login() {
           type: "error",
           text1: "Senha ou e-mail incorretos",
           text2: "Por favor, verifique os dados digitados",
-          visibilityTime: 5000,
+          visibilityTime: 4000,
         });
       } else {
         Toast.show({
           type: "error",
           text1: "Erro inesperado",
           text2: "Tente novamente",
-          visibilityTime: 5000,
+          visibilityTime: 4000,
         });
       }
       console.error("Erro ao fazer login:", error);
