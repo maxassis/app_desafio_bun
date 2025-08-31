@@ -17,5 +17,13 @@ export default (async () => {
     {
       ignores: ['dist/*', 'node_modules/*', 'package.json'],
     },
+    {
+      rules: {
+        'perfectionist/sort-imports': 'off',
+        'style/multiline-ternary': 'off',
+        'ts/no-require-imports': 'off',
+        'ts/no-use-before-define': 'off',
+      },
+    },
   ]
 })()

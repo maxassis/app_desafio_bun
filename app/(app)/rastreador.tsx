@@ -1,182 +1,219 @@
-import { useEffect, useState, useRef } from "react";
+import { useQuery } from '@tanstack/react-query'
+import { router } from 'expo-router'
+import LottieView from 'lottie-react-native'
+import { useEffect, useRef, useState } from 'react'
 import {
-  SafeAreaView,
-  View,
+  Alert,
   ImageBackground,
+  SafeAreaView,
   Text,
   TouchableOpacity,
-} from "react-native";
+  View,
+} from 'react-native'
+import { SystemBars } from 'react-native-edge-to-edge'
 import Animated, {
-  useSharedValue,
+  Easing,
+  runOnJS,
   useAnimatedStyle,
+  useSharedValue,
+  withDelay,
   withSequence,
   withTiming,
-  withDelay,
-  runOnJS,
-  Easing,
-} from "react-native-reanimated";
-import Pause from "../../assets/Pause.svg";
-import Play from "../../assets/play.svg";
-import LottieView from "lottie-react-native";
-import useTracker from "../../hooks/useTracker";
-import { router } from "expo-router";
-import tokenExists from "../../store/auth-store";
-import { useQuery } from "@tanstack/react-query";
-import { fetchAllDesafios } from "../../utils/api-service";
-import useDesafioStore from "../../store/desafio-store";
-import { HoldProgressButton } from "@/components/buttonAnime";
-import { SystemBars } from "react-native-edge-to-edge";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { HoldProgressButton } from '@/components/buttonAnime'
+import { PermissionModal } from '@/components/permissionModal'
+import Pause from '../../assets/Pause.svg'
+import Play from '../../assets/play.svg'
 
-const fundoCinza = require("../../assets/fundo-cinza.png");
-const fundoVerde = require("../../assets/fundo-verde.png");
-const fundoPreto = require("../../assets/fundo-preto.png");
+import useTracker from '../../hooks/useTracker'
+import useDesafioStore from '../../store/desafio-store'
+
+import { fetchAllDesafios } from '../../utils/api-service'
+
+const fundoCinza = require('../../assets/fundo-cinza.png')
+const fundoPreto = require('../../assets/fundo-preto.png')
+const fundoVerde = require('../../assets/fundo-verde.png')
 
 export default function Rastreador() {
   const {
     status,
     elapsed,
-    city,
     distance,
+    requestPermissions,
     startTracking,
     pauseTracking,
     resumeTracking,
     stopTracking,
-  } = useTracker();
-  const lottieRef = useRef<any>(null);
-  const insets = useSafeAreaInsets();
+  } = useTracker()
+  const lottieRef = useRef<any>(null)
+  const insets = useSafeAreaInsets()
 
+  const [modalVisible, setModalVisible] = useState(true)
+  const [permissionsGranted, setPermissionsGranted] = useState(false)
+  const [showCountdown, setShowCountdown] = useState(false)
+  const [countdownNumber, setCountdownNumber] = useState(3)
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [lastKm, setLastKm] = useState(0)
+  const [splits, setSplits] = useState<number[]>([])
 
-  const [showCountdown, setShowCountdown] = useState(true);
-  const [countdownNumber, setCountdownNumber] = useState(3);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [lastKm, setLastKm] = useState(0);
-  const [splits, setSplits] = useState<number[]>([]);
+  const setDesafioData = useDesafioStore(state => state.setDesafioData)
 
-  const token = tokenExists((state) => state.token);
-  const setDesafioData = useDesafioStore((state) => state.setDesafioData);
+  const scale = useSharedValue(1)
+  const opacity = useSharedValue(1)
 
-  const scale = useSharedValue(1);
-  const opacity = useSharedValue(1);
-
-  const isPaused = status === "paused";
+  const isPaused = status === 'paused'
 
   const {
     data: desafios,
-    isLoading: isDesafiosLoading,
-    isError: isDesafiosError,
   } = useQuery({
-    queryKey: ["getAllDesafios"],
+    queryKey: ['getAllDesafios'],
     queryFn: fetchAllDesafios,
     staleTime: 5 * 60 * 1000,
-  });
+  })
+
+  const handleDecline = () => {
+    setModalVisible(false)
+    Alert.alert(
+      'Permissão Necessária',
+      'A permissão de localização é necessária para rastrear sua atividade.',
+      [{ text: 'OK', onPress: () => router.back() }],
+    )
+  }
+
+  const handleAccept = async () => {
+    const granted = await requestPermissions()
+    if (granted) {
+      setPermissionsGranted(true)
+      setModalVisible(false)
+      setShowCountdown(true)
+    }
+    else {
+      handleDecline()
+    }
+  }
 
   const handlePause = () => {
-    pauseTracking();
-    lottieRef.current?.pause();
-  };
+    pauseTracking()
+    lottieRef.current?.pause()
+  }
 
   const handleResume = () => {
-    resumeTracking();
-    lottieRef.current?.play();
-  };
+    resumeTracking()
+    lottieRef.current?.play()
+  }
 
   function pressStop() {
-    console.log("Botão pressionado!");
-    setShowTooltip(true);
-    setTimeout(() => setShowTooltip(false), 2000);
+    // console.log('Botão pressionado!')
+    setShowTooltip(true)
+    setTimeout(() => setShowTooltip(false), 2000)
   }
 
   function longPressStop() {
-    stopTracking();
-    const incomplete = desafios?.filter((desafio) => !desafio.completed && desafio.isRegistered) ?? [];
+    stopTracking()
+    const incomplete = desafios?.filter(desafio => !desafio.completed && desafio.isRegistered) ?? []
 
     if (incomplete.length === 1 && incomplete[0].isRegistered) {
-      const desafio = incomplete[0];
-      setDesafioData(desafio.inscriptionId, desafio.name, 0, 0, desafio.id);
+      const desafio = incomplete[0]
+      setDesafioData(desafio.inscriptionId, desafio.name, 0, 0, desafio.id)
 
-      router.push("/createTaskGps");
-    } else {
-      router.push({ pathname: "/desafios", params: { gps: "true" } });
+      router.push('/createTaskGps')
+    }
+    else {
+      router.push({ pathname: '/desafios', params: { gps: 'true' } })
     }
   }
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600)
       .toString()
-      .padStart(2, "0");
+      .padStart(2, '0')
     const m = Math.floor((seconds % 3600) / 60)
       .toString()
-      .padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${h}:${m}:${s}`;
-  };
+      .padStart(2, '0')
+    const s = (seconds % 60).toString().padStart(2, '0')
+    return `${h}:${m}:${s}`
+  }
 
   const calculatePace = (time: number, dist: number) => {
-    if (dist <= 0) return "0'00\"";
-    const minPerKm = time / 60 / dist;
-    const min = Math.floor(minPerKm);
-    const sec = Math.floor((minPerKm - min) * 60);
-    return `${Math.min(min, 99)}'${sec.toString().padStart(2, "0")}"`;
-  };
+    if (dist <= 0)
+      return '0\'00"'
+    const minPerKm = time / 60 / dist
+    const min = Math.floor(minPerKm)
+    const sec = Math.floor((minPerKm - min) * 60)
+    return `${Math.min(min, 99)}'${sec.toString().padStart(2, '0')}"`
+  }
 
   const animatedNumberStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: opacity.value,
-  }));
+  }))
 
   const decrementCount = () => {
     if (countdownNumber > 1) {
-      setCountdownNumber((prev) => prev - 1);
-    } else {
-      setShowCountdown(false);
-      startTracking();
+      setCountdownNumber(prev => prev - 1)
     }
-  };
+    else {
+      setShowCountdown(false)
+      startTracking()
+    }
+  }
 
   useEffect(() => {
-    if (showCountdown) {
-      scale.value = 1;
-      opacity.value = 1;
+    if (showCountdown && permissionsGranted) {
+      scale.value = 1
+      opacity.value = 1
 
       scale.value = withSequence(
         withTiming(1.5, { duration: 300, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 700, easing: Easing.inOut(Easing.ease) })
-      );
+        withTiming(1, { duration: 700, easing: Easing.inOut(Easing.ease) }),
+      )
 
       opacity.value = withSequence(
         withTiming(1, { duration: 500 }),
         withDelay(
           500,
           withTiming(0, { duration: 500 }, (finished) => {
-            if (finished) runOnJS(decrementCount)();
-          })
-        )
-      );
+            if (finished)
+              runOnJS(decrementCount)()
+          }),
+        ),
+      )
     }
-  }, [countdownNumber, showCountdown]);
+  }, [countdownNumber, showCountdown, permissionsGranted])
 
   useEffect(() => {
     if (!showCountdown) {
       // Detect split when user passes a new integer km
-      const currentKm = Math.floor(distance);
+      const currentKm = Math.floor(distance)
       if (currentKm > lastKm) {
-        setSplits((prev) => [...prev, elapsed]);
-        setLastKm(currentKm);
+        setSplits(prev => [...prev, elapsed])
+        setLastKm(currentKm)
       }
     }
-  }, [distance, elapsed, showCountdown]);
+  }, [distance, elapsed, showCountdown])
 
   useEffect(() => {
     return () => {
-      if (!showCountdown) stopTracking();
-    };
-  }, [showCountdown]);
+      if (!showCountdown)
+        stopTracking()
+    }
+  }, [showCountdown])
 
-  const backgroundImage = isPaused ? fundoCinza : fundoVerde;
+  const backgroundImage = isPaused ? fundoCinza : fundoVerde
 
-  const paceAtual = calculatePace(elapsed, distance); // pace em tempo real
-  const paceMedio = calculatePace(elapsed, distance); // pace médio igual ao atual neste caso
+  const paceAtual = calculatePace(elapsed, distance) // pace em tempo real
+  const paceMedio = calculatePace(elapsed, distance) // pace médio igual ao atual neste caso
+
+  if (modalVisible) {
+    return (
+      <PermissionModal
+        visible={modalVisible}
+        onAccept={handleAccept}
+        onDecline={handleDecline}
+      />
+    )
+  }
 
   return showCountdown ? (
     <SafeAreaView className="flex-1 bg-black">
@@ -184,7 +221,7 @@ export default function Rastreador() {
       <ImageBackground source={fundoPreto} className="flex-1">
         <View className="flex-1 justify-center items-center">
           <Animated.Text
-            style={[animatedNumberStyle, { color: "#74FE52" }]}
+            style={[animatedNumberStyle, { color: '#74FE52' }]}
             className="font-anton-regular text-9xl leading-[300px]"
           >
             {countdownNumber}
@@ -194,7 +231,7 @@ export default function Rastreador() {
     </SafeAreaView>
   ) : (
     <SafeAreaView className="flex-1 text-white">
-      <View className="bg-bondis-green flex-1" >
+      <View className="bg-bondis-green flex-1">
         <ImageBackground
           source={backgroundImage}
           className="flex-1 px-5"
@@ -202,13 +239,13 @@ export default function Rastreador() {
         >
           <LottieView
             ref={lottieRef}
-            source={require("../../assets/lottie/run3.json")}
+            source={require('../../assets/lottie/run3.json')}
             autoPlay
             loop
             style={{
               width: 80,
               height: 80,
-              alignSelf: "center",
+              alignSelf: 'center',
               marginBottom: 25,
             }}
           />
@@ -233,7 +270,7 @@ export default function Rastreador() {
                 {isPaused ? paceMedio : paceAtual}
               </Text>
               <Text className="text-xs text-[#00000099]">
-                {isPaused ? "Average Pace" : "Pace (min/km)"}
+                {isPaused ? 'Average Pace' : 'Pace (min/km)'}
               </Text>
             </View>
             <View className="justify-center items-center">
@@ -246,69 +283,65 @@ export default function Rastreador() {
             </View>
           </View>
 
-          {isPaused ? (
-  <View className="mt-[143px] flex-row justify-between h-[90px] relative px-14">
-    {/* Botão antigo comentado */}
-    {/* <TouchableOpacity
-      onPress={pressStop}
-      onLongPress={longPressStop}
-      className="rounded-full h-[90px] w-[90px] bg-black mx-auto flex items-center justify-center"
-    >
-      <View className="w-4 h-4 bg-white" />
-    </TouchableOpacity> */}
+          {isPaused
+            ? (
+                <View className="mt-[143px] flex-row justify-between h-[90px] relative px-14">
 
-    {/* Novo HoldProgressButton */}
-    <HoldProgressButton
-      onComplete={longPressStop}
-      onShortPress={pressStop}
-      duration={2000}
-      style={{
-        position: 'relative',
-        width: 90,
-        height: 90,
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <View className="w-4 h-4 bg-white" />
-    </HoldProgressButton>
+                  <HoldProgressButton
+                    onComplete={longPressStop}
+                    onShortPress={pressStop}
+                    duration={2000}
+                    style={{
+                      position: 'relative',
+                      width: 90,
+                      height: 90,
+                      marginLeft: 'auto',
+                      marginRight: 'auto',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <View className="w-4 h-4 bg-white" />
+                  </HoldProgressButton>
 
-    <TouchableOpacity
-      onPress={handleResume}
-      className="rounded-full h-[90px] w-[90px] bg-[#74FE52] flex items-center justify-center"
-    >
-      <Play />
-    </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleResume}
+                    className="rounded-full h-[90px] w-[90px] bg-[#74FE52] flex items-center justify-center"
+                  >
+                    <Play />
+                  </TouchableOpacity>
 
-    {showTooltip && (
-      <View className="top-[-75px] right-[35px] bg-black w-[300px] flex items-center justify-center p-4 absolute rounded-md">
-        <Text className="text-white font-inter-regular text-xs">
-          Mantenha o botão{" "}
-          <Text className="font-inter-bold">pressionado</Text> para finalizar a atividade.
-        </Text>
-      </View>
-    )}
-  </View>
-) : (
-  <TouchableOpacity
-    onPress={handlePause}
-    className="rounded-full h-[90px] w-[90px] bg-black mx-auto mt-[143px]"
-  >
-    <Pause />
-  </TouchableOpacity>
-)}
+                  {showTooltip && (
+                    <View className="top-[-75px] right-[35px] bg-black w-[300px] flex items-center justify-center p-4 absolute rounded-md">
+                      <Text className="text-white font-inter-regular text-xs">
+                        Mantenha o botão
+                        {' '}
+                        <Text className="font-inter-bold">pressionado</Text>
+                        {' '}
+                        para finalizar a atividade.
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )
+            : (
+                <TouchableOpacity
+                  onPress={handlePause}
+                  className="rounded-full h-[90px] w-[90px] bg-black mx-auto mt-[143px]"
+                >
+                  <Pause />
+                </TouchableOpacity>
+              )}
 
           {/* <HoldProgressButton
             onComplete={() => Alert.alert("Ação completa!")}
             duration={2000}
-          /> */}
+          /> */ }
         </ImageBackground>
       </View>
-      
+
       <SystemBars style="dark" />
-      
+
     </SafeAreaView>
-  );
+  )
 }
