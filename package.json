@@ -1,6 +1,6 @@
 {
   "name": "meu-desafio-2",
-  "type": "module",
+  
   "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",

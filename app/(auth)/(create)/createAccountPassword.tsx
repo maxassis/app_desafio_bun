@@ -4,8 +4,6 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
   Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -16,6 +14,7 @@ import Logo from "../../../assets/logo2.svg";
 import CheckGreen from "../../../assets/check-green.svg";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 interface Criteria {
   length: boolean;
@@ -103,9 +102,13 @@ export default function CreatePassword() {
   };
 
   return (
-    <KeyboardAvoidingView className="flex-1 bg-white" behavior="padding">
-      <ScrollView className="flex-1" overScrollMode="never">
-        <View className="flex-1 bg-white " style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-white">
+      <KeyboardAwareScrollView
+        className="flex-1"
+        overScrollMode="never"
+        contentContainerStyle={{ paddingBottom: 42 }}
+      >
+        <View style={{ paddingTop: insets.top }}>
           <View className="px-5 pt-[38px]">
             <View className="items-end mb-[10px]">
               <TouchableOpacity
@@ -256,9 +259,9 @@ export default function CreatePassword() {
             </Text>
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <SystemBars style="dark" />
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
