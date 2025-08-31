@@ -15,7 +15,7 @@ export default (async () => {
     ...antfuConfig,
     ...filteredExpoConfig, // Use the filtered config
     {
-      ignores: ['dist/*', 'node_modules/*'],
+      ignores: ['dist/*', 'node_modules/*', 'package.json'],
     },
   ]
 })()
