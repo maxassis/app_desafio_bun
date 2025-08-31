@@ -1,62 +1,63 @@
-import React, { useEffect, useState } from "react";
-import { configureReanimatedLogger } from "react-native-reanimated";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Slot, useRouter, useSegments } from "expo-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import * as SplashScreen from "expo-splash-screen";
-import useAuthStore from "../store/auth-store";
+import { Anton_400Regular } from '@expo-google-fonts/anton'
 import {
-  Inter_700Bold,
   Inter_400Regular,
+  Inter_700Bold,
   useFonts,
-} from "@expo-google-fonts/inter";
-import { Anton_400Regular } from "@expo-google-fonts/anton";
-import { StripeProvider } from "@stripe/stripe-react-native"; // ✅ importe aqui
-import Constants from "expo-constants";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-// import * as NavigationBar from "expo-navigation-bar";
-import Toast from "react-native-toast-message";
-import { toastConfig } from "@/utils/toastConfig";
+} from '@expo-google-fonts/inter'
+import { StripeProvider } from '@stripe/stripe-react-native'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import Constants from 'expo-constants'
+import { Slot, useRouter, useSegments } from 'expo-router'
+import * as SplashScreen from 'expo-splash-screen'
+import React, { useEffect, useState } from 'react'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { configureReanimatedLogger } from 'react-native-reanimated'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '@/utils/toastConfig'
+import useAuthStore from '../store/auth-store'
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync()
 
 configureReanimatedLogger({
   strict: false,
-});
+})
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 export default function RootLayout() {
-  const { isAuthenticated, loadToken, checkTokenExpiration } = useAuthStore();
-  const router = useRouter();
-  const segments = useSegments();
+  const { isAuthenticated, loadToken, checkTokenExpiration } = useAuthStore()
+  const router = useRouter()
+  const segments = useSegments()
 
-  const [appIsReady, setAppIsReady] = useState(false);
+  const [appIsReady, setAppIsReady] = useState(false)
 
   const [fontsLoaded] = useFonts({
     Inter_700Bold,
     Inter_400Regular,
     Anton_400Regular,
-  });
+  })
 
   useEffect(() => {
     const prepareApp = async () => {
       try {
-        await loadToken();
-      } catch (e) {
-        console.warn("Erro ao carregar token:", e);
-      } finally {
+        await loadToken()
+      }
+      catch (e) {
+        console.warn('Erro ao carregar token:', e)
+      }
+      finally {
         if (fontsLoaded) {
-          setAppIsReady(true);
-          await SplashScreen.hideAsync();
+          setAppIsReady(true)
+          await SplashScreen.hideAsync()
         }
       }
-    };
+    }
 
     if (fontsLoaded) {
-      prepareApp();
+      prepareApp()
     }
-  }, [fontsLoaded, loadToken]);
+  }, [fontsLoaded, loadToken])
 
   // useEffect(() => {
   //   if (appIsReady) {
@@ -67,36 +68,40 @@ export default function RootLayout() {
 
   // Navegação baseada na autenticação
   useEffect(() => {
-    if (!appIsReady) return;
+    if (!appIsReady)
+      return
 
-    const currentGroup = segments[0];
+    const currentGroup = segments[0]
 
     if (!isAuthenticated) {
-      if (currentGroup !== "(auth)") {
-        router.replace("/(auth)/intro");
-      }
-    } else {
-      if (currentGroup !== "(app)") {
-        router.replace("/(app)/dashboard");
+      if (currentGroup !== '(auth)') {
+        router.replace('/(auth)/intro')
       }
     }
-  }, [isAuthenticated, appIsReady, segments, router]);
+    else {
+      if (currentGroup !== '(app)') {
+        router.replace('/(app)/dashboard')
+      }
+    }
+  }, [isAuthenticated, appIsReady, segments, router])
 
   // Verificação periódica de expiração do token
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated)
+      return
 
     const interval = setInterval(async () => {
-      const isValid = await checkTokenExpiration();
+      const isValid = await checkTokenExpiration()
       if (!isValid) {
-        console.log("Token expirou, deslogando...");
+        console.error('Token expirou, deslogando...')
       }
-    }, 5 * 60 * 1000);
+    }, 5 * 60 * 1000)
 
-    return () => clearInterval(interval);
-  }, [isAuthenticated, checkTokenExpiration]);
+    return () => clearInterval(interval)
+  }, [isAuthenticated, checkTokenExpiration])
 
-  if (!appIsReady) return null;
+  if (!appIsReady)
+    return null
 
   return (
     <SafeAreaProvider>
@@ -112,5 +117,5 @@ export default function RootLayout() {
       </StripeProvider>
       <Toast config={toastConfig} />
     </SafeAreaProvider>
-  );
+  )
 }

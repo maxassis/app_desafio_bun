@@ -1,98 +1,98 @@
+import { useMutation } from '@tanstack/react-query'
+import Constants from 'expo-constants'
+import { Link, useRouter } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
+import { Controller, useForm } from 'react-hook-form'
 import {
+  ScrollView,
   Text,
-  View,
   TextInput,
   TouchableOpacity,
-  // Alert,
-  ScrollView,
-} from "react-native";
-import { StatusBar } from "expo-status-bar";
-import { useForm, Controller } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
-import Close from "../../assets/Close.svg";
-import Logo from "../../assets/logo2.svg";
-import Google from "../../assets/google.svg";
-import Facebook from "../../assets/facebook.svg";
-import Apple from "../../assets/apple.svg";
-import useAuthStore from "../../store/auth-store";
-import { Link, useRouter } from "expo-router";
-import { Button } from "../../components/Button";
-import Constants from "expo-constants";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
+  View,
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Toast from 'react-native-toast-message'
+import Apple from '../../assets/apple.svg'
+import Close from '../../assets/Close.svg'
+import Facebook from '../../assets/facebook.svg'
+import Google from '../../assets/google.svg'
+import Logo from '../../assets/logo2.svg'
+import { Button } from '../../components/Button'
+import useAuthStore from '../../store/auth-store'
 
-type FormData = {
-  email: string;
-  password: string;
-};
+interface FormData {
+  email: string
+  password: string
+}
 
-type TokenType = {
-  access_token: string;
-};
+interface TokenType {
+  access_token: string
+}
 
-const loginRequest = async ({
+async function loginRequest({
   email,
   password,
-}: FormData): Promise<TokenType> => {
+}: FormData): Promise<TokenType> {
   const response = await fetch(
     `${Constants.expoConfig?.extra?.apiUrl}/signin`,
     {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-type': 'application/json' },
       body: JSON.stringify({ email, password }),
-    }
-  );
+    },
+  )
 
   if (!response.ok) {
     // Lançar o status code junto com o erro para tratamento posterior
-    const error = new Error("Erro ao fazer login");
-    (error as any).status = response.status;
-    throw error;
+    const error = new Error('Erro ao fazer login');
+    (error as any).status = response.status
+    throw error
   }
 
-  return response.json();
-};
+  return response.json()
+}
 
 export default function Login() {
-  const { login } = useAuthStore();
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const { login } = useAuthStore()
+  const router = useRouter()
+  const insets = useSafeAreaInsets()
 
   const {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>()
 
   const mutation = useMutation({
     mutationFn: loginRequest,
     onSuccess: (data) => {
-      login(data.access_token);
+      login(data.access_token)
       // console.log("Login bem-sucedido:", data.access_token);
     },
     onError: (error: any) => {
       if (error.status === 401) {
         Toast.show({
-          type: "error",
-          text1: "Senha ou e-mail incorretos",
-          text2: "Por favor, verifique os dados digitados",
+          type: 'error',
+          text1: 'Senha ou e-mail incorretos',
+          text2: 'Por favor, verifique os dados digitados',
           visibilityTime: 4000,
-        });
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Erro inesperado",
-          text2: "Tente novamente",
-          visibilityTime: 4000,
-        });
+        })
       }
-      console.error("Erro ao fazer login:", error);
+      else {
+        Toast.show({
+          type: 'error',
+          text1: 'Erro inesperado',
+          text2: 'Tente novamente',
+          visibilityTime: 4000,
+        })
+      }
+      console.error('Erro ao fazer login:', error)
     },
-  });
+  })
 
   const onSubmit = (formData: FormData) => {
-    mutation.mutate(formData);
-  };
+    mutation.mutate(formData)
+  }
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
@@ -100,7 +100,7 @@ export default function Login() {
         <View className="pt-[28px] px-5 bg-white flex-1">
           <View className="items-end mb-[10px]">
             <View className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center">
-              <TouchableOpacity onPress={() => router.push("/intro")}>
+              <TouchableOpacity onPress={() => router.push('/intro')}>
                 <Close />
               </TouchableOpacity>
             </View>
@@ -117,10 +117,10 @@ export default function Login() {
             control={control}
             name="email"
             rules={{
-              required: "Email obrigatório",
+              required: 'Email obrigatório',
               pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Email inválido",
+                value: /^[\w.%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Email inválido',
               },
             }}
             render={({ field: { value, onChange } }) => (
@@ -143,7 +143,7 @@ export default function Login() {
           <Controller
             control={control}
             name="password"
-            rules={{ required: "Digite sua senha" }}
+            rules={{ required: 'Digite sua senha' }}
             render={({ field: { value, onChange } }) => (
               <TextInput
                 placeholder="Senha"
@@ -156,11 +156,12 @@ export default function Login() {
             )}
           />
           <Text className="mt-1 text-bondis-alert-red">
-            {errors?.password?.message ? String(errors.password.message) : ""}
+            {errors?.password?.message ? String(errors.password.message) : ''}
           </Text>
 
           <Text className="mt-8 font-inter-regular text-center">
-            Esqueceu a senha?{" "}
+            Esqueceu a senha?
+            {' '}
             <Link href="/recovery">
               <Text className="font-inter-bold underline">Recuperar</Text>
             </Link>
@@ -185,5 +186,5 @@ export default function Login() {
         <StatusBar style="dark" />
       </ScrollView>
     </View>
-  );
+  )
 }

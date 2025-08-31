@@ -1,55 +1,54 @@
-import { useState } from "react";
+import { useQuery } from '@tanstack/react-query'
+import { Image } from 'expo-image'
+import { LinearGradient } from 'expo-linear-gradient'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useState } from 'react'
 import {
-  View,
-  Text,
-  SafeAreaView,
-  TouchableOpacity,
-  ImageBackground,
-  ScrollView,
   ActivityIndicator,
   Dimensions,
-  Linking,
-} from "react-native";
-import { Image } from "expo-image";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import Left from "../../assets/arrow-left.svg";
-import Track from "../../assets/track.svg";
-import Carousel from "react-native-reanimated-carousel";
-import { LinearGradient } from "expo-linear-gradient";
-import { useQuery } from "@tanstack/react-query";
-import { fetchPurchaseData } from "@/utils/api-service";
-import AceitarDesafioButton from "@/components/buttonStripe";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+  ImageBackground,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import Carousel from 'react-native-reanimated-carousel'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import AceitarDesafioButton from '@/components/buttonStripe'
+import { fetchPurchaseData } from '@/utils/api-service'
+import Left from '../../assets/arrow-left.svg'
+import Track from '../../assets/track.svg'
 
 export default function Buy() {
-  const router = useRouter();
-  const { desafioId } = useLocalSearchParams();
+  const router = useRouter()
+  const { desafioId } = useLocalSearchParams()
 
-  const [show, setShow] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const screenWidth = Dimensions.get("window").width;
-  const insets = useSafeAreaInsets();
+  const [show, setShow] = useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const screenWidth = Dimensions.get('window').width
+  const insets = useSafeAreaInsets()
 
   const {
     data: purchaseData,
     isLoading: purchaseDataLoading,
     isError: isDesafiosError,
   } = useQuery({
-    queryKey: ["purchaseData", desafioId],
+    queryKey: ['purchaseData', desafioId],
     queryFn: () => fetchPurchaseData(desafioId as string),
     staleTime: 5 * 60 * 1000,
-  });
+  })
 
-  const trackPhoto = purchaseData?.images?.[0];
-  const backgroundPhoto = purchaseData?.images?.[1];
-  const carouselPhotos = purchaseData?.images?.slice(2) ?? [];
+  const trackPhoto = purchaseData?.images?.[0]
+  const backgroundPhoto = purchaseData?.images?.[1]
+  const carouselPhotos = purchaseData?.images?.slice(2) ?? []
 
   if (purchaseDataLoading) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#00B37E" />
       </SafeAreaView>
-    );
+    )
   }
 
   if (isDesafiosError) {
@@ -59,7 +58,7 @@ export default function Buy() {
           Ocorreu um erro ao carregar os dados. Tente novamente.
         </Text>
       </SafeAreaView>
-    );
+    )
   }
 
   return (
@@ -69,12 +68,12 @@ export default function Buy() {
         <ImageBackground
           className="px-5"
           source={{ uri: backgroundPhoto }}
-          style={{ position: "relative" }}
+          style={{ position: 'relative' }}
         >
           <LinearGradient
-            colors={["transparent", "white"]}
+            colors={['transparent', 'white']}
             style={{
-              position: "absolute",
+              position: 'absolute',
               bottom: 0,
               left: 0,
               right: 0,
@@ -84,9 +83,9 @@ export default function Buy() {
           />
 
           <View style={{ zIndex: 1, marginTop: insets.top }}>
-            <View className="mt-[28px]" >
+            <View className="mt-[28px]">
               <TouchableOpacity
-                onPress={() => router.push("/dashboard")}
+                onPress={() => router.push('/dashboard')}
                 className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center"
               >
                 <Left />
@@ -102,12 +101,12 @@ export default function Buy() {
                   data={carouselPhotos}
                   scrollAnimationDuration={500}
                   loop={false}
-                  onSnapToItem={(index) => setCurrentIndex(index)}
+                  onSnapToItem={index => setCurrentIndex(index)}
                   renderItem={({ item }) => (
                     <Image
                       source={{ uri: item }}
                       contentFit="cover"
-                      style={{ width: "100%", height: "100%" }}
+                      style={{ width: '100%', height: '100%' }}
                     />
                   )}
                 />
@@ -126,7 +125,7 @@ export default function Buy() {
             <View
               key={index}
               className={`h-2 w-2 mx-[2px] rounded-full ${
-                index === currentIndex ? "bg-bondis-green" : "bg-[#C4C4C4]"
+                index === currentIndex ? 'bg-bondis-green' : 'bg-[#C4C4C4]'
               }`}
             />
           ))}
@@ -145,7 +144,7 @@ export default function Buy() {
         <View className="flex-row flex-wrap gap-3 mx-5 mt-4">
           <View className="h-[37px] ml-5 rounded-full flex-row justify-center items-center gap-x-2 bg-bondis-text-gray px-4">
             <Track />
-            <Text>{purchaseData && Math.trunc(+purchaseData.distance) + "km"}</Text>
+            <Text>{purchaseData && `${Math.trunc(+purchaseData.distance)}km`}</Text>
           </View>
 
           <View className="h-[37px] ml-5 rounded-full flex-row justify-center items-center gap-x-2 bg-bondis-text-gray px-4">
@@ -191,7 +190,7 @@ export default function Buy() {
               <Image
                 source={{ uri: trackPhoto }}
                 contentFit="cover"
-                style={{ width: "100%", height: 115 }}
+                style={{ width: '100%', height: 115 }}
               />
             </View>
 
@@ -205,7 +204,9 @@ export default function Buy() {
               </Text>
 
               <Text className="text-base text-bondis-gray-dark mt-8">
-                Preço: R$ {purchaseData?.price}
+                Preço: R$
+                {' '}
+                {purchaseData?.price}
               </Text>
             </View>
 
@@ -218,7 +219,7 @@ export default function Buy() {
                 <Text
                   key={index}
                   className={`text-base text-bondis-gray-dark text-left ${
-                    index !== 0 ? "mt-6" : ""
+                    index !== 0 ? 'mt-6' : ''
                   }`}
                 >
                   {benefit}
@@ -233,7 +234,7 @@ export default function Buy() {
                 <Text
                   key={index}
                   className={`text-base text-bondis-gray-dark text-left ${
-                    index !== 0 ? "mt-6" : ""
+                    index !== 0 ? 'mt-6' : ''
                   }`}
                 >
                   {`${index + 1}. ${rule}`}
@@ -241,11 +242,11 @@ export default function Buy() {
               ))}
             </View>
 
-            {/* Botao comprar desafio*/}
+            {/* Botao comprar desafio */}
             <AceitarDesafioButton desafioId={desafioId as string} price={purchaseData?.price as string} />
           </View>
         )}
       </ScrollView>
     </View>
-  );
+  )
 }
