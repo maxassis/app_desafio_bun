@@ -3,14 +3,14 @@ import { Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import * as Progress from 'react-native-progress'
 import { LinearGradient } from 'expo-linear-gradient'
-import UserTime from './user_time'
+import { UserTime } from './user_time'
 import {
   fetchAllDesafios,
   fetchRankData,
 
 } from '@/utils/api-service'
 import type { RankData, RouteResponse, UserData } from '@/utils/api-service'
-import Winner from '../assets/winner.svg'
+import Winner from '../../assets/winner.svg'
 import { convertSecondsToTimeString } from '@/utils'
 import useDesafioStore from '@/store/desafio-store'
 import { router } from 'expo-router'
@@ -32,15 +32,15 @@ function RankingBottomSheet({
 }: BottomSheetProps) {
   const bottomSheetRef = useRef(null)
   const snapPoints = useMemo(() => ['21%', '85%', '100%'], [])
-  const { desafioId } = useDesafioStore()
+  const { desafioSelecionado } = useDesafioStore()
   const insets = useSafeAreaInsets()
 
   const { data: rankData, isLoading } = useQuery<
     RankData[],
     Error
   >({
-    queryKey: ['rankData', desafioId],
-    queryFn: () => fetchRankData(`${desafioId}`),
+    queryKey: ['rankData', desafioSelecionado?.id],
+    queryFn: () => fetchRankData(`${desafioSelecionado?.id}`),
     staleTime: 1000 * 60 * 5,
   })
 
@@ -52,7 +52,7 @@ function RankingBottomSheet({
     staleTime: 5 * 60 * 1000,
   })
 
-  const currentDesafio = allDesafios?.find(desafio => desafio.id === desafioId)
+  const currentDesafio = allDesafios?.find(desafio => desafio.id === desafioSelecionado?.id)
 
   const handleUserPress = (userId: string) => {
     if (userData?.usersId === userId) {
@@ -134,7 +134,7 @@ function RankingBottomSheet({
           </View>
 
           <View className="w-full h-[92px] bg-bondis-black mt-6 rounded p-4 flex-row items-center ">
-            <Image source={require('../assets/top.png')} />
+            <Image source={require('../../assets/top.png')} />
             <Text className="flex-1 flex-wrap ml-[10px] text-center">
               <Text className="text-bondis-green font-inter-bold">
                 {userData?.username}
@@ -198,7 +198,7 @@ function RankingBottomSheet({
                       source={
                         rankData[2].userAvatar
                           ? { uri: rankData[2].userAvatar }
-                          : require('../assets/user2.png')
+                          : require('../../assets/user2.png')
                       }
                     />
                   </TouchableOpacity>
@@ -253,7 +253,7 @@ function RankingBottomSheet({
                       source={
                         rankData[0].userAvatar
                           ? { uri: rankData[0].userAvatar }
-                          : require('../assets/user2.png')
+                          : require('../../assets/user2.png')
                       }
                     />
                   </TouchableOpacity>
@@ -310,7 +310,7 @@ function RankingBottomSheet({
                       source={
                         rankData[1].userAvatar
                           ? { uri: rankData[1].userAvatar }
-                          : require('../assets/user2.png')
+                          : require('../../assets/user2.png')
                       }
                     />
                   </TouchableOpacity>

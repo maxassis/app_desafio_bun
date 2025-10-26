@@ -25,18 +25,21 @@ function CardDesafio({
   inscriptionId,
 }: desafioProps) {
   const router = useRouter()
-  const { setMapData, setDesafioData } = useDesafioStore()
+  const { setDesafioSelecionado } = useDesafioStore()
 
   const handleCardPress = () => {
     if (isRegistered || completed) {
-      setMapData(desafioId, inscriptionId)
-      setDesafioData(
-        inscriptionId,
-        desafioName,
-        +progress,
-        +distance,
-        desafioId,
-      )
+      const desafio = {
+        id: desafioId,
+        name: desafioName,
+        distance,
+        progressPercentage: +progress,
+        isRegistered,
+        completed,
+        photo,
+        inscriptionId: inscriptionId ?? 0, // Ensure inscriptionId is always a number
+      }
+      setDesafioSelecionado(desafio as any)
       router.push({ pathname: '/map' })
     }
     else {

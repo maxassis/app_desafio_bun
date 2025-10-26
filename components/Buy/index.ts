@@ -1,1 +1,1 @@
-export * from './button_stripe.js'
+export * from './button_stripe'

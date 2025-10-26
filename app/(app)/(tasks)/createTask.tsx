@@ -22,9 +22,6 @@ import tokenExists from "../../../store/auth-store";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { ptBR } from "../../../utils/localeCalendar";
 import dayjs from "dayjs";
-import TimePickerModal, {
-  TimePickerModalRef,
-} from "../../../components/Tasks/time_picker";
 import { router } from "expo-router";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,6 +29,7 @@ import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
+import { TimePickerModal, TimePickerModalRef } from "@/components";
 
 LocaleConfig.locales["pt-br"] = ptBR;
 LocaleConfig.defaultLocale = "pt-br";
@@ -81,7 +79,6 @@ export default function TaskCreate() {
     minutes: 0,
     seconds: 0,
   });
-  const [showCompletionBottomSheet, setShowCompletionBottomSheet] = useState(false);
   const token = tokenExists((state) => state.token);
   const { desafioSelecionado, setDesafioSelecionado } =
     useDesafioStore();
@@ -89,58 +86,8 @@ export default function TaskCreate() {
   const timePickerRef = useRef<TimePickerModalRef>(null);
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["33%"], []);
 
-  // Limpa o desafio selecionado do store quando a tela é desmontada
-  useEffect(() => {
-    return () => {
-      setDesafioSelecionado(null);
-    };
-  }, []);
-
-  const verificarConclusaoDesafioMutation = useMutation({
-    mutationFn: async () => {
-      const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
-
-      console.log("Corpo da requisição para verificar conclusão:", {
-        inscriptionId: inscriptionId,
-        distance: distanciaSelecionada,
-      });
-
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/tasks/check-completion",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            inscriptionId: desafioSelecionado?.inscriptionId,
-            distance: distanciaSelecionada,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Erro ao verificar conclusão do desafio");
-      }
-
-      return response.json();
-    },
-    onSuccess: (data) => {
-      if (data.willCompleteChallenge) {
-        setShowCompletionBottomSheet(true);
-        bottomSheetRef.current?.expand();
-      } else {
-        criarTarefa();
-      }
-    },
-    onError: (erro) => {
-      console.error("Erro ao verificar conclusão do desafio:", erro);
-    },
-  });
+  
 
   const criarTarefaMutation = useMutation({
     mutationFn: async (dadosTarefa: CheckCompletion) => {
@@ -202,9 +149,7 @@ export default function TaskCreate() {
     }
   };
 
-  function verificarConclusao() {
-    verificarConclusaoDesafioMutation.mutate();
-  }
+  
 
   function criarTarefa() {
     const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
@@ -250,16 +195,7 @@ export default function TaskCreate() {
     return hours * 3600 + minutes * 60 + seconds;
   }
 
-  function confirmarConclusao() {
-    setShowCompletionBottomSheet(false);
-    bottomSheetRef.current?.close();
-    criarTarefa();
-  }
-
-  function cancelarConclusao() {
-    setShowCompletionBottomSheet(false);
-    bottomSheetRef.current?.close();
-  }
+  
 
   const formularioValido =
     nomeAtividade !== "" &&
@@ -451,22 +387,20 @@ export default function TaskCreate() {
         />
 
         <TouchableOpacity
-          onPress={() => verificarConclusao()}
+          onPress={() => criarTarefa()}
           className={botaoDesabilitado({
             intent:
               !formularioValido ||
-              criarTarefaMutation.isPending ||
-              verificarConclusaoDesafioMutation.isPending
+              criarTarefaMutation.isPending
                 ? "disabled"
                 : null,
           })}
           disabled={
             !formularioValido ||
-            criarTarefaMutation.isPending ||
-            verificarConclusaoDesafioMutation.isPending
+            criarTarefaMutation.isPending
           }
         >
-          {criarTarefaMutation.isPending || verificarConclusaoDesafioMutation.isPending ? (
+          {criarTarefaMutation.isPending ? (
             <View className="flex-row items-center gap-x-2">
               <Text className="font-inter-bold text-base">Carregando...</Text>
               <ActivityIndicator color="#000000" />
@@ -478,38 +412,14 @@ export default function TaskCreate() {
           )}
         </TouchableOpacity>
 
-        {(criarTarefaMutation.isError || verificarConclusaoDesafioMutation.isError) && (
+        {criarTarefaMutation.isError && (
           <Text className="text-bondis-alert-red font-inter-medium text-center mb-4">
             Erro ao cadastrar atividade. Tente novamente.
           </Text>
         )}
       </KeyboardAwareScrollView>
 
-      <BottomSheet
-        ref={bottomSheetRef}
-        snapPoints={snapPoints}
-        index={-1}
-        enablePanDownToClose
-        backgroundStyle={{
-          borderRadius: 20,
-        }}
-      >
-        <BottomSheetView className="flex-1 z-50">
-          <View className="mx-5">
-            <Text className="font-inter-bold text-center text-base mt-4">Deseja concluir seu desafio?</Text>
-
-            <Text className="mt-2 text-center">Esta atividade completa o desafio <Text className="font-inter-bold">{desafioSelecionado?.name}</Text>. Após concluir, não será mais possível editar ou adicionar 
-              novas atividades. 
-            </Text>
-
-            <Button title="Sim, concluir atividade" onPress={confirmarConclusao} />
-
-            <TouchableOpacity onPress={cancelarConclusao} className="items-center justify-center h-[52px]">
-              <Text className="text-center font-inter-bold">Voltar</Text>
-            </TouchableOpacity>
-          </View>
-        </BottomSheetView>
-      </BottomSheet>
+      
 
       <SystemBars style="dark" />
     </View>

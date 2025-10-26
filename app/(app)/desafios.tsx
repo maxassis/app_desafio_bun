@@ -19,7 +19,6 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 
 export default function DesafioSelect() {
   const token = tokenExists(state => state.token)
-  const setDesafioData = useDesafioStore(state => state.setDesafioData)
   const setDesafioSelecionado = useDesafioStore(state => state.setDesafioSelecionado)
   const { gps } = useLocalSearchParams()
   const insets = useSafeAreaInsets()
@@ -65,17 +64,7 @@ export default function DesafioSelect() {
   }, [gps])
 
   const handleDesafioPress = (item: AllDesafios) => {
-    // Guarda todo o objeto do desafio no store para a próxima tela usar
-    setDesafioSelecionado(item)
-
-    // Mantendo essa chamada caso outra parte do app a utilize
-    setDesafioData(
-      item.inscriptionId,
-      item.name,
-      +item.progressPercentage,
-      +item.distance,
-      item.id,
-    )
+    setDesafioSelecionado(item);
 
     if (gps === 'true') {
       router.push({

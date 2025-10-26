@@ -137,12 +137,12 @@ export default function Map2() {
   // Refs & Store
   const mapRef = useRef<MapView>(null)
   const flatListRef = useRef<FlatList>(null)
-  const { desafioId } = useDesafioStore()
+  const { desafioSelecionado } = useDesafioStore()
   // const insets = useSafeAreaInsets();
 
   // Custom Hooks
   useDayjs()
-  const { routeQuery, userQuery } = useMapData(`${desafioId}`)
+  const { routeQuery, userQuery } = useMapData(desafioSelecionado?.id ?? '')
   const { data: routeData, isLoading, isSuccess } = routeQuery
   const { data: userConfig } = userQuery
 

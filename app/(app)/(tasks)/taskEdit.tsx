@@ -51,7 +51,7 @@ export default function TaskEdit() {
   const [calories, setCalories] = useState("");
   const [local, setLocal] = useState("");
   const token = tokenExists((state) => state.token);
-  const { taskData, inscriptionId, desafioId } = useDesafioStore();
+  const { taskData, desafioSelecionado } = useDesafioStore();
   const [day, setDay] = useState<DateData>({} as DateData);
   const [initialDate, setInitialDate] = useState<any>();
   const [calendar, setCalendarVisible] = useState(false);
@@ -83,7 +83,7 @@ export default function TaskEdit() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            inscriptionId: inscriptionId,
+            inscriptionId: taskData.inscriptionId,
             distance: +`${distance.kilometers}.${distance.meters}`,
           }),
         }
@@ -160,8 +160,8 @@ export default function TaskEdit() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
-      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
-      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioSelecionado?.id] });
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioSelecionado?.id] });
 
       router.push("/taskList");
     },

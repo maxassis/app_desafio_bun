@@ -1,12 +1,12 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import Livre from "../assets/livre.svg";
-import Calendar from "../assets/calendar.svg";
-import Pin from "../assets/map-pin.svg";
-import Gear from "../assets/settings-black.svg";
+import Livre from "../../assets/livre.svg";
+import Calendar from "../../assets/calendar.svg";
+import Pin from "../../assets/map-pin.svg";
+import Gear from "../../assets/settings-black.svg";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { convertSecondsToTimeString } from "../../utils/timeUtils";
-import RSS from "../assets/rss.svg";
+import RSS from "../../assets/rss.svg";
 import relativeTime from "dayjs/plugin/relativeTime";
 import utc from "dayjs/plugin/utc";
 

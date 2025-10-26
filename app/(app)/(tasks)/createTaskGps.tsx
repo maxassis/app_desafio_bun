@@ -36,10 +36,7 @@ interface DadosTarefaGps {
   local: string | null;
 }
 
-interface CheckCompletion {
-  willCompleteChallenge: boolean
-  inscriptionId: number
-}
+
 
 interface CreateTaskApiResponse {
   message: string;
@@ -55,12 +52,8 @@ export default function CreateTaskGps() {
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
   const insets = useSafeAreaInsets();
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const bottomSheetSuccessRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["33%"], []);
-  const snapPointsSuccess = useMemo(() => ["33%"], []);
-  const { desafioName, inscriptionId, desafioId } = useDesafioStore();
-
-  const [isSuccessSheetOpen, setIsSuccessSheetOpen] = useState(false);
+  const { desafioSelecionado } = useDesafioStore();
 
   function converterKmParaString(km: number): string {
     const kmAbsoluto: number = Math.abs(km);
@@ -120,8 +113,8 @@ export default function CreateTaskGps() {
       setIsLoading(false);
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
-      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
-      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioSelecionado?.id] });
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioSelecionado?.id] });
 
       if (metaAtingida) {
         router.replace("/dashboard");
@@ -135,70 +128,15 @@ export default function CreateTaskGps() {
     },
   });
 
-  const verificarConclusaoDesafioMutation = useMutation<CheckCompletion, Error, void>({
-    mutationFn: async (): Promise<CheckCompletion> => {
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/tasks/check-completion",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            inscriptionId: inscriptionId,
-            distance: +distanceStore,
-          }),
-        }
-      );
+  
 
-      if (!response.ok) {
-        throw new Error("Erro ao verificar conclusão do desafio");
-      }
-
-      return response.json();
-    },
-    onSuccess: (data: CheckCompletion) => {
-      if (data.willCompleteChallenge) {
-        setIsLoading(false);
-        bottomSheetSuccessRef.current?.expand();
-      } else {
-        criarTarefa(false);
-      }
-    },
-    onError: (erro) => {
-      console.error("Erro ao verificar conclusão do desafio:", erro);
-      setIsLoading(false);
-      Alert.alert(
-        "Erro",
-        "Não foi possível verificar se o desafio será concluído. Tente novamente."
-      );
-    },
-  });
-
-  useEffect(() => {
-    const backAction = () => {
-      if (isSuccessSheetOpen) {
-        bottomSheetSuccessRef.current?.close();
-        return true;
-      }
-      confirmarDescarte();
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, [isSuccessSheetOpen]);
+  
 
   function confirmarDescarte() {
     bottomSheetRef.current?.expand();
   }
 
-  function criarTarefa(checkCompletion: boolean) {
+  function criarTarefa() {
     const distanceFormated = (d: number): number => {
       const num = d.toFixed(3);
       return +num;
@@ -209,20 +147,17 @@ export default function CreateTaskGps() {
       distance: distanceFormated(+distanceStore),
       environment: "livre",
       calories: 200,
-      inscriptionId: inscriptionId as number,
+      inscriptionId: desafioSelecionado?.inscriptionId as number,
       date: getFormattedCurrentUtcDate(),
       duration: +elapsedStore,
       gpsTask: true,
       local: cityStore ?? "",
     };
 
-    criarTarefaMutation.mutate({...dadosTarefa, willCompleteChallenge: checkCompletion});
+    criarTarefaMutation.mutate(dadosTarefa);
   }
 
-  function verificarConclusao() {
-    setIsLoading(true);
-    verificarConclusaoDesafioMutation.mutate();
-  }
+  
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
@@ -308,7 +243,7 @@ export default function CreateTaskGps() {
         </TouchableOpacity>
 
         <Pressable
-          onPress={verificarConclusao}
+          onPress={() => criarTarefa()}
           className={botaoDesabilitado({
             intent: nomeAtividade.length === 0 || isLoading ? "disabled" : null,
           })}
@@ -369,32 +304,7 @@ export default function CreateTaskGps() {
         </BottomSheetView>
       </BottomSheet>
 
-      <BottomSheet
-        ref={bottomSheetSuccessRef}
-        snapPoints={snapPointsSuccess}
-        index={-1}
-        enablePanDownToClose
-        backgroundStyle={{
-          borderRadius: 20,
-        }}
-        onChange={(index) => setIsSuccessSheetOpen(index !== -1)}
-      >
-        <BottomSheetView className="flex-1 z-50">
-          <View className="mx-5">
-            <Text className="font-inter-bold text-center text-base mt-4">Deseja concluir seu desafio?</Text>
-
-            <Text className="mt-2 text-center">Esta atividade completa o desafio <Text className="font-inter-bold">{desafioName}</Text>. Após concluir, não será mais possível editar ou adicionar 
-              novas atividades. 
-            </Text>
-
-            <Button title="Sim, concluir atividade" onPress={() => criarTarefa(true)} />
-
-            <TouchableOpacity  className="items-center justify-center h-[52px]" onPress={() => bottomSheetSuccessRef.current?.close()}>
-              <Text className="text-center font-inter-bold">Voltar</Text>
-            </TouchableOpacity>
-          </View>
-        </BottomSheetView>
-      </BottomSheet>
+      
     </View>
   );
 }

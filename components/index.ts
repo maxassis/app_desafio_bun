@@ -1,4 +1,4 @@
-export * from './button.js'
+export * from './button'
 export * from './Dashboard'
 export * from './Map'
 export * from './Tracker'

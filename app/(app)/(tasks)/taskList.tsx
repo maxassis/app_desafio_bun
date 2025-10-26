@@ -40,7 +40,7 @@ const fetchTasks = async (
   token: string
 ): Promise<TasksData> => {
   const res = await fetch(
-    `https://bondis-app-backend.onrender.com/tasks/get-tasks/${inscriptionId}`,
+    `http://10.0.2.2:3000/tasks/get-tasks/${inscriptionId}`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -53,7 +53,7 @@ const fetchTasks = async (
 
 const deleteTaskApi = async (id: number, token: string) => {
   const res = await fetch(
-    `https://bondis-app-backend.onrender.com/tasks/delete-task/${id}`,
+    `http://10.0.2.2:3000/tasks/delete-task/${id}`,
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
@@ -64,7 +64,7 @@ const deleteTaskApi = async (id: number, token: string) => {
 };
 
 export default function TaskList() {
-  const { inscriptionId, desafioName, setTaskData, desafioId } =
+  const { desafioSelecionado, setTaskData } =
     useDesafioStore();
 
   const token = tokenExists((state) => state.token);
@@ -85,19 +85,19 @@ export default function TaskList() {
   const snapPointsEdit = useMemo(() => ["30%"], []);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["tasks", inscriptionId],
-    queryFn: () => fetchTasks(inscriptionId as number, token!),
-    enabled: !!inscriptionId && !!token,
+    queryKey: ["tasks", desafioSelecionado?.inscriptionId],
+    queryFn: () => fetchTasks(desafioSelecionado?.inscriptionId as number, token!),
+    enabled: !!desafioSelecionado?.inscriptionId && !!token,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteTaskApi(id, token!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", inscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", desafioSelecionado?.inscriptionId] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
-      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioSelecionado?.id] });
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
-      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioSelecionado?.id] });
       closeAllSheets();
     },
     onError: () => {
@@ -200,7 +200,7 @@ export default function TaskList() {
                 Desafio
               </Text>
               <Text className="text-base font-inter-bold mt-2">
-                {desafioName}
+                {desafioSelecionado?.name}
               </Text>
             </View>
           </View>
