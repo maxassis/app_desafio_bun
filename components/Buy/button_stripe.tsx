@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserData } from "@/utils/api-service";
 import { useRouter } from "expo-router";
 
-const AceitarDesafioButton = ({
+const AcceptDesafioButton = ({
   desafioId,
   price,
 }: {
@@ -92,4 +92,4 @@ const AceitarDesafioButton = ({
   );
 };
 
-export default AceitarDesafioButton;
+export  { AcceptDesafioButton }

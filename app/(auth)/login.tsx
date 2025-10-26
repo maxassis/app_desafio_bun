@@ -17,7 +17,7 @@ import Close from '../../assets/Close.svg'
 import Facebook from '../../assets/facebook.svg'
 import Google from '../../assets/google.svg'
 import Logo from '../../assets/logo2.svg'
-import { Button } from '../../components/Button'
+import { Button } from '../../components/button'
 import useAuthStore from '../../store/auth-store'
 
 interface FormData {

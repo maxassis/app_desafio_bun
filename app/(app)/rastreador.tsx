@@ -21,8 +21,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { HoldProgressButton } from '@/components/buttonAnime'
-import { PermissionModal } from '@/components/permissionModal'
+import { HoldProgressButton } from '@/components/Tracker/button_anime'
+import { PermissionModal } from '@/components/Tracker/permission_modal'
 import Pause from '../../assets/Pause.svg'
 import Play from '../../assets/play.svg'
 
@@ -55,6 +55,7 @@ export default function Rastreador() {
   const [countdownNumber, setCountdownNumber] = useState(3)
   const [showTooltip, setShowTooltip] = useState(false)
   const [lastKm, setLastKm] = useState(0)
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [splits, setSplits] = useState<number[]>([])
 
   const setDesafioData = useDesafioStore(state => state.setDesafioData)

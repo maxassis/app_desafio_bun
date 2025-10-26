@@ -11,14 +11,14 @@ import {
 } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import Left from "../../../assets/Icon-left.svg";
-import TaskItem from "../../../components/taskItem";
-import TaskItemSkeleton from "@/components/taskItemSkeleton";
+
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Plus from "../../../assets/plus.svg";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TaskItem, TaskItemSkeleton } from "@/components";
 
 export type TasksData = Data[];
 export interface Data {

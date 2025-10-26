@@ -21,7 +21,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/button";
 import useDesafioStore from "../../../store/desafio-store";
 
 interface DadosTarefaGps {

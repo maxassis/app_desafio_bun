@@ -13,7 +13,7 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import KilometerMeterPicker, {
   KilometerMeterPickerModalRef,
-} from "../../../components/distancePicker";
+} from "../../../components/Tasks/distance_picker";
 import { router } from "expo-router";
 import Outdoor from "../../../assets/Outdoor.svg";
 import Indoor from "../../../assets/Indoor.svg";
@@ -26,12 +26,10 @@ import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { ptBR } from "../../../utils/localeCalendar";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import TimePickerModal, {
-  TimePickerModalRef,
-} from "../../../components/timePicker";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TimePickerModal, TimePickerModalRef } from "@/components";
 
 dayjs.extend(utc);
 LocaleConfig.locales["pt-br"] = ptBR;

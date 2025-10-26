@@ -1,7 +1,7 @@
 import { Text, View, Image } from "react-native";
 import Arrow from "../assets/arrow.svg";
-import { convertSecondsToTimeString } from "../utils/timeUtils";
 import { cva } from "class-variance-authority";
+import { convertSecondsToTimeString } from "@/utils";
 
 interface UserTimeProps {
   position: number;
@@ -14,7 +14,7 @@ interface UserTimeProps {
   isCurrentUser?: boolean;
 }
 
-export default function UserTime(data: UserTimeProps) {
+function UserTime(data: UserTimeProps) {
   return (
     <View className={userTimeVariants({ isCurrentUser: data.isCurrentUser })}>
       <Image
@@ -45,3 +45,6 @@ const userTimeVariants = cva(
     },
   }
 );
+
+
+export { UserTime };

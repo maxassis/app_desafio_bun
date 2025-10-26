@@ -15,7 +15,7 @@ import Arrow from "../../../assets/arrow-right.svg";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import { Button } from "../../../components/Button";
+import { Button } from "../../../components/button";
 import { useMutation } from "@tanstack/react-query";
 
 type FormData = {

@@ -127,7 +127,7 @@ interface RecentTask {
   id: number;
   name: string;
   environment: string;
-  date: string;
+  date: Date;
   duration: string;
   calories: number;
   local: string;

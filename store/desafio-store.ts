@@ -14,6 +14,13 @@ interface Task {
   gpsTask: boolean;
 }
 
+// Você pode ajustar essa interface para que corresponda à estrutura real do seu objeto "desafio"
+interface Desafio {
+  id: any;
+  name: string;
+  // Adicione outros campos que seu objeto desafio possa ter
+}
+
 interface DesafioStore {
   inscriptionId: number | null;
   desafioName: string | null;
@@ -21,6 +28,7 @@ interface DesafioStore {
   distanceTotal: number;
   progress: number;
   desafioId: string | null;
+  desafioSelecionado: Desafio | null; // Para passar o desafio para a tela de criação de task
   setDesafioData: (participationId: number, desafioName: string, progress: number, distanceTotal: number, desafioId: string) => void;
   setTaskData: (taskData: Task) => void;
   clearDesafioData: () => void;
@@ -29,6 +37,7 @@ interface DesafioStore {
     desafioId: string,
     inscriptionId: number,
   ) => void;
+  setDesafioSelecionado: (desafio: Desafio | null) => void;
   totalDuration: number;
   taskCount: number; 
   progressPercentage: number,
@@ -42,6 +51,7 @@ const useDesafioStore = create<DesafioStore>((set) => ({
   distanceTotal: 0,
   progress: 0,
   desafioId: null,
+  desafioSelecionado: null,
   totalDuration: 0,
   taskCount: 0,
   progressPercentage: 0,
@@ -51,6 +61,7 @@ const useDesafioStore = create<DesafioStore>((set) => ({
     set({ inscriptionId, desafioName, progress ,distanceTotal, desafioId }),
   setTaskData: (taskData) =>
     set({ taskData }),
+  setDesafioSelecionado: (desafio) => set({ desafioSelecionado: desafio }),
   clearDesafioData: () => 
     set({ inscriptionId: null, desafioName: null }),
   clearTaskData: () =>

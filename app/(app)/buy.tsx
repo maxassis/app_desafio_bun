@@ -15,10 +15,10 @@ import {
 } from 'react-native'
 import Carousel from 'react-native-reanimated-carousel'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import AceitarDesafioButton from '@/components/buttonStripe'
 import { fetchPurchaseData } from '@/utils/api-service'
 import Left from '../../assets/arrow-left.svg'
 import Track from '../../assets/track.svg'
+import { AcceptDesafioButton } from '@/components'
 
 export default function Buy() {
   const router = useRouter()
@@ -243,7 +243,7 @@ export default function Buy() {
             </View>
 
             {/* Botao comprar desafio */}
-            <AceitarDesafioButton desafioId={desafioId as string} price={purchaseData?.price as string} />
+            <AcceptDesafioButton desafioId={desafioId as string} price={purchaseData?.price as string} />
           </View>
         )}
       </ScrollView>

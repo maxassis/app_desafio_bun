@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -11,7 +11,7 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import KilometerMeterPicker, {
   KilometerMeterPickerModalRef,
-} from "../../../components/distancePicker";
+} from "../../../components/Tasks/distance_picker";
 import Left from "../../../assets/arrow-left.svg";
 import Outdoor from "../../../assets/Outdoor.svg";
 import Indoor from "../../../assets/Indoor.svg";
@@ -24,14 +24,14 @@ import { ptBR } from "../../../utils/localeCalendar";
 import dayjs from "dayjs";
 import TimePickerModal, {
   TimePickerModalRef,
-} from "../../../components/timePicker";
+} from "../../../components/Tasks/time_picker";
 import { router } from "expo-router";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/button";
 
 LocaleConfig.locales["pt-br"] = ptBR;
 LocaleConfig.defaultLocale = "pt-br";
@@ -83,7 +83,7 @@ export default function TaskCreate() {
   });
   const [showCompletionBottomSheet, setShowCompletionBottomSheet] = useState(false);
   const token = tokenExists((state) => state.token);
-  const { inscriptionId, desafioId, desafioName } =
+  const { desafioSelecionado, setDesafioSelecionado } =
     useDesafioStore();
   const childRef = useRef<KilometerMeterPickerModalRef>(null);
   const timePickerRef = useRef<TimePickerModalRef>(null);
@@ -91,6 +91,13 @@ export default function TaskCreate() {
   const insets = useSafeAreaInsets();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["33%"], []);
+
+  // Limpa o desafio selecionado do store quando a tela é desmontada
+  useEffect(() => {
+    return () => {
+      setDesafioSelecionado(null);
+    };
+  }, []);
 
   const verificarConclusaoDesafioMutation = useMutation({
     mutationFn: async () => {
@@ -110,7 +117,7 @@ export default function TaskCreate() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            inscriptionId: inscriptionId,
+            inscriptionId: desafioSelecionado?.inscriptionId,
             distance: distanciaSelecionada,
           }),
         }
@@ -155,8 +162,8 @@ export default function TaskCreate() {
       limparInputs();
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
-      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
-      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioSelecionado?.id] });
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioSelecionado?.id] });
 
       const metaAtingida = data.challengeCompleted;
 
@@ -216,7 +223,7 @@ export default function TaskCreate() {
       distance: distanciaSelecionada,
       environment: ambiente,
       calories: +calorias,
-      inscriptionId: inscriptionId!,
+      inscriptionId: desafioSelecionado?.inscriptionId!,
       date: dataFinal.toISOString(), // Formato final: "2025-05-23T14:01:07.606Z"
       duration: converterTempoParaSegundos(tempoSelecionado),
       local: local
@@ -491,7 +498,7 @@ export default function TaskCreate() {
           <View className="mx-5">
             <Text className="font-inter-bold text-center text-base mt-4">Deseja concluir seu desafio?</Text>
 
-            <Text className="mt-2 text-center">Esta atividade completa o desafio <Text className="font-inter-bold">{desafioName}</Text>. Após concluir, não será mais possível editar ou adicionar 
+            <Text className="mt-2 text-center">Esta atividade completa o desafio <Text className="font-inter-bold">{desafioSelecionado?.name}</Text>. Após concluir, não será mais possível editar ou adicionar 
               novas atividades. 
             </Text>
 

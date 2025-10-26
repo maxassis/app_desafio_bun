@@ -7,7 +7,7 @@ interface PermissionModalProps {
   onDecline: () => void
 }
 
-export const PermissionModal: React.FC<PermissionModalProps> = ({
+const PermissionModal: React.FC<PermissionModalProps> = ({
   visible,
   onAccept,
   onDecline,
@@ -71,6 +71,8 @@ export const PermissionModal: React.FC<PermissionModalProps> = ({
     </Modal>
   )
 }
+
+export { PermissionModal }
 
 const styles = StyleSheet.create({
   centeredView: {

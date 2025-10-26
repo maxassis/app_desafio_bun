@@ -25,4 +25,4 @@ const TaskItemSkeleton = () => {
   );
 };
 
-export default TaskItemSkeleton;
+export  { TaskItemSkeleton }
