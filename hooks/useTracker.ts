@@ -480,9 +480,6 @@ export default function useTracker() {
   }
 
   async function startTracking() {
-    const ok = await requestPermissions();
-    if (!ok) return;
-
     if (status === "idle") {
       // console.log("Limpando dados de tracking anteriores...");
       
@@ -563,6 +560,7 @@ export default function useTracker() {
     elapsed,
     distance,
     city,
+    requestPermissions,
     startTracking,
     pauseTracking,
     resumeTracking,
