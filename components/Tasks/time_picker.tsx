@@ -8,7 +8,7 @@ interface Time {
   seconds: number;
 }
 
-export interface TimePickerModalRef {
+interface TimePickerModalRef {
   clearTime: () => void;
   changeTime: (hours: number, minutes: number, seconds: number) => void;
 }
@@ -122,4 +122,4 @@ const TimePickerModal = forwardRef<TimePickerModalRef, TimePickerModalProps>(
   }
 );
 
-export default TimePickerModal;
+export  { TimePickerModal, TimePickerModalRef }

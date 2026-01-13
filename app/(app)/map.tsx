@@ -1,175 +1,178 @@
 import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
   useCallback,
-} from "react";
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
-  View,
   ActivityIndicator,
-  TouchableOpacity,
-  Image,
-  Text,
   FlatList,
+  Image,
   Platform,
   Pressable,
-} from "react-native";
-import { SystemBars } from "react-native-edge-to-edge";
-import { Image as ExpoImage } from "expo-image";
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { SystemBars } from 'react-native-edge-to-edge'
+import { Image as ExpoImage } from 'expo-image'
+import type {
+  Camera,
+} from 'react-native-maps'
 import MapView, {
+  Marker,
   Polyline,
   PROVIDER_GOOGLE,
-  Marker,
-  Camera,
-} from "react-native-maps";
-import { useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
-import { cva } from "class-variance-authority";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import "dayjs/locale/pt-br";
-import relativeTime from "dayjs/plugin/relativeTime";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Octicons from "@expo/vector-icons/Octicons";
+} from 'react-native-maps'
+import { useQuery } from '@tanstack/react-query'
+import { router } from 'expo-router'
+import { cva } from 'class-variance-authority'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import 'dayjs/locale/pt-br'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import AntDesign from '@expo/vector-icons/AntDesign'
+import Octicons from '@expo/vector-icons/Octicons'
 // import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// Components
-import RankingBottomSheet from "../../components/bottomSheeetMap";
-import Left from "../../assets/arrow-left.svg";
+import Left from '../../assets/arrow-left.svg'
 
-// Utils & Services
-import { fetchUserData, fetchRouteData } from "@/utils/api-service";
-import useDesafioStore from "@/store/desafio-store";
+import { fetchRouteData } from '@/services/desafios-service'
+import { fetchUserData } from '@/services/users-service'
+import useDesafioStore from '@/store/desafio-store'
 import {
-  haversine,
-  findPointAtDistance,
   calculateUserDistance,
-  type Coordinate,
-} from "@/utils/gpsFunctions";
-import { mapStyle } from "../../styles/mapStyles";
+
+  findPointAtDistance,
+  haversine,
+} from '@/utils/gpsFunctions'
+import type { Coordinate } from '@/utils/gpsFunctions'
+import { mapStyle } from '../../styles/mapStyles'
+import { RankingBottomSheet } from '@/components'
 
 interface UserParticipation {
-  avatar: string;
-  location: Coordinate;
-  name: string;
-  userId: string;
-  distance: number;
-  percentage: string;
-  totalTasks: number;
-  totalCalories: number;
-  totalDistanceKm: number;
-  lastTaskDate: Date;
+  avatar: string
+  location: Coordinate
+  name: string
+  userId: string
+  distance: number
+  percentage: string
+  totalTasks: number
+  totalCalories: number
+  totalDistanceKm: number
+  lastTaskDate: Date
 }
 
-type MapType = "standard" | "satellite" | "hybrid";
+type MapType = 'standard' | 'satellite' | 'hybrid'
 
 // Constants
-const MAP_EDGE_PADDING = { top: 50, right: 50, bottom: 50, left: 50 };
-const ANIMATION_DURATION = 1000;
-const MARKERS_READY_DELAY = 1000;
-const MAX_TILT = 60;
-const TILT_STEP = 15;
+const MAP_EDGE_PADDING = { top: 50, right: 50, bottom: 50, left: 50 }
+const ANIMATION_DURATION = 1000
+const MARKERS_READY_DELAY = 1000
+const MAX_TILT = 60
+const TILT_STEP = 15
 
 // Styles
 const userPin = cva(
-  "h-[35px] w-[35px] rounded-full bg-black justify-center items-center",
+  'h-[35px] w-[35px] rounded-full bg-black justify-center items-center',
   {
-    variants: { intent: { user: "bg-bondis-green h-[39px] w-[39px]" } },
-  }
-);
+    variants: { intent: { user: 'bg-bondis-green h-[39px] w-[39px]' } },
+  },
+)
 
-const photoUser = cva("h-[30px] w-[30px] rounded-full", {
-  variants: { intent: { user: "h-[34px] w-[34px]" } },
-});
+const photoUser = cva('h-[30px] w-[30px] rounded-full', {
+  variants: { intent: { user: 'h-[34px] w-[34px]' } },
+})
 
 // Utility Functions
-const formatPercentage = (progress: number): string => {
-  return progress.toLocaleString("en-US", {
+function formatPercentage(progress: number): string {
+  return progress.toLocaleString('en-US', {
     minimumIntegerDigits: 2,
     maximumFractionDigits: 1,
-  });
-};
+  })
+}
 
 // Custom Hooks
-const useDayjs = () => {
+function useDayjs() {
   useEffect(() => {
-    dayjs.extend(relativeTime);
-    dayjs.locale("pt-br");
-    dayjs.extend(utc);
-  }, []);
-};
+    dayjs.extend(relativeTime)
+    dayjs.locale('pt-br')
+    dayjs.extend(utc)
+  }, [])
+}
 
-const useMapData = (desafioId: string) => {
+function useMapData(desafioId: string) {
   const routeQuery = useQuery({
-    queryKey: ["routeData", desafioId],
+    queryKey: ['routeData', desafioId],
     queryFn: () => fetchRouteData(desafioId),
     enabled: !!desafioId,
-  });
+  })
 
   const userQuery = useQuery({
-    queryKey: ["userData"],
+    queryKey: ['userData'],
     queryFn: fetchUserData,
     staleTime: 45 * 60 * 1000,
-  });
+  })
 
-  return { routeQuery, userQuery };
-};
+  return { routeQuery, userQuery }
+}
 
 // Main Component
 export default function Map2() {
   // State
-  const [routeCoordinates, setRouteCoordinates] = useState<Coordinate[]>([]);
-  const [mapReady, setMapReady] = useState(false);
-  const [markersReady, setMarkersReady] = useState(false);
-  const [userProgress, setUserProgress] = useState<number>(0);
-  const [userDistance, setUserDistance] = useState<number>(0);
+  const [routeCoordinates, setRouteCoordinates] = useState<Coordinate[]>([])
+  const [mapReady, setMapReady] = useState(false)
+  const [markersReady, setMarkersReady] = useState(false)
+  const [userProgress, setUserProgress] = useState<number>(0)
+  const [userDistance, setUserDistance] = useState<number>(0)
   const [usersParticipants, setUsersParticipants] = useState<
     UserParticipation[]
-  >([]);
-  const [mapType, setMapType] = useState<MapType>("standard");
-  const [tilt, setTilt] = useState<number>(0);
+  >([])
+  const [mapType, setMapType] = useState<MapType>('standard')
+  const [tilt, setTilt] = useState<number>(0)
   const [selectedUser, setSelectedUser] = useState<UserParticipation | null>(
-    null
-  );
+    null,
+  )
 
   // Refs & Store
-  const mapRef = useRef<MapView>(null);
-  const flatListRef = useRef<FlatList>(null);
-  const { desafioId } = useDesafioStore();
+  const mapRef = useRef<MapView>(null)
+  const flatListRef = useRef<FlatList>(null)
+  const { desafioSelecionado } = useDesafioStore()
   // const insets = useSafeAreaInsets();
 
   // Custom Hooks
-  useDayjs();
-  const { routeQuery, userQuery } = useMapData(desafioId + "");
-  const { data: routeData, isLoading, isSuccess } = routeQuery;
-  const { data: userConfig } = userQuery;
+  useDayjs()
+  const { routeQuery, userQuery } = useMapData(desafioSelecionado?.id ?? '')
+  const { data: routeData, isLoading, isSuccess } = routeQuery
+  const { data: userConfig } = userQuery
 
   // Process route data and participants
   const processRouteData = useCallback(() => {
-    if (!isSuccess || !routeData || !mapReady) return;
+    if (!isSuccess || !routeData || !mapReady)
+      return
 
-    const coordinates = routeData.location;
-    setRouteCoordinates(coordinates);
+    const coordinates = routeData.location
+    setRouteCoordinates(coordinates)
 
-    const totalDistance = +routeData.distance;
+    const totalDistance = +routeData.distance
 
     const updatedParticipants = routeData.inscription.map((dta) => {
-      const userLocation = findPointAtDistance(coordinates, dta.progress);
-      const userDistance = calculateUserDistance(coordinates, dta.progress);
+      const userLocation = findPointAtDistance(coordinates, dta.progress)
+      const userDistance = calculateUserDistance(coordinates, dta.progress)
       const progressPercentage = formatPercentage(
-        (userDistance / totalDistance) * 100
-      );
+        (userDistance / totalDistance) * 100,
+      )
 
       if (dta.user.id === userConfig?.usersId) {
-        setUserProgress(Number(progressPercentage) / 100);
-        setUserDistance(dta.progress);
+        setUserProgress(Number(progressPercentage) / 100)
+        setUserDistance(dta.progress)
       }
 
       return {
         userId: dta.user.id,
         name: dta.user.name,
-        avatar: dta.user.UserData?.avatar_url || "",
+        avatar: dta.user.UserData?.avatar_url || '',
         location: userLocation || coordinates[0],
         distance: userDistance,
         percentage: progressPercentage,
@@ -177,86 +180,89 @@ export default function Map2() {
         totalCalories: dta.totalCalories,
         totalDistanceKm: dta.totalDistanceKm,
         lastTaskDate: dta.lastTaskDate,
-      };
-    });
+      }
+    })
 
-    setUsersParticipants(updatedParticipants);
+    setUsersParticipants(updatedParticipants)
 
     // Fit map to coordinates
     mapRef.current?.fitToCoordinates(coordinates, {
       edgePadding: MAP_EDGE_PADDING,
       animated: false,
-    });
+    })
 
     // Set markers ready after delay
-    setTimeout(() => setMarkersReady(true), MARKERS_READY_DELAY);
-  }, [isSuccess, routeData, mapReady, userConfig?.usersId]);
+    setTimeout(() => setMarkersReady(true), MARKERS_READY_DELAY)
+  }, [isSuccess, routeData, mapReady, userConfig?.usersId])
 
   useEffect(() => {
-    processRouteData();
-  }, [processRouteData]);
+    processRouteData()
+  }, [processRouteData])
 
   // Calculate user path
   const getUserPath = useMemo(() => {
-    if (!routeCoordinates.length || userDistance === 0) return [];
+    if (!routeCoordinates.length || userDistance === 0)
+      return []
 
-    const path: Coordinate[] = [];
-    let traveled = 0;
+    const path: Coordinate[] = []
+    let traveled = 0
 
     for (let i = 0; i < routeCoordinates.length - 1; i++) {
-      const start = routeCoordinates[i];
-      const end = routeCoordinates[i + 1];
+      const start = routeCoordinates[i]
+      const end = routeCoordinates[i + 1]
       const segmentDistance = haversine(
         start.latitude,
         start.longitude,
         end.latitude,
-        end.longitude
-      );
+        end.longitude,
+      )
 
       if (traveled + segmentDistance >= userDistance) {
-        const ratio = (userDistance - traveled) / segmentDistance;
+        const ratio = (userDistance - traveled) / segmentDistance
         path.push(start, {
           latitude: start.latitude + (end.latitude - start.latitude) * ratio,
           longitude:
             start.longitude + (end.longitude - start.longitude) * ratio,
-        });
-        break;
-      } else {
-        path.push(start);
-        traveled += segmentDistance;
+        })
+        break
+      }
+      else {
+        path.push(start)
+        traveled += segmentDistance
       }
     }
 
-    return path;
-  }, [routeCoordinates, userDistance]);
+    return path
+  }, [routeCoordinates, userDistance])
 
   const handleMarkerPress = useCallback(
     (user: UserParticipation) => {
-      setSelectedUser(user);
+      setSelectedUser(user)
       const userIndex = usersParticipants.findIndex(
-        (p) => p.userId === user.userId
-      );
+        p => p.userId === user.userId,
+      )
       if (userIndex !== -1 && flatListRef.current) {
         flatListRef.current.scrollToIndex({
           index: userIndex,
           animated: true,
           viewPosition: 0.5, // Center the item
-        });
+        })
       }
     },
-    [usersParticipants]
-  );
+    [usersParticipants],
+  )
 
   // User markers
   const userMarkers = useMemo(() => {
-    if (!routeData) return null;
+    if (!routeData)
+      return null
 
     return usersParticipants.map((user, index) => {
-      const isCurrentUser = user.userId === userConfig?.usersId;
-      const coordinate =
-        user.distance > +routeData.distance
+      const isCurrentUser = user.userId === userConfig?.usersId
+      const coordinate
+        = user.distance > +routeData.distance
           ? routeCoordinates[routeCoordinates.length - 1]
-          : user.location;
+          : user.location
 
       return (
         <Marker
@@ -270,22 +276,22 @@ export default function Map2() {
           title={`${user.name} - ${user.distance} Km`}
           onPress={() => handleMarkerPress(user)}
         >
-          <View className={userPin({ intent: isCurrentUser ? "user" : null })}>
+          <View className={userPin({ intent: isCurrentUser ? 'user' : null })}>
             {user.avatar ? (
               <Image
                 source={{ uri: user.avatar }}
-                className={photoUser({ intent: isCurrentUser ? "user" : null })}
+                className={photoUser({ intent: isCurrentUser ? 'user' : null })}
               />
             ) : (
               <Image
-                source={require("../../assets/user2.png")}
+                source={require('../../assets/user2.png')}
                 className="h-[32px] w-[32px] rounded-full"
               />
             )}
           </View>
         </Marker>
-      );
-    });
+      )
+    })
   }, [
     usersParticipants,
     userConfig,
@@ -293,57 +299,57 @@ export default function Map2() {
     routeCoordinates,
     markersReady,
     handleMarkerPress,
-  ]);
+  ])
 
   // Map Controls
   const toggleMapType = useCallback(() => {
     setMapType((prev) => {
       switch (prev) {
-        case "standard":
-          return "satellite";
-        case "satellite":
-          return "hybrid";
+        case 'standard':
+          return 'satellite'
+        case 'satellite':
+          return 'hybrid'
         default:
-          return "standard";
+          return 'standard'
       }
-    });
-  }, []);
+    })
+  }, [])
 
   const animateCamera = useCallback((cameraParams: Partial<Camera>) => {
     mapRef.current?.animateCamera(cameraParams, {
       duration: ANIMATION_DURATION,
-    });
-  }, []);
+    })
+  }, [])
 
   const adjustTilt = useCallback(
     (delta: number) => {
-      const newTilt = Math.max(0, Math.min(tilt + delta, MAX_TILT));
-      setTilt(newTilt);
-      animateCamera({ pitch: newTilt });
+      const newTilt = Math.max(0, Math.min(tilt + delta, MAX_TILT))
+      setTilt(newTilt)
+      animateCamera({ pitch: newTilt })
     },
-    [tilt, animateCamera]
-  );
+    [tilt, animateCamera],
+  )
 
   const resetCamera = useCallback(() => {
-    setTilt(0);
-    animateCamera({ pitch: 0, heading: 0 });
+    setTilt(0)
+    animateCamera({ pitch: 0, heading: 0 })
     mapRef.current?.fitToCoordinates(routeCoordinates, {
       edgePadding: MAP_EDGE_PADDING,
       animated: true,
-    });
-  }, [animateCamera, routeCoordinates]);
+    })
+  }, [animateCamera, routeCoordinates])
 
   const focusOnUser = useCallback(
     (user: UserParticipation) => {
-      setSelectedUser(user);
-      animateCamera({ center: user.location, pitch: 60, zoom: 16 });
+      setSelectedUser(user)
+      animateCamera({ center: user.location, pitch: 60, zoom: 16 })
     },
-    [animateCamera]
-  );
+    [animateCamera],
+  )
 
   const navigateBack = useCallback(() => {
-    router.push("/dashboard");
-  }, []);
+    router.push('/dashboard')
+  }, [])
 
   // Render user card
   const renderUserCard = useCallback(
@@ -359,12 +365,13 @@ export default function Map2() {
             <Pressable
               onPress={() => {
                 if (item.userId === userConfig?.usersId) {
-                  router.push("/dashboard");
-                } else {
+                  router.push('/dashboard')
+                }
+                else {
                   router.push({
-                    pathname: "/profile",
+                    pathname: '/profile',
                     params: { userId: item.userId },
-                  });
+                  })
                 }
               }}
               className="flex-row items-start"
@@ -377,7 +384,7 @@ export default function Map2() {
                 />
               ) : (
                 <Image
-                  source={require("../../assets/user2.png")}
+                  source={require('../../assets/user2.png')}
                   className="h-[43px] w-[43px] rounded-full"
                 />
               )}
@@ -409,10 +416,10 @@ export default function Map2() {
             </View>
           </View>
         </TouchableOpacity>
-      );
+      )
     },
-    [focusOnUser, selectedUser, userConfig]
-  );
+    [focusOnUser, selectedUser, userConfig],
+  )
 
   // Loading state
   if (isLoading) {
@@ -420,7 +427,7 @@ export default function Map2() {
       <View className="flex-1 bg-white justify-center items-center">
         <ActivityIndicator size="large" color="#12FF55" />
       </View>
-    );
+    )
   }
 
   return (
@@ -430,7 +437,7 @@ export default function Map2() {
         onMapReady={() => setMapReady(true)}
         className="flex-1 w-full"
         provider={PROVIDER_GOOGLE}
-        customMapStyle={mapType === "standard" ? mapStyle : []}
+        customMapStyle={mapType === 'standard' ? mapStyle : []}
         showsCompass={false}
         toolbarEnabled={false}
         zoomControlEnabled={false}
@@ -444,11 +451,11 @@ export default function Map2() {
               coordinates={routeCoordinates}
               strokeWidth={4}
               strokeColor={
-                Platform.OS === "ios" ? "rgba(0, 0, 0, 1)" : "#000000"
+                Platform.OS === 'ios' ? 'rgba(0, 0, 0, 1)' : '#000000'
               }
-              fillColor={Platform.OS === "ios" ? "rgba(0, 0, 0, 1)" : undefined}
+              fillColor={Platform.OS === 'ios' ? 'rgba(0, 0, 0, 1)' : undefined}
               strokeColors={
-                Platform.OS === "ios" ? ["rgba(0, 0, 0, 1)"] : undefined
+                Platform.OS === 'ios' ? ['rgba(0, 0, 0, 1)'] : undefined
               }
               zIndex={1}
             />
@@ -457,13 +464,13 @@ export default function Map2() {
               coordinates={getUserPath}
               strokeWidth={2}
               strokeColor={
-                Platform.OS === "ios" ? "rgba(18, 255, 85, 1)" : "#12FF55"
+                Platform.OS === 'ios' ? 'rgba(18, 255, 85, 1)' : '#12FF55'
               }
               fillColor={
-                Platform.OS === "ios" ? "rgba(18, 255, 85, 1)" : undefined
+                Platform.OS === 'ios' ? 'rgba(18, 255, 85, 1)' : undefined
               }
               strokeColors={
-                Platform.OS === "ios" ? ["rgba(18, 255, 85, 1)"] : undefined
+                Platform.OS === 'ios' ? ['rgba(18, 255, 85, 1)'] : undefined
               }
               zIndex={2}
             />
@@ -483,7 +490,7 @@ export default function Map2() {
             tracksViewChanges={!markersReady}
           >
             <Image
-              source={require("../../assets/final-pin.png")}
+              source={require('../../assets/final-pin.png')}
               className="h-[40px] w-[40px] rounded-full"
             />
           </Marker>
@@ -532,7 +539,7 @@ export default function Map2() {
         <FlatList
           ref={flatListRef}
           data={usersParticipants}
-          keyExtractor={(item) => item.userId}
+          keyExtractor={item => item.userId}
           renderItem={renderUserCard}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -551,5 +558,5 @@ export default function Map2() {
 
       <SystemBars style="dark" />
     </View>
-  );
+  )
 }

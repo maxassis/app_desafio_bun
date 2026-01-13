@@ -13,7 +13,7 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import KilometerMeterPicker, {
   KilometerMeterPickerModalRef,
-} from "../../../components/distancePicker";
+} from "../../../components/Tasks/distance_picker";
 import { router } from "expo-router";
 import Outdoor from "../../../assets/Outdoor.svg";
 import Indoor from "../../../assets/Indoor.svg";
@@ -26,12 +26,10 @@ import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { ptBR } from "../../../utils/localeCalendar";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import TimePickerModal, {
-  TimePickerModalRef,
-} from "../../../components/timePicker";
 import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { TimePickerModal, TimePickerModalRef } from "@/components";
 
 dayjs.extend(utc);
 LocaleConfig.locales["pt-br"] = ptBR;
@@ -53,7 +51,7 @@ export default function TaskEdit() {
   const [calories, setCalories] = useState("");
   const [local, setLocal] = useState("");
   const token = tokenExists((state) => state.token);
-  const { taskData, inscriptionId, desafioId } = useDesafioStore();
+  const { taskData, desafioSelecionado } = useDesafioStore();
   const [day, setDay] = useState<DateData>({} as DateData);
   const [initialDate, setInitialDate] = useState<any>();
   const [calendar, setCalendarVisible] = useState(false);
@@ -85,7 +83,7 @@ export default function TaskEdit() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            inscriptionId: inscriptionId,
+            inscriptionId: taskData.inscriptionId,
             distance: +`${distance.kilometers}.${distance.meters}`,
           }),
         }
@@ -162,8 +160,8 @@ export default function TaskEdit() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
-      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
-      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioSelecionado?.id] });
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioSelecionado?.id] });
 
       router.push("/taskList");
     },

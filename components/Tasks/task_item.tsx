@@ -1,12 +1,12 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import Livre from "../assets/livre.svg";
-import Calendar from "../assets/calendar.svg";
-import Pin from "../assets/map-pin.svg";
-import Gear from "../assets/settings-black.svg";
+import Livre from "../../assets/livre.svg";
+import Calendar from "../../assets/calendar.svg";
+import Pin from "../../assets/map-pin.svg";
+import Gear from "../../assets/settings-black.svg";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { convertSecondsToTimeString } from "../utils/timeUtils";
-import RSS from "../assets/rss.svg";
+import { convertSecondsToTimeString } from "../../utils/timeUtils";
+import RSS from "../../assets/rss.svg";
 import relativeTime from "dayjs/plugin/relativeTime";
 import utc from "dayjs/plugin/utc";
 
@@ -18,7 +18,7 @@ export interface TaskItemProps {
   id: number;
   name: string;
   environment: string;
-  date: string;
+  date: Date;
   duration: number;
   calories: number | null;
   local: string | null;
@@ -34,7 +34,7 @@ export interface TaskListProps {
   edit?: boolean;
 }
 
-function tempoDecorrido(data: string) {
+function tempoDecorrido(data: Date) {
   if (!data) return "Data indisponível";
   const nowUTC = dayjs().utc();
   const dateUTC = dayjs(data).utc();
@@ -42,7 +42,7 @@ function tempoDecorrido(data: string) {
   return dateUTC.from(nowUTC);
 }
 
-export default function TaskItem({
+function TaskItem({
   task,
   openModalEdit,
   edit = true,
@@ -114,3 +114,5 @@ export default function TaskItem({
     </View>
   );
 }
+
+export { TaskItem };

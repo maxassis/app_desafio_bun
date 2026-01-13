@@ -7,7 +7,7 @@ interface PermissionModalProps {
   onDecline: () => void
 }
 
-export const PermissionModal: React.FC<PermissionModalProps> = ({
+const PermissionModal: React.FC<PermissionModalProps> = ({
   visible,
   onAccept,
   onDecline,
@@ -27,7 +27,7 @@ export const PermissionModal: React.FC<PermissionModalProps> = ({
           </Text>
 
           <View style={styles.permissionItem}>
-            <Image source={require('../assets/map-pin-black.svg')} style={styles.icon} />
+            <Image source={require('../../assets/map-pin-black.svg')} style={styles.icon} />
             <View style={{ flex: 1 }}>
               <Text style={styles.permissionTitle}>Ver sua atividade no mapa</Text>
               <Text style={styles.permissionDescription}>
@@ -37,7 +37,7 @@ export const PermissionModal: React.FC<PermissionModalProps> = ({
           </View>
 
           <View style={styles.permissionItem}>
-            <Image source={require('../assets/track.svg')} style={styles.icon} />
+            <Image source={require('../../assets/track.svg')} style={styles.icon} />
             <View style={{ flex: 1 }}>
               <Text style={styles.permissionTitle}>Grave a atividade com a tela bloqueada</Text>
               <Text style={styles.permissionDescription}>
@@ -71,6 +71,8 @@ export const PermissionModal: React.FC<PermissionModalProps> = ({
     </Modal>
   )
 }
+
+export { PermissionModal }
 
 const styles = StyleSheet.create({
   centeredView: {

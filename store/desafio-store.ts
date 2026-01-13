@@ -14,47 +14,39 @@ interface Task {
   gpsTask: boolean;
 }
 
-interface DesafioStore {
-  inscriptionId: number | null;
-  desafioName: string | null;
-  taskData: Task | null;
-  distanceTotal: number;
-  progress: number;
-  desafioId: string | null;
-  setDesafioData: (participationId: number, desafioName: string, progress: number, distanceTotal: number, desafioId: string) => void;
-  setTaskData: (taskData: Task) => void;
-  clearDesafioData: () => void;
-  clearTaskData: () => void;
-  setMapData: (
-    desafioId: string,
-    inscriptionId: number,
-  ) => void;
+// Você pode ajustar essa interface para que corresponda à estrutura real do seu objeto "desafio"
+interface Desafio {
+  id: string;
+  name: string;
+  description: string;
+  distance: string;
+  isRegistered: boolean;
+  completed: boolean;
+  completedAt: null | Date;
+  progressPercentage: number;
+  totalDistanceCompleted: number;
+  photo: string;
+  tasksCount: number;
   totalDuration: number;
-  taskCount: number; 
-  progressPercentage: number,
+  inscriptionId: number;
 }
 
-const useDesafioStore = create<DesafioStore>((set) => ({
-  inscriptionId: null,
-  desafioName: null,
+interface DesafioStore {
+  taskData: Task | null
+  desafioSelecionado: Desafio | null // Para passar o desafio para a tela de criação de task
+  setTaskData: (taskData: Task) => void
+  clearTaskData: () => void
+  setDesafioSelecionado: (desafio: Desafio | null) => void
+  clearDesafioSelecionado: () => void
+}
+
+const useDesafioStore = create<DesafioStore>(set => ({
   taskData: null,
-  distance: 0,
-  distanceTotal: 0,
-  progress: 0,
-  desafioId: null,
-  totalDuration: 0,
-  taskCount: 0,
-  progressPercentage: 0,
-  setMapData: (desafioId, inscriptionId) =>
-    set({ desafioId, inscriptionId }),
-  setDesafioData: (inscriptionId, desafioName, progress ,distanceTotal, desafioId ) => 
-    set({ inscriptionId, desafioName, progress ,distanceTotal, desafioId }),
-  setTaskData: (taskData) =>
-    set({ taskData }),
-  clearDesafioData: () => 
-    set({ inscriptionId: null, desafioName: null }),
-  clearTaskData: () =>
-    set({ taskData: null })
-}));
+  desafioSelecionado: null,
+  setTaskData: taskData => set({ taskData }),
+  setDesafioSelecionado: desafio => set({ desafioSelecionado: desafio }),
+  clearDesafioSelecionado: () => set({ desafioSelecionado: null }),
+  clearTaskData: () => set({ taskData: null }),
+}))
 
 export default useDesafioStore; 

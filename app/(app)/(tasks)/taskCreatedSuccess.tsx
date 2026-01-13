@@ -2,7 +2,7 @@ import { View, Text, SafeAreaView, TouchableOpacity, Alert } from "react-native"
 import useDesafioStore from "../../../store/desafio-store";
 import { Image } from "expo-image";
 import { useQuery } from "@tanstack/react-query";
-import { fetchAllDesafios } from "@/utils/api-service";
+import { fetchAllDesafios } from "@/services/desafios-service";
 import * as Progress from "react-native-progress";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
@@ -10,21 +10,35 @@ import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 
 export default function TaskCreatedSuccess() {
-  const { desafioId } = useDesafioStore();
+  const { desafioSelecionado } = useDesafioStore();
   const viewShotRef = useRef(null);
   const [isSharing, setIsSharing] = useState(false);
 
+  console.log("taskCreatedSuccess: desafioSelecionado:", desafioSelecionado);
+
   const {
     data: allDesafios,
+    isLoading: isLoadingAllDesafios,
+    isError: isErrorAllDesafios,
+    error: errorAllDesafios,
   } = useQuery({
     queryKey: ["getAllDesafios"],
     queryFn: fetchAllDesafios,
     staleTime: 5 * 60 * 1000,
   });
 
+  console.log("taskCreatedSuccess: allDesafios:", allDesafios);
+  if (isErrorAllDesafios) {
+    console.error("taskCreatedSuccess: Erro ao buscar allDesafios:", errorAllDesafios);
+  }
+
+  console.log(desafioSelecionado)
+
   const currentDesafio = allDesafios?.find(
-    (desafio) => desafio.id === desafioId
+    (desafio) => desafio.id === desafioSelecionado?.id
   );
+
+  console.log("taskCreatedSuccess: currentDesafio:", currentDesafio);
 
   const totalDistance = currentDesafio?.distance;
   const userProgress = currentDesafio?.progressPercentage;

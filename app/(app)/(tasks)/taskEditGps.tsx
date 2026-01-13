@@ -13,7 +13,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
-import { useLocalSearchParams } from "expo-router";
+
 import dayjs from "dayjs";
 import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,8 +25,7 @@ export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
   const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
-  const { desafioId } = useLocalSearchParams();
-  const { taskData } = useDesafioStore();
+  const { taskData, desafioSelecionado } = useDesafioStore();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -92,8 +91,8 @@ export default function CreateTaskGps() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
-      queryClient.invalidateQueries({ queryKey: ["routeData", desafioId] });
-      queryClient.invalidateQueries({ queryKey: ["rankData", desafioId] });
+      queryClient.invalidateQueries({ queryKey: ["routeData", desafioSelecionado?.id] });
+      queryClient.invalidateQueries({ queryKey: ["rankData", desafioSelecionado?.id] });
 
       router.back();
     },

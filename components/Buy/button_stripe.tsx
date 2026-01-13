@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchUserData } from "@/utils/api-service";
+import { fetchUserData } from "@/services/users-service";
 import { useRouter } from "expo-router";
 
-const AceitarDesafioButton = ({
+const AcceptDesafioButton = ({
   desafioId,
   price,
 }: {
@@ -92,4 +92,4 @@ const AceitarDesafioButton = ({
   );
 };
 
-export default AceitarDesafioButton;
+export  { AcceptDesafioButton }

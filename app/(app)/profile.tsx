@@ -9,15 +9,16 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import { getProfile, fetchAllDesafios } from "@/utils/api-service";
+import { fetchAllDesafios } from "@/services/desafios-service";
+import { getProfile } from "@/services/users-service";
 import { Image } from "expo-image";
 import * as Progress from "react-native-progress";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
 import Rigth from "../../assets/gray-right.svg";
 import React, { useState } from "react";
-import TaskItem from "@/components/taskItem";
-import TaskItemSkeleton from "@/components/taskItemSkeleton";
+// import TaskItem from "@/components/taskItem";
+// import TaskItemSkeleton from "@/components";
 import Carousel from "react-native-reanimated-carousel";
 import PinIcon from "../../assets/map-pin-black.svg";
 import useDesafioStore from "@/store/desafio-store";
@@ -27,8 +28,9 @@ import {
   UserInfoSkeleton,
   StatsSkeleton,
   SectionTitleSkeleton,
-} from "@/components/skeletons";
+} from "@/components/Skeletons/skeletons";
 import { SystemBars } from "react-native-edge-to-edge";
+import { TaskItem, TaskItemSkeleton } from "@/components";
 
 export default function Profile() {
   const width = Dimensions.get("window").width;

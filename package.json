@@ -1,6 +1,5 @@
 {
   "name": "meu-desafio-2",
-  
   "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",
@@ -28,6 +27,7 @@
     "@react-navigation/native": "^7.0.0",
     "@stripe/stripe-react-native": "0.45.0",
     "@tanstack/react-query": "^5.56.2",
+    "axios": "^1.13.2",
     "class-variance-authority": "^0.7.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
