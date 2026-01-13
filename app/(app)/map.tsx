@@ -38,7 +38,8 @@ import Octicons from '@expo/vector-icons/Octicons'
 
 import Left from '../../assets/arrow-left.svg'
 
-import { fetchRouteData, fetchUserData } from '@/utils/api-service'
+import { fetchRouteData } from '@/services/desafios-service'
+import { fetchUserData } from '@/services/users-service'
 import useDesafioStore from '@/store/desafio-store'
 import {
   calculateUserDistance,

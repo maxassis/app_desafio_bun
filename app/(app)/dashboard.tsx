@@ -16,7 +16,8 @@ import { useQuery } from "@tanstack/react-query";
 import Logo from "../../assets/logo-white.svg";
 import Settings from "../../assets/settings.svg";
 import { useRouter } from "expo-router";
-import { fetchUserData, fetchAllDesafios } from "@/utils/api-service";
+import { fetchAllDesafios } from "@/services/desafios-service";
+import { fetchUserData } from "@/services/users-service";
 import { 
   AvatarSkeleton, 
   UserInfoSkeleton, 

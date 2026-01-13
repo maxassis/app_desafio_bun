@@ -29,7 +29,7 @@ import Play from '../../assets/play.svg'
 import useTracker from '../../hooks/useTracker'
 import useDesafioStore from '../../store/desafio-store'
 
-import { fetchAllDesafios } from '../../utils/api-service'
+import { fetchAllDesafios } from '../../services/desafios-service'
 
 const fundoCinza = require('../../assets/fundo-cinza.png')
 const fundoPreto = require('../../assets/fundo-preto.png')

@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import { getProfile, fetchAllDesafios } from "@/utils/api-service";
+import { fetchAllDesafios } from "@/services/desafios-service";
+import { getProfile } from "@/services/users-service";
 import { Image } from "expo-image";
 import * as Progress from "react-native-progress";
 import dayjs from "dayjs";

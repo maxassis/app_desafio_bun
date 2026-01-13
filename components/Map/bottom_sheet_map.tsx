@@ -4,12 +4,11 @@ import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import * as Progress from 'react-native-progress'
 import { LinearGradient } from 'expo-linear-gradient'
 import { UserTime } from './user_time'
-import {
-  fetchAllDesafios,
-  fetchRankData,
-
-} from '@/utils/api-service'
-import type { RankData, RouteResponse, UserData } from '@/utils/api-service'
+import { fetchAllDesafios } from '@/services/desafios-service'
+import { fetchRankData } from '@/services/users-service'
+import type { RouteResponse } from '@/@types/desafio-get-desafio'
+import type { RankData } from '@/@types/users-get-ranking'
+import type { UserData } from '@/@types/users-get-user-data'
 import Winner from '../../assets/winner.svg'
 import { convertSecondsToTimeString } from '@/utils'
 import useDesafioStore from '@/store/desafio-store'

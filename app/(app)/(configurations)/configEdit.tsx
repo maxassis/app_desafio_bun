@@ -19,7 +19,7 @@ import tokenExists from "../../../store/auth-store";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cva } from "class-variance-authority";
-import { fetchUserData } from "@/utils/api-service";
+import { fetchUserData } from "@/services/users-service";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
