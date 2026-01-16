@@ -19,56 +19,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TaskItem, TaskItemSkeleton } from "@/components";
-
-export type TasksData = Data[];
-export interface Data {
-  id: number;
-  name: string;
-  environment: string;
-  date: Date;
-  duration: number;
-  calories: number | null;
-  local: null | string;
-  distanceKm: string;
-  inscriptionId: number;
-  usersId: string;
-  gpsTask: boolean;
-}
-
-const fetchTasks = async (
-  inscriptionId: number,
-  token: string
-): Promise<TasksData> => {
-  const res = await fetch(
-    `http://10.0.2.2:3000/tasks/get-tasks/${inscriptionId}`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  return res.json();
-};
-
-const deleteTaskApi = async (id: number, token: string) => {
-  const res = await fetch(
-    `http://10.0.2.2:3000/tasks/delete-task/${id}`,
-    {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
-  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-  return res.json();
-};
+import type { TasksGetTask } from "../../../@types/tasks-get-tasks";
+import { deleteTask, fetchTasks } from "../../../services/tasks-service";
 
 export default function TaskList() {
   const { desafioSelecionado, setTaskData } =
     useDesafioStore();
 
   const token = tokenExists((state) => state.token);
-  const [task, setTask] = useState<Data>();
+  const [task, setTask] = useState<TasksGetTask>();
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetEditRef = useRef<BottomSheet>(null);
@@ -86,12 +45,12 @@ export default function TaskList() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["tasks", desafioSelecionado?.inscriptionId],
-    queryFn: () => fetchTasks(desafioSelecionado?.inscriptionId as number, token!),
+    queryFn: () => fetchTasks(desafioSelecionado?.inscriptionId as number),
     enabled: !!desafioSelecionado?.inscriptionId && !!token,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteTaskApi(id, token!),
+    mutationFn: (id: number) => deleteTask(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks", desafioSelecionado?.inscriptionId] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
@@ -139,7 +98,7 @@ export default function TaskList() {
     return () => backHandler.remove();
   }, [isBottomSheetOpen, isEditSheetOpen, sheetContent]);
 
-  const handleEdit = (taskData: Data) => {
+  const handleEdit = (taskData: TasksGetTask) => {
     setTask(taskData);
     bottomSheetEditRef.current?.expand();
   };

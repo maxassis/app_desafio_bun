@@ -1,12 +1,8 @@
-export interface TasksGetTasksParams {
-  inscriptionId: number;
-}
-
-export interface TasksGetTasksItem {
+export interface TasksGetTask {
   id: number;
   name: string;
   environment: string;
-  date: string;
+  date: string | Date;
   duration: number;
   calories: number | null;
   local: string | null;
@@ -16,4 +12,4 @@ export interface TasksGetTasksItem {
   gpsTask: boolean;
 }
 
-export type TasksGetTasksResponse = TasksGetTasksItem[];
+export type TasksGetResponse = TasksGetTask[];
