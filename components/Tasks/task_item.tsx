@@ -18,7 +18,7 @@ export interface TaskItemProps {
   id: number;
   name: string;
   environment: string;
-  date: Date;
+  date: string | Date;
   duration: number;
   calories: number | null;
   local: string | null;
@@ -34,7 +34,7 @@ export interface TaskListProps {
   edit?: boolean;
 }
 
-function tempoDecorrido(data: Date) {
+function tempoDecorrido(data: string | Date) {
   if (!data) return "Data indisponível";
   const nowUTC = dayjs().utc();
   const dateUTC = dayjs(data).utc();

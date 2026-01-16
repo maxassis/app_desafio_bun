@@ -36,7 +36,7 @@ export default function Profile() {
   const width = Dimensions.get("window").width;
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { setMapData, setDesafioData } = useDesafioStore();
+  const { setDesafioSelecionado } = useDesafioStore();
   const { userId } = useLocalSearchParams<{ userId: string }>();
 
   const { data } = useQuery({
@@ -60,14 +60,7 @@ export default function Profile() {
 
     if (desafio) {
       if (desafio.isRegistered) {
-        setMapData(desafio.id, desafio.inscriptionId);
-        setDesafioData(
-          desafio.inscriptionId,
-          desafio.name,
-          desafio.progressPercentage,
-          +desafio.distance,
-          desafio.id
-        );
+        setDesafioSelecionado(desafio);
         router.push({ pathname: "/map" });
       } else {
         router.push({ pathname: "/buy", params: { desafioId: id } });

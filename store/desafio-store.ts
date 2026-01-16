@@ -4,7 +4,7 @@ interface Task {
   id: number;
   name: string;
   environment: string;
-  date: null | Date;
+  date: null | string | Date;
   duration: number;
   calories: number | null;
   local: null | string;

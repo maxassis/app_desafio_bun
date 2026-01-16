@@ -351,6 +351,11 @@ export default function Map2() {
     router.push('/dashboard')
   }, [])
 
+  const formatKm = useCallback((value: number) => {
+    const rounded = value.toFixed(3)
+    return rounded.replace(/\.?0+$/, '')
+  }, [])
+
   // Render user card
   const renderUserCard = useCallback(
     ({ item }: { item: UserParticipation }) => {
@@ -399,7 +404,9 @@ export default function Map2() {
 
           <View className="flex-row w-1/3 h-[37px] items-center justify-between mt-3">
             <View className="w-full border-l-2 border-[#D1D5DA] pl-2">
-              <Text className="font-inter-bold">{item.totalDistanceKm}</Text>
+              <Text className="font-inter-bold">
+                {formatKm(item.totalDistanceKm)}
+              </Text>
               <Text className="text-[10px] text-bondis-gray-secondary">km</Text>
             </View>
             <View className="w-full border-l-2 border-[#D1D5DA] pl-2">

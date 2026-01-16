@@ -19,7 +19,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TaskItem, TaskItemSkeleton } from "@/components";
-import type { TasksGetTask } from "../../../@types/tasks-get-tasks";
+import type { TaskItemProps } from "@/components";
 import { deleteTask, fetchTasks } from "../../../services/tasks-service";
 
 export default function TaskList() {
@@ -27,7 +27,7 @@ export default function TaskList() {
     useDesafioStore();
 
   const token = tokenExists((state) => state.token);
-  const [task, setTask] = useState<TasksGetTask>();
+  const [task, setTask] = useState<TaskItemProps>();
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetEditRef = useRef<BottomSheet>(null);
@@ -43,7 +43,7 @@ export default function TaskList() {
   const snapPoints = useMemo(() => ["30%"], []);
   const snapPointsEdit = useMemo(() => ["30%"], []);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<TaskItemProps[]>({
     queryKey: ["tasks", desafioSelecionado?.inscriptionId],
     queryFn: () => fetchTasks(desafioSelecionado?.inscriptionId as number),
     enabled: !!desafioSelecionado?.inscriptionId && !!token,
@@ -98,7 +98,7 @@ export default function TaskList() {
     return () => backHandler.remove();
   }, [isBottomSheetOpen, isEditSheetOpen, sheetContent]);
 
-  const handleEdit = (taskData: TasksGetTask) => {
+  const handleEdit = (taskData: TaskItemProps) => {
     setTask(taskData);
     bottomSheetEditRef.current?.expand();
   };

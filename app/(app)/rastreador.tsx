@@ -58,7 +58,9 @@ export default function Rastreador() {
   // eslint-disable-next-line unused-imports/no-unused-vars
   const [splits, setSplits] = useState<number[]>([])
 
-  const setDesafioData = useDesafioStore(state => state.setDesafioData)
+  const setDesafioSelecionado = useDesafioStore(
+    state => state.setDesafioSelecionado,
+  )
 
   const scale = useSharedValue(1)
   const opacity = useSharedValue(1)
@@ -116,7 +118,7 @@ export default function Rastreador() {
 
     if (incomplete.length === 1 && incomplete[0].isRegistered) {
       const desafio = incomplete[0]
-      setDesafioData(desafio.inscriptionId, desafio.name, 0, 0, desafio.id)
+      setDesafioSelecionado(desafio)
 
       router.push('/createTaskGps')
     }

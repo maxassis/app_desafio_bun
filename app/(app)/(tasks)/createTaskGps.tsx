@@ -41,6 +41,7 @@ interface DadosTarefaGps {
 interface CreateTaskApiResponse {
   message: string;
   task: DadosTarefaGps;
+  challengeCompleted?: boolean;
 }
 
 export default function CreateTaskGps() {
@@ -86,8 +87,14 @@ export default function CreateTaskGps() {
     return dataFormatada;
   }
 
-  const criarTarefaMutation = useMutation<CreateTaskApiResponse, Error, CheckCompletion>({
-        mutationFn: async (dadosTarefa: CheckCompletion): Promise<CreateTaskApiResponse> => {
+  const criarTarefaMutation = useMutation<
+    CreateTaskApiResponse,
+    Error,
+    DadosTarefaGps
+  >({
+    mutationFn: async (
+      dadosTarefa: DadosTarefaGps
+    ): Promise<CreateTaskApiResponse> => {
       const response = await fetch(
         "https://bondis-app-backend.onrender.com/tasks/create",
         {
@@ -105,9 +112,8 @@ export default function CreateTaskGps() {
       }
       return response.json();
     },
-    onSuccess: (data: CreateTaskApiResponse, variables: CheckCompletion) => {
-      console.log("Variáveis recebidas no onSuccess:", variables);
-      const metaAtingida = variables.willCompleteChallenge;
+    onSuccess: (data: CreateTaskApiResponse) => {
+      const metaAtingida = data.challengeCompleted;
 
       // limparInputs();
       setIsLoading(false);
