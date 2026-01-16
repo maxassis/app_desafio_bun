@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { router } from "expo-router";
 import {
   ScrollView,
@@ -7,12 +7,8 @@ import {
   Text,
   TextInput,
   Alert,
-  ActivityIndicator,
-  Pressable,
-  BackHandler,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
 import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
@@ -46,7 +42,6 @@ interface CreateTaskApiResponse {
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
-  const [isLoading, setIsLoading] = useState(false); 
   const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
   // const { inscriptionId, desafioId } = useLocalSearchParams();
@@ -87,7 +82,7 @@ export default function CreateTaskGps() {
     return dataFormatada;
   }
 
-  const criarTarefaMutation = useMutation<
+  const { mutate, isPending } = useMutation<
     CreateTaskApiResponse,
     Error,
     DadosTarefaGps
@@ -116,7 +111,6 @@ export default function CreateTaskGps() {
       const metaAtingida = data.challengeCompleted;
 
       // limparInputs();
-      setIsLoading(false);
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["routeData", desafioSelecionado?.id] });
@@ -130,7 +124,6 @@ export default function CreateTaskGps() {
     },
     onError: (erro) => {
       console.error("Erro ao criar tarefa:", erro);
-      setIsLoading(false);
     },
   });
 
@@ -143,6 +136,7 @@ export default function CreateTaskGps() {
   }
 
   function criarTarefa() {
+    if (isPending) return;
     const distanceFormated = (d: number): number => {
       const num = d.toFixed(3);
       return +num;
@@ -160,7 +154,7 @@ export default function CreateTaskGps() {
       local: cityStore ?? "",
     };
 
-    criarTarefaMutation.mutate(dadosTarefa);
+    mutate(dadosTarefa);
   }
 
   
@@ -248,24 +242,14 @@ export default function CreateTaskGps() {
           </Text>
         </TouchableOpacity>
 
-        <Pressable
-          onPress={() => criarTarefa()}
-          className={botaoDesabilitado({
-            intent: nomeAtividade.length === 0 || isLoading ? "disabled" : null,
-          })}
-          disabled={nomeAtividade.length === 0 || isLoading}
-        >
-          {isLoading ? (
-            <View className="flex-row items-center gap-x-2">
-              <Text className="font-inter-bold text-base">Carregando...</Text>
-              <ActivityIndicator color="#000000" />
-            </View>
-          ) : (
-            <Text className="font-inter-bold text-base">
-              Cadastrar atividade
-            </Text>
-          )}
-        </Pressable>
+        <View className="mx-5 mb-[32px]">
+          <Button
+            title="Cadastrar atividade"
+            onPress={() => criarTarefa()}
+            isLoading={isPending}
+            disabled={nomeAtividade.length === 0 || isPending}
+          />
+        </View>
       </ScrollView>
 
       <BottomSheet
@@ -314,14 +298,3 @@ export default function CreateTaskGps() {
     </View>
   );
 }
-
-const botaoDesabilitado = cva(
-  "h-[52px] flex-row bg-bondis-green mt-8 mb-[32px] rounded-full justify-center items-center mx-5",
-  {
-    variants: {
-      intent: {
-        disabled: "opacity-50 pointer-events-none",
-      },
-    },
-  }
-);
