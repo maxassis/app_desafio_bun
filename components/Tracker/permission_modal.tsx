@@ -21,17 +21,17 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Ative os Serviços de Localização</Text>
+          <Text style={styles.modalTitle}>Ative a localização do seu dispositivo</Text>
           <Text style={styles.modalText}>
-            Permita que o app acesse sua localização para que você possa registrar suas atividades, ver seu percurso no mapa e analisar suas estatísticas.
+            Os serviços de localização estão desativados. Ligue o GPS do dispositivo para que possamos iniciar o rastreamento da sua atividade.
           </Text>
 
           <View style={styles.permissionItem}>
             <Image source={require('../../assets/map-pin-black.svg')} style={styles.icon} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.permissionTitle}>Ver sua atividade no mapa</Text>
+              <Text style={styles.permissionTitle}>Abra as configurações</Text>
               <Text style={styles.permissionDescription}>
-                Requer acesso à localização enquanto o app está aberto.
+                Ative os serviços de localização do seu celular.
               </Text>
             </View>
           </View>
@@ -39,25 +39,11 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
           <View style={styles.permissionItem}>
             <Image source={require('../../assets/track.svg')} style={styles.icon} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.permissionTitle}>Grave a atividade com a tela bloqueada</Text>
+              <Text style={styles.permissionTitle}>Volte ao app</Text>
               <Text style={styles.permissionDescription}>
-                Requer acesso à localização mesmo quando o app está em segundo plano.
+                Assim que o GPS estiver ligado, continuamos a configuração.
               </Text>
             </View>
-          </View>
-
-          <View style={styles.instructionsContainer}>
-            <Text style={styles.instructionsText}>
-              Para garantir que tudo funcione, o sistema operacional pedirá que você aprove duas permissões. Por favor, escolha:
-            </Text>
-            <Text style={styles.instructionsStep}>
-              1. Localização:
-              <Text style={{ fontWeight: 'bold' }}>'Permitir durante o uso do aplicativo'</Text>
-            </Text>
-            <Text style={styles.instructionsStep}>
-              2. Localização em segundo plano:
-              <Text style={{ fontWeight: 'bold' }}>'Permitir o tempo todo'</Text>
-            </Text>
           </View>
 
           <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>

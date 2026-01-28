@@ -77,7 +77,8 @@
     "react-native-view-shot": "4.0.3",
     "react-native-web": "^0.20.0",
     "react-native-wheely": "^0.6.0",
-    "zustand": "^4.5.7"
+    "zustand": "^4.5.7",
+    "expo-intent-launcher": "~12.1.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.2.1",

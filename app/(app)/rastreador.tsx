@@ -1,10 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
+import * as Location from 'expo-location'
+import * as IntentLauncher from 'expo-intent-launcher'
 import { router } from 'expo-router'
 import LottieView from 'lottie-react-native'
 import { useEffect, useRef, useState } from 'react'
 import {
   Alert,
+  AppState,
   ImageBackground,
+  Linking,
+  Platform,
   SafeAreaView,
   Text,
   TouchableOpacity,
@@ -49,7 +54,8 @@ export default function Rastreador() {
   const lottieRef = useRef<any>(null)
   const insets = useSafeAreaInsets()
 
-  const [modalVisible, setModalVisible] = useState(true)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [servicesEnabled, setServicesEnabled] = useState<boolean | null>(null)
   const [permissionsGranted, setPermissionsGranted] = useState(false)
   const [showCountdown, setShowCountdown] = useState(false)
   const [countdownNumber, setCountdownNumber] = useState(3)
@@ -64,6 +70,7 @@ export default function Rastreador() {
 
   const scale = useSharedValue(1)
   const opacity = useSharedValue(1)
+  const permissionsChecked = useRef(false)
 
   const isPaused = status === 'paused'
 
@@ -85,14 +92,24 @@ export default function Rastreador() {
   }
 
   const handleAccept = async () => {
-    const granted = await requestPermissions()
-    if (granted) {
-      setPermissionsGranted(true)
-      setModalVisible(false)
-      setShowCountdown(true)
-    }
-    else {
-      handleDecline()
+    if (servicesEnabled === false) {
+      if (Platform.OS === 'android') {
+        try {
+          await IntentLauncher.startActivityAsync(
+            IntentLauncher.ActivityAction.LOCATION_SOURCE_SETTINGS,
+          )
+        }
+        catch (error) {
+          await Linking.openSettings()
+          Alert.alert(
+            'Ative a localização',
+            'Não foi possível abrir a tela de localização. Ative o GPS nas configurações do app.',
+          )
+        }
+      }
+      else {
+        await Linking.openSettings()
+      }
     }
   }
 
@@ -163,6 +180,44 @@ export default function Rastreador() {
   }
 
   useEffect(() => {
+    let isMounted = true
+
+    const checkLocationServices = async () => {
+      const enabled = await Location.hasServicesEnabledAsync()
+      if (!isMounted)
+        return
+
+      setServicesEnabled(enabled)
+      setModalVisible(!enabled)
+
+      if (enabled && !permissionsChecked.current) {
+        permissionsChecked.current = true
+        const granted = await requestPermissions()
+        if (granted) {
+          setPermissionsGranted(true)
+          setShowCountdown(true)
+        }
+        else {
+          handleDecline()
+        }
+      }
+    }
+
+    checkLocationServices()
+
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        checkLocationServices()
+      }
+    })
+
+    return () => {
+      isMounted = false
+      subscription.remove()
+    }
+  }, [])
+
+  useEffect(() => {
     if (showCountdown && permissionsGranted) {
       scale.value = 1
       opacity.value = 1
@@ -216,6 +271,10 @@ export default function Rastreador() {
         onDecline={handleDecline}
       />
     )
+  }
+
+  if (!permissionsGranted) {
+    return <SafeAreaView className="flex-1 bg-black" />
   }
 
   return showCountdown ? (
