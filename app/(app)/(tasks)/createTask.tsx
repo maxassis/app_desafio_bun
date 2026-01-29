@@ -18,7 +18,6 @@ import Indoor from "../../../assets/Indoor.svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Down from "../../../assets/down.svg";
-import tokenExists from "../../../store/auth-store";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { ptBR } from "../../../utils/localeCalendar";
 import dayjs from "dayjs";
@@ -30,6 +29,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
 import { TimePickerModal, TimePickerModalRef } from "@/components";
+import type { TasksCreateRequest, TasksCreateResponse } from "../../../@types/tasks-create";
+import { createTask } from "../../../services/tasks-service";
 
 LocaleConfig.locales["pt-br"] = ptBR;
 LocaleConfig.defaultLocale = "pt-br";
@@ -37,22 +38,6 @@ LocaleConfig.defaultLocale = "pt-br";
 interface Distancia {
   kilometers: number;
   meters: number;
-}
-
-interface DadosTarefa {
-  name: string;
-  distance: number;
-  environment: string;
-  calories: number;
-  inscriptionId: number;
-  date: string | null;
-  duration: number;
-  local: string | null;
-}
-
-interface CheckCompletion {
-  inscriptionId: number;
-  distance: number;
 }
 
 export default function TaskCreate() {
@@ -79,7 +64,6 @@ export default function TaskCreate() {
     minutes: 0,
     seconds: 0,
   });
-  const token = tokenExists((state) => state.token);
   const { desafioSelecionado, setDesafioSelecionado } =
     useDesafioStore();
   const childRef = useRef<KilometerMeterPickerModalRef>(null);
@@ -89,22 +73,9 @@ export default function TaskCreate() {
 
   
 
-  const criarTarefaMutation = useMutation({
-    mutationFn: async (dadosTarefa: CheckCompletion) => {
-      const response = await fetch("https://bondis-app-backend.onrender.com/tasks/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(dadosTarefa),
-      });
-      if (!response.ok) {
-        const dadosErro = await response.json();
-        throw new Error(dadosErro.message || "Falha ao criar tarefa");
-      }
-      return response.json();
-    },
+  const criarTarefaMutation = useMutation<TasksCreateResponse, Error, TasksCreateRequest>({
+    mutationFn: async (dadosTarefa: TasksCreateRequest) =>
+      createTask(dadosTarefa),
     onSuccess: (data) => {
       limparInputs();
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
@@ -152,7 +123,8 @@ export default function TaskCreate() {
   
 
   function criarTarefa() {
-    const distanciaSelecionada = +`${distancia.kilometers}.${distancia.meters}`;
+    const distanciaSelecionada =
+      distancia.kilometers + distancia.meters / 1000;
   
     // Pega a hora atual (para usar tanto no caso do dia atual quanto de um dia específico)
     const agora = dayjs();
@@ -163,7 +135,7 @@ export default function TaskCreate() {
       ? agora
       : dayjs(`${dia.dateString} ${agora.format('HH:mm:ss')}`); // adiciona a hora atual à data
   
-    const dadosTarefa: DadosTarefa = {
+    const dadosTarefa: TasksCreateRequest = {
       name: nomeAtividade,
       distance: distanciaSelecionada,
       environment: ambiente,

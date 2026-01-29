@@ -15,15 +15,19 @@ import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
 
 import dayjs from "dayjs";
-import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
 import Left from "../../../assets/Icon-left.svg";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type {
+  TasksUpdateTaskParams,
+  TasksUpdateTaskRequest,
+  TasksUpdateTaskResponse,
+} from "../../../@types/tasks-update-task";
+import { updateTask } from "../../../services/tasks-service";
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
-  const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
   const { taskData, desafioSelecionado } = useDesafioStore();
   const insets = useSafeAreaInsets();
@@ -56,38 +60,12 @@ export default function CreateTaskGps() {
     )}:${String(seconds).padStart(2, "0")}`;
   }
 
-  const mutation = useMutation({
-    mutationFn: async () => {
-      console.log("Payload enviado:", {
-        name: nomeAtividade,
-        environment: taskData?.environment,
-        distanceKm: taskData ? +taskData.distanceKm : 0,
-        date: taskData?.date,
-        duration: taskData?.duration,
-      });
-
-      const response = await fetch(
-        `https://bondis-app-backend.onrender.com/tasks/update-task/${taskData?.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: nomeAtividade,
-            environment: taskData?.environment,
-            distanceKm: taskData ? +taskData.distanceKm : 0,
-            date: taskData?.date,
-            duration: taskData?.duration ? +taskData.duration : 0,
-          }),
-        }
-      );
-
-      const data = await response.json();
-      console.log(data);
-      return data;
-    },
+  const mutation = useMutation<
+    TasksUpdateTaskResponse,
+    Error,
+    { params: TasksUpdateTaskParams; payload: TasksUpdateTaskRequest }
+  >({
+    mutationFn: async ({ params, payload }) => updateTask(params, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
@@ -102,12 +80,25 @@ export default function CreateTaskGps() {
   });
 
   function editRequest() {
-    console.log("edit");
     if (nomeAtividade.trim().length === 0) {
       Alert.alert("Erro", "O nome da atividade é obrigatório.");
       return;
     }
-    mutation.mutate();
+    if (!taskData) return;
+
+    const payload: TasksUpdateTaskRequest = {
+      name: nomeAtividade,
+      environment: taskData.environment,
+      distanceKm: +taskData.distanceKm,
+      date: taskData.date as string,
+      duration: taskData.duration ? +taskData.duration : 0,
+      local: taskData.local ?? null,
+    };
+
+    mutation.mutate({
+      params: { id: taskData.id },
+      payload,
+    });
   }
 
   return (

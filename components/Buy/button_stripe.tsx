@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserData } from "@/services/users-service";
-import { useRouter } from "expo-router";
+import { createPaymentIntent } from "@/services/payments-service";
 
 const AcceptDesafioButton = ({
   desafioId,
@@ -14,7 +14,6 @@ const AcceptDesafioButton = ({
 }) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const queryClient = useQueryClient();
-  const router = useRouter();
   const [showBtn, setShowBtn] = useState(false);
 
   const valor = price;
@@ -29,20 +28,12 @@ const AcceptDesafioButton = ({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/payments/payment-intent",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: valorCentavos,
-            currency: "brl",
-            userId: userData?.usersId,
-            desafioId: desafioId,
-          }),
-        }
-      );
-      const data = await response.json();
+      const data = await createPaymentIntent({
+        amount: valorCentavos,
+        currency: "brl",
+        userId: userData?.usersId,
+        desafioId: desafioId,
+      });
       if (!data.clientSecret) {
         throw new Error("Resposta inválida do servidor");
       }

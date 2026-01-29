@@ -8,6 +8,7 @@ import { SystemBars } from "react-native-edge-to-edge";
 import Toast from "react-native-toast-message";
 import { Button } from "../../../components/button";
 import { useMutation } from "@tanstack/react-query";
+import { checkEmail } from "../../../services/auth-service";
 
 export default function Recovery() {
   const router = useRouter();
@@ -20,30 +21,20 @@ export default function Recovery() {
   } = useForm<{ email: string }>();
 
   const checkEmailMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/check-email",
-        {
-          method: "POST",
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
-      return response;
-    },
+    mutationFn: async (email: string) => checkEmail({ email }),
   });
 
   const onSubmit = async ({ email }: { email: string }) => {
     try {
-      const response = await checkEmailMutation.mutateAsync(email);
+      const status = await checkEmailMutation.mutateAsync(email);
 
-      if (response.status === 409) {
+      if (status === 409) {
         // Email EXISTS, proceed with recovery
         router.push({
           pathname: "/recoveryCode",
           params: { email },
         });
-      } else if (response.status === 204) {
+      } else if (status === 204) {
         // Email does NOT exist, show error toast
         Toast.show({
           type: "error",

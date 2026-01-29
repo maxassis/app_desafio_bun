@@ -6,43 +6,22 @@ import {
   View,
   Text,
   TextInput,
-  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Outdoor from "../../../assets/Outdoor.svg";
 import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
-import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
 import useDesafioStore from "../../../store/desafio-store";
-
-interface DadosTarefaGps {
-  name: string;
-  distance: number;
-  environment: string;
-  calories: number;
-  inscriptionId: number;
-  date: string | null;
-  duration: number;
-  gpsTask: boolean;
-  local: string | null;
-}
-
-
-
-interface CreateTaskApiResponse {
-  message: string;
-  task: DadosTarefaGps;
-  challengeCompleted?: boolean;
-}
+import type { TasksCreateRequest, TasksCreateResponse } from "../../../@types/tasks-create";
+import { createTask } from "../../../services/tasks-service";
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
-  const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
   // const { inscriptionId, desafioId } = useLocalSearchParams();
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
@@ -83,31 +62,13 @@ export default function CreateTaskGps() {
   }
 
   const { mutate, isPending } = useMutation<
-    CreateTaskApiResponse,
+    TasksCreateResponse,
     Error,
-    DadosTarefaGps
+    TasksCreateRequest
   >({
-    mutationFn: async (
-      dadosTarefa: DadosTarefaGps
-    ): Promise<CreateTaskApiResponse> => {
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/tasks/create",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(dadosTarefa),
-        }
-      );
-      if (!response.ok) {
-        const dadosErro = await response.json();
-        throw new Error(dadosErro.message || "Falha ao criar tarefa");
-      }
-      return response.json();
-    },
-    onSuccess: (data: CreateTaskApiResponse) => {
+    mutationFn: async (dadosTarefa: TasksCreateRequest) =>
+      createTask(dadosTarefa),
+    onSuccess: (data: TasksCreateResponse) => {
       const metaAtingida = data.challengeCompleted;
 
       // limparInputs();
@@ -142,7 +103,7 @@ export default function CreateTaskGps() {
       return +num;
     };
 
-    const dadosTarefa: DadosTarefaGps = {
+    const dadosTarefa: TasksCreateRequest = {
       name: nomeAtividade,
       distance: distanceFormated(+distanceStore),
       environment: "livre",

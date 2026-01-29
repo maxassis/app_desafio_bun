@@ -1,5 +1,4 @@
 import { useMutation } from '@tanstack/react-query'
-import Constants from 'expo-constants'
 import { Link, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { Controller, useForm } from 'react-hook-form'
@@ -19,38 +18,16 @@ import Google from '../../assets/google.svg'
 import Logo from '../../assets/logo2.svg'
 import { Button } from '../../components/button'
 import useAuthStore from '../../store/auth-store'
+import type { AuthSigninRequest, AuthSigninResponse } from '../../@types/auth-signin'
+import { signIn } from '../../services/auth-service'
 
 interface FormData {
   email: string
   password: string
 }
 
-interface TokenType {
-  access_token: string
-}
-
-async function loginRequest({
-  email,
-  password,
-}: FormData): Promise<TokenType> {
-  const response = await fetch(
-    `${Constants.expoConfig?.extra?.apiUrl}/signin`,
-    {
-      method: 'POST',
-      headers: { 'Content-type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    },
-  )
-
-  if (!response.ok) {
-    // Lançar o status code junto com o erro para tratamento posterior
-    const error = new Error('Erro ao fazer login');
-    (error as any).status = response.status
-    throw error
-  }
-
-  return response.json()
-}
+const loginRequest = (payload: AuthSigninRequest): Promise<AuthSigninResponse> =>
+  signIn(payload)
 
 export default function Login() {
   const { login } = useAuthStore()

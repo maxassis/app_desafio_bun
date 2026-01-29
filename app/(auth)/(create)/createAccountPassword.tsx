@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import CheckGreen from '../../../assets/check-green.svg'
 import Close from '../../../assets/Close.svg'
 import Logo from '../../../assets/logo2.svg'
+import { createUser } from '../../../services/users-service'
 
 interface Criteria {
   length: boolean
@@ -55,30 +56,9 @@ export default function CreatePassword() {
     setPassword(text)
   }
 
-  const createUser = async (newPassword: string) => {
-    const response = await fetch(
-      'https://bondis-app-backend.onrender.com/users',
-      {
-        method: 'POST',
-        headers: { 'Content-type': 'application/json' },
-        body: JSON.stringify({ name, email, password: newPassword }),
-      },
-    )
-
-    if (!response.ok) {
-      if (response.statusText === 'User already exists') {
-        throw new Error('Usuário já existe')
-      }
-      else {
-        throw new Error(response.statusText)
-      }
-    }
-
-    return response.json()
-  }
-
   const { mutate, isPending } = useMutation({
-    mutationFn: () => createUser(password),
+    mutationFn: () =>
+      createUser({ name: String(name), email: String(email), password }),
     onSuccess: () => {
       router.push('/createAccountDone')
     },

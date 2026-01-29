@@ -18,6 +18,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SystemBars } from "react-native-edge-to-edge";
 import Toast from "react-native-toast-message";
+import { confirmCode, sendMailRecovery } from "../../../services/auth-service";
 
 export default function RecoveryGetCode({ route }: any) {
   const [timeLeft, setTimeLeft] = useState<number>(0);
@@ -69,59 +70,27 @@ export default function RecoveryGetCode({ route }: any) {
     }${remainingSeconds}`;
   };
 
-  function sendMail(showToast = true) {
-    fetch("https://bondis-app-backend.onrender.com/send-mail-recovery", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify({ email }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-
-        if (!res.ok) {
-          console.error("Erro do servidor:", res.status, data);
-          return;
-        }
-
-        if (showToast) {
-          Toast.show({
-            type: "success",
-            text1: "Novo código enviado.",
-            text2: "Por favor, verifique seu e-mail.",
-            visibilityTime: 4000,
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Erro na requisição:", error);
-      });
+  async function sendMail(showToast = true) {
+    try {
+      await sendMailRecovery({ email: String(email) });
+      if (showToast) {
+        Toast.show({
+          type: "success",
+          text1: "Novo código enviado.",
+          text2: "Por favor, verifique seu e-mail.",
+          visibilityTime: 4000,
+        });
+      }
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
   }
 
   const onSubmit = async ({ code }: { code: string }) => {
     // console.log("teste");
 
     try {
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/confirm-code/",
-        {
-          method: "POST",
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify({ code, email }),
-        }
-      );
-      const data: { message: string } = await response.json();
-      console.log(data);
-
-      if (!response.ok) {
-        Alert.alert("Código invalido", "", [
-          {
-            text: "Ok",
-            style: "cancel",
-          },
-        ]);
-
-        throw new Error(`Código inválido, status ${response.status}`);
-      }
+      await confirmCode({ code, email: String(email) });
 
       // console.log("codigo correto");
       router.push({
@@ -129,6 +98,12 @@ export default function RecoveryGetCode({ route }: any) {
         params: { email },
       });
     } catch (error) {
+      Alert.alert("Código invalido", "", [
+        {
+          text: "Ok",
+          style: "cancel",
+        },
+      ]);
       console.error(error);
     }
 

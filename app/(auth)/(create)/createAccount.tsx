@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { Button } from "../../../components/button";
 import { useMutation } from "@tanstack/react-query";
+import { checkEmail } from "../../../services/auth-service";
 
 type FormData = {
   name: string;
@@ -34,30 +35,20 @@ export default function CreateAccount() {
   } = useForm<FormData>();
 
   const checkEmailMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/check-email",
-        {
-          method: "POST",
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
-      return response;
-    },
+    mutationFn: async (email: string) => checkEmail({ email }),
   });
 
   const onSubmit = async ({ name, email }: { name: string; email: string }) => {
     try {
-      const response = await checkEmailMutation.mutateAsync(email);
+      const status = await checkEmailMutation.mutateAsync(email);
 
-      if (response.status === 204) {
+      if (status === 204) {
         console.log("Email is available");
         router.push({
           pathname: "/createAccountCode",
           params: { name, email },
         });
-      } else if (response.status === 409) {
+      } else if (status === 409) {
         console.log("Email already exists");
         Toast.show({
           type: "error",

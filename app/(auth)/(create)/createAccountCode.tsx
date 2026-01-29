@@ -15,6 +15,7 @@ import { cva } from "class-variance-authority";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Toast from "react-native-toast-message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { confirmCode, sendEmail } from "../../../services/auth-service";
 
 const buttonDisabled = cva(
   "h-[52px] flex-row bg-bondis-green mt-auto rounded-full justify-center items-center",
@@ -76,64 +77,37 @@ export default function CreateAccountGetCode() {
     }${remainingSeconds}`;
   };
 
-  function sendMail(showToast = true) {
-    fetch("https://bondis-app-backend.onrender.com/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-
-        if (!res.ok) {
-          console.error("Erro do servidor:", res.status, data);
-          return;
-        }
-
-        if (showToast) {
-          Toast.show({
-            type: "success",
-            text1: "Novo código enviado.",
-            text2: "Por favor, verifique seu e-mail.",
-            visibilityTime: 4000,
-          });
-        }
-
-        // console.log("Resposta do backend:", data);
-      })
-      .catch((error) => {
-        console.error("Erro na requisição:", error);
-      });
+  async function sendMail(showToast = true) {
+    try {
+      await sendEmail({ name: String(name), email: String(email) });
+      if (showToast) {
+        Toast.show({
+          type: "success",
+          text1: "Novo código enviado.",
+          text2: "Por favor, verifique seu e-mail.",
+          visibilityTime: 4000,
+        });
+      }
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
   }
 
   const onSubmit = async ({ code }: { code: string }) => {
     try {
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/confirm-code/",
-        {
-          method: "POST",
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify({ code, email }),
-        }
-      );
-      // const data: { message: string } = await response.json();
-
-      if (!response.ok) {
-        Toast.show({
-          type: "error",
-          text1: "Código incorreto.",
-          text2: "Digite outra vez.",
-          visibilityTime: 4000,
-        });
-
-        throw new Error(`Código inválido, status ${response.status}`);
-      }
+      await confirmCode({ code, email: String(email) });
 
       router.push({
         pathname: "/createAccountPassword",
         params: { name, email },
       });
     } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Código incorreto.",
+        text2: "Digite outra vez.",
+        visibilityTime: 4000,
+      });
       console.error(error);
     }
   };

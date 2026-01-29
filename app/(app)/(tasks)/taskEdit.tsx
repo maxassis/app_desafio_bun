@@ -20,7 +20,6 @@ import Indoor from "../../../assets/Indoor.svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Down from "../../../assets/down.svg";
-import tokenExists from "../../../store/auth-store";
 import Left from "../../../assets/Icon-left.svg";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { ptBR } from "../../../utils/localeCalendar";
@@ -30,6 +29,13 @@ import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TimePickerModal, TimePickerModalRef } from "@/components";
+import type { TasksCheckCompletionResponse } from "../../../@types/tasks-check-completion";
+import type {
+  TasksUpdateTaskParams,
+  TasksUpdateTaskRequest,
+  TasksUpdateTaskResponse,
+} from "../../../@types/tasks-update-task";
+import { checkCompletion, updateTask as updateTaskService } from "../../../services/tasks-service";
 
 dayjs.extend(utc);
 LocaleConfig.locales["pt-br"] = ptBR;
@@ -50,7 +56,6 @@ export default function TaskEdit() {
   const [activityName, setActivityName] = useState("");
   const [calories, setCalories] = useState("");
   const [local, setLocal] = useState("");
-  const token = tokenExists((state) => state.token);
   const { taskData, desafioSelecionado } = useDesafioStore();
   const [day, setDay] = useState<DateData>({} as DateData);
   const [initialDate, setInitialDate] = useState<any>();
@@ -72,27 +77,16 @@ export default function TaskEdit() {
   }
 
   // Mutations
-  const checkCompletionMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(
-        "https://bondis-app-backend.onrender.com/tasks/check-completion",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            inscriptionId: taskData.inscriptionId,
-            distance: +`${distance.kilometers}.${distance.meters}`,
-          }),
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Erro ao verificar conclusão do desafio");
-      }
-      return response.json();
-    },
+  const checkCompletionMutation = useMutation<
+    TasksCheckCompletionResponse,
+    Error,
+    void
+  >({
+    mutationFn: async () =>
+      checkCompletion({
+        inscriptionId: taskData.inscriptionId,
+        distance: toDistanceKm(distance.kilometers, distance.meters),
+      }),
     onSuccess: (data) => {
       if (data.willCompleteChallenge) {
         Alert.alert(
@@ -122,41 +116,12 @@ export default function TaskEdit() {
     },
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: async () => {
-      const agora = dayjs(); // Hora atual do sistema
-
-      const response = await fetch(
-        `https://bondis-app-backend.onrender.com/tasks/update-task/${taskData.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: activityName,
-            distanceKm: +`${distance.kilometers}.${distance.meters}`,
-            environment: ambience,
-            // date: dataFinal.toISOString(), // Formato ISO completo: "2025-05-23T14:01:07.606Z"
-            date: initialDate
-              ? taskData.date // mantém hora original
-              : dayjs(
-                  `${day.dateString} ${agora.format("HH:mm:ss")}`
-                ).toISOString(),
-            duration: convertTimeToSeconds(selectedTime),
-            local: local,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Falha ao atualizar tarefa");
-      }
-
-      return response.json();
-    },
+  const updateTaskMutation = useMutation<
+    TasksUpdateTaskResponse,
+    Error,
+    { params: TasksUpdateTaskParams; payload: TasksUpdateTaskRequest }
+  >({
+    mutationFn: async ({ params, payload }) => updateTaskService(params, payload),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["desafios"] });
       queryClient.invalidateQueries({ queryKey: ["getAllDesafios"] });
@@ -185,14 +150,24 @@ export default function TaskEdit() {
     setModalTimeVisible(false);
   }
 
+  function parseDistanceKm(distanceKm: string) {
+    const value = Number(distanceKm);
+    if (Number.isNaN(value)) {
+      return { kilometers: 0, meters: 0 };
+    }
+    const kilometers = Math.floor(value);
+    const meters = Math.round((value - kilometers) * 1000);
+    return { kilometers, meters };
+  }
+
+  function toDistanceKm(kilometers: number, meters: number) {
+    return kilometers + meters / 1000;
+  }
+
   const ChangeDistancePicker = () => {
     if (childRef.current && taskData?.distanceKm) {
-      childRef.current.changeDistance(
-        +taskData.distanceKm.split(".")[0],
-        +taskData.distanceKm.split(".")[1]
-          ? +taskData.distanceKm.split(".")[1]
-          : 0
-      );
+      const { kilometers, meters } = parseDistanceKm(taskData.distanceKm);
+      childRef.current.changeDistance(kilometers, meters);
     }
   };
 
@@ -226,10 +201,7 @@ export default function TaskEdit() {
   useEffect(() => {
     if (!taskData) return;
     setActivityName(taskData.name);
-    setDistance({
-      kilometers: +taskData.distanceKm.split(".")[0],
-      meters: +taskData.distanceKm.split(".")[1] || 0,
-    });
+    setDistance(parseDistanceKm(taskData.distanceKm));
     setCalories(taskData.calories?.toString() ?? "");
     setLocal(taskData.local ?? "");
     setAmbience(taskData.environment);
@@ -262,7 +234,23 @@ export default function TaskEdit() {
   }
 
   function updateTask() {
-    updateTaskMutation.mutate();
+    if (!taskData) return;
+    const agora = dayjs();
+    const payload: TasksUpdateTaskRequest = {
+      name: activityName,
+      distanceKm: toDistanceKm(distance.kilometers, distance.meters),
+      environment: ambience,
+      date: initialDate
+        ? (taskData.date as string)
+        : dayjs(`${day.dateString} ${agora.format("HH:mm:ss")}`).toISOString(),
+      duration: convertTimeToSeconds(selectedTime),
+      local: local,
+    };
+
+    updateTaskMutation.mutate({
+      params: { id: taskData.id },
+      payload,
+    });
   }
 
   return (
