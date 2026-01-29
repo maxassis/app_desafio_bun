@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
+  FlatList,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
@@ -19,7 +20,6 @@ import Rigth from "../../assets/gray-right.svg";
 import React, { useState } from "react";
 // import TaskItem from "@/components/taskItem";
 // import TaskItemSkeleton from "@/components";
-import Carousel from "react-native-reanimated-carousel";
 import PinIcon from "../../assets/map-pin-black.svg";
 import useDesafioStore from "@/store/desafio-store";
 import { useLocalSearchParams } from "expo-router";
@@ -54,6 +54,7 @@ export default function Profile() {
     queryFn: fetchAllDesafios,
     staleTime: 5 * 60 * 1000,
   });
+  const activeChallenges = data?.activeChallenges ?? [];
 
   function handleChallengePress(id: string) {
     const desafio = allDesafios?.find((d) => d.id === id);
@@ -182,27 +183,27 @@ export default function Profile() {
 
       {/* Carousel dos desafios ativos */}
       {data ? (
-        data.activeChallenges &&
-        data.activeChallenges.length > 0 && (
+        activeChallenges.length > 0 && (
           <View style={{ height: 380 }}>
-            <Carousel
-              loop={false}
-              width={width}
-              height={410}
-              autoPlay={false}
-              data={data.activeChallenges}
-              scrollAnimationDuration={1000}
-              onSnapToItem={(index) => setCurrentIndex(index)}
-              mode="parallax"
-              modeConfig={{
-                parallaxScrollingScale: 0.95,
-                parallaxScrollingOffset: 30,
+            <FlatList
+              data={activeChallenges}
+              keyExtractor={(item) => item.id}
+              horizontal
+              pagingEnabled
+              snapToInterval={width}
+              decelerationRate="fast"
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 10 }}
+              onMomentumScrollEnd={(event) => {
+                const index = Math.round(
+                  event.nativeEvent.contentOffset.x / width
+                );
+                setCurrentIndex(index);
               }}
               renderItem={({ item }) => (
                 <View
                   style={{
                     width: width - 20,
-                    // height: 410,
                     paddingHorizontal: 1,
                   }}
                 >
@@ -307,9 +308,9 @@ export default function Profile() {
       )}
 
       {/* Indicador de posição */}
-      {data && data.activeChallenges && data.activeChallenges.length > 1 && (
+      {data && activeChallenges.length > 1 && (
         <View className="flex-row justify-center items-center mt-2 mb-4">
-          {data.activeChallenges.map((_, index) => (
+          {activeChallenges.map((_, index) => (
             <View
               key={index}
               className={`mx-1 rounded-full ${
