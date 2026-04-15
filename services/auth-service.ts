@@ -1,0 +1,71 @@
+import axios from "axios";
+import type {
+  AuthSigninRequest,
+  AuthSigninResponse,
+  AuthTokenResponse,
+  AuthAccessTokenResponse,
+} from "../@types/auth-signin";
+import { getErrorMessage } from "./api-client";
+
+const AUTH_SIGN_IN_URL = "http://10.0.2.2:3000/api/auth/sign-in/email";
+const AUTH_TOKEN_URL = "http://10.0.2.2:3000/api/auth/token";
+const AUTH_ORIGIN = "http://localhost:5173";
+
+export const signIn = async (
+  payload: AuthSigninRequest
+): Promise<AuthSigninResponse> => {
+  try {
+    const { data } = await axios.post<AuthSigninResponse>(
+      AUTH_SIGN_IN_URL,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Origin: AUTH_ORIGIN,
+        },
+      }
+    );
+
+    return data;
+  } catch (error) {
+    const authError = new Error(getErrorMessage(error, "Erro ao fazer login")) as Error & {
+      status?: number;
+    };
+
+    if (axios.isAxiosError(error)) {
+      authError.status = error.response?.status;
+    }
+
+    throw authError;
+  }
+};
+
+export const exchangeAuthToken = async (
+  token: string
+): Promise<AuthAccessTokenResponse> => {
+  try {
+    const { data } = await axios.get<AuthTokenResponse>(AUTH_TOKEN_URL, {
+      headers: {
+        "Content-Type": "application/json",
+        Origin: AUTH_ORIGIN,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return {
+      access_token: data.token,
+    };
+  } catch (error) {
+    const authError = new Error(
+      getErrorMessage(error, "Erro ao obter token de acesso")
+    ) as Error & {
+      status?: number;
+    };
+
+    if (axios.isAxiosError(error)) {
+      authError.status = error.response?.status;
+    }
+
+    throw authError;
+  }
+};

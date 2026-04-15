@@ -1,5 +1,4 @@
 import { useMutation } from '@tanstack/react-query'
-import Constants from 'expo-constants'
 import { Link, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { Controller, useForm } from 'react-hook-form'
@@ -18,38 +17,12 @@ import Facebook from '../../assets/facebook.svg'
 import Google from '../../assets/google.svg'
 import Logo from '../../assets/logo2.svg'
 import { Button } from '../../components/button'
+import { exchangeAuthToken, signIn } from '../../services/auth-service'
 import useAuthStore from '../../store/auth-store'
+import type { AuthAccessTokenResponse, AuthSigninRequest } from '../../@types/auth-signin'
 
-interface FormData {
-  email: string
-  password: string
-}
-
-interface TokenType {
-  access_token: string
-}
-
-async function loginRequest({
-  email,
-  password,
-}: FormData): Promise<TokenType> {
-  const response = await fetch(
-    `${Constants.expoConfig?.extra?.apiUrl}/signin`,
-    {
-      method: 'POST',
-      headers: { 'Content-type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    },
-  )
-
-  if (!response.ok) {
-    // Lançar o status code junto com o erro para tratamento posterior
-    const error = new Error('Erro ao fazer login');
-    (error as any).status = response.status
-    throw error
-  }
-
-  return response.json()
+type LoginError = Error & {
+  status?: number
 }
 
 export default function Login() {
@@ -61,15 +34,17 @@ export default function Login() {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormData>()
+  } = useForm<AuthSigninRequest>()
 
   const mutation = useMutation({
-    mutationFn: loginRequest,
-    onSuccess: (data) => {
-      login(data.access_token)
-      // console.log("Login bem-sucedido:", data.access_token);
+    mutationFn: async (formData: AuthSigninRequest) => {
+      const signInData = await signIn(formData)
+      return exchangeAuthToken(signInData.token)
     },
-    onError: (error: any) => {
+    onSuccess: (data: AuthAccessTokenResponse) => {
+      login(data.access_token)
+    },
+    onError: (error: LoginError) => {
       if (error.status === 401) {
         Toast.show({
           type: 'error',
@@ -90,7 +65,7 @@ export default function Login() {
     },
   })
 
-  const onSubmit = (formData: FormData) => {
+  const onSubmit = (formData: AuthSigninRequest) => {
     mutation.mutate(formData)
   }
 
