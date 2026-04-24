@@ -5,11 +5,11 @@ import type {
   AuthTokenResponse,
   AuthAccessTokenResponse,
 } from "../@types/auth-signin";
-import { getErrorMessage } from "./api-client";
+import { API_BASE_URL, getErrorMessage } from "./api-client";
 
-const AUTH_SIGN_IN_URL = "http://10.0.2.2:3000/api/auth/sign-in/email";
-const AUTH_TOKEN_URL = "http://10.0.2.2:3000/api/auth/token";
-const AUTH_ORIGIN = "http://localhost:5173";
+const AUTH_SIGN_IN_URL = `${API_BASE_URL}/api/auth/sign-in/email`;
+const AUTH_TOKEN_URL = `${API_BASE_URL}/api/auth/token`;
+const AUTH_ORIGIN = API_BASE_URL;
 
 export const signIn = async (
   payload: AuthSigninRequest

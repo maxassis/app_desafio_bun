@@ -2,7 +2,7 @@ import axios from "axios";
 import Constants from "expo-constants";
 import useAuthStore from "../store/auth-store";
 
-const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl;
+export const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl;
 
 const getToken = () => useAuthStore.getState().token;
 
@@ -12,6 +12,13 @@ export const apiClient = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 apiClient.interceptors.request.use((config) => {
   const token = getToken();

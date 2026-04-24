@@ -1,5 +1,10 @@
 import "dotenv/config";
 
+const apiUrl =
+  process.env.APP_ENV === "production"
+    ? process.env.API_URL_PRODUCTION
+    : process.env.API_URL_DEVELOPMENT;
+
 export default {
   expo: {
     name: "Meu Desafio",
@@ -93,9 +98,8 @@ export default {
         projectId: "230cd5ae-e636-4f24-a992-74172495dd48",
       },
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
-      apiUrl: process.env.URL,
+      apiUrl,
       stripePublicKey: process.env.STRIPE_PUBLIC_KEY,
     },
   },
 };
-
