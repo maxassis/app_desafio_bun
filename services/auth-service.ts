@@ -10,6 +10,7 @@ import { API_BASE_URL, getErrorMessage } from "./api-client";
 const AUTH_SIGN_IN_URL = `${API_BASE_URL}/api/auth/sign-in/email`;
 const AUTH_TOKEN_URL = `${API_BASE_URL}/api/auth/token`;
 const AUTH_ORIGIN = API_BASE_URL;
+console.log(API_BASE_URL)
 
 export const signIn = async (
   payload: AuthSigninRequest

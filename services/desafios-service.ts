@@ -21,7 +21,7 @@ export const fetchRouteData = async (
 ): Promise<RouteResponse> => {
   try {
     const { data } = await apiClient.get<RouteResponse>(
-      `/desafio/get-desafio/${desafioId}`
+      `/desafio/${desafioId}`
     );
 
     if (!Array.isArray(data.location)) {

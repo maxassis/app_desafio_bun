@@ -8,25 +8,25 @@ export interface Coordinate {
 export interface RouteResponse {
   id: string;
   name: string;
-  description: string;
   location: Coordinate[];
   distance: string;
-  inscription: Inscription[];
+  photo: string;
+  inscriptions: Inscription[];
 }
 
 export interface Inscription {
-  lastTaskDate: Date;
   user: User;
-  progress: number;
+  progress: string;
   totalTasks: number;
   totalCalories: number;
   totalDistanceKm: number;
+  lastTaskDate: string;
 }
 
 export interface User {
   id: string;
   name: string;
-  UserData: UserData | null;
+  avatar?: string;
 }
 
 export interface DesafioGetDesafioParams {

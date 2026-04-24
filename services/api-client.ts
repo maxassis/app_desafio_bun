@@ -13,13 +13,6 @@ export const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 apiClient.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {

@@ -157,22 +157,22 @@ export default function Map2() {
 
     const totalDistance = +routeData.distance
 
-    const updatedParticipants = routeData.inscription.map((dta) => {
-      const userLocation = findPointAtDistance(coordinates, dta.progress)
-      const userDistance = calculateUserDistance(coordinates, dta.progress)
+    const updatedParticipants = routeData.inscriptions.map((dta) => {
+      const userLocation = findPointAtDistance(coordinates, Number(dta.progress))
+      const userDistance = calculateUserDistance(coordinates, Number(dta.progress))
       const progressPercentage = formatPercentage(
         (userDistance / totalDistance) * 100,
       )
 
       if (dta.user.id === userConfig?.usersId) {
         setUserProgress(Number(progressPercentage) / 100)
-        setUserDistance(dta.progress)
+        setUserDistance(Number(dta.progress))
       }
 
       return {
         userId: dta.user.id,
         name: dta.user.name,
-        avatar: dta.user.UserData?.avatar_url || '',
+        avatar: dta.user.avatar || '',
         location: userLocation || coordinates[0],
         distance: userDistance,
         percentage: progressPercentage,
