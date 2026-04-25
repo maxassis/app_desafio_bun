@@ -17,10 +17,15 @@
   "jest": {
     "preset": "jest-expo"
   },
+  "overrides": {
+    "@better-auth/core": "1.6.9"
+  },
   "dependencies": {
     "@babel/runtime": "^7.26.0",
+    "@better-auth/expo": "1.6.5",
     "@expo-google-fonts/anton": "^0.3.0",
     "@expo-google-fonts/inter": "^0.2.3",
+    "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^4.6.4",
     "@react-native-async-storage/async-storage": "^2.1.2",
@@ -28,6 +33,7 @@
     "@stripe/stripe-react-native": "0.45.0",
     "@tanstack/react-query": "^5.56.2",
     "axios": "^1.13.2",
+    "better-auth": "1.6.5",
     "class-variance-authority": "^0.7.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
@@ -79,7 +85,7 @@
     "react-native-web": "^0.20.0",
     "react-native-wheely": "^0.6.0",
     "zustand": "^4.5.7",
-    "@expo/ngrok": "^4.1.0"
+    "expo-network": "~7.1.5"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.2.1",

@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import * as Linking from 'expo-linking'
 import { Link, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { Controller, useForm } from 'react-hook-form'
@@ -17,6 +18,7 @@ import Facebook from '../../assets/facebook.svg'
 import Google from '../../assets/google.svg'
 import Logo from '../../assets/logo2.svg'
 import { Button } from '../../components/button'
+import { authClient, getAuthAccessToken } from '../../services/auth-client'
 import { exchangeAuthToken, signIn } from '../../services/auth-service'
 import useAuthStore from '../../store/auth-store'
 import type { AuthAccessTokenResponse, AuthSigninRequest } from '../../@types/auth-signin'
@@ -29,6 +31,7 @@ export default function Login() {
   const { login } = useAuthStore()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const googleRedirectUrl = Linking.createURL('login')
 
   const {
     handleSubmit,
@@ -65,8 +68,43 @@ export default function Login() {
     },
   })
 
+  const googleMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: googleRedirectUrl,
+      })
+
+      if (error) {
+        throw new Error(error.message || 'Erro ao entrar com Google')
+      }
+
+      if (!authClient.getCookie()) {
+        throw new Error('Sessão do Google não retornada')
+      }
+
+      return getAuthAccessToken()
+    },
+    onSuccess: (data: AuthAccessTokenResponse) => {
+      login(data.access_token)
+    },
+    onError: (error: LoginError) => {
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao entrar com Google',
+        text2: error.message || 'Tente novamente',
+        visibilityTime: 4000,
+      })
+      console.error('Erro ao fazer login com Google:', error)
+    },
+  })
+
   const onSubmit = (formData: AuthSigninRequest) => {
     mutation.mutate(formData)
+  }
+
+  const handleGoogleSignIn = () => {
+    googleMutation.mutate()
   }
 
   return (
@@ -153,7 +191,14 @@ export default function Login() {
           </Text>
 
           <View className="flex-row mt-4 justify-center gap-x-7">
-            <Google />
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Entrar com Google"
+              disabled={googleMutation.isPending}
+              onPress={handleGoogleSignIn}
+            >
+              <Google />
+            </TouchableOpacity>
             <Facebook />
             <Apple />
           </View>

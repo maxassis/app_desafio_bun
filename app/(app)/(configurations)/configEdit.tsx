@@ -19,7 +19,7 @@ import tokenExists from "../../../store/auth-store";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cva } from "class-variance-authority";
-import { fetchUserData } from "@/services/users-service";
+import { editUserData, fetchUserData } from "@/services/users-service";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -217,34 +217,18 @@ export default function ProfileEdit() {
 
   const profileUpdateMutation = useMutation({
     mutationFn: async () => {
-      const result = await fetch(
-        "https://bondis-app-backend.onrender.com/users/edit-userdata",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-type": "application/json",
-            authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            full_name: nameValue || null,
-            bio: bioValue || null,
-            gender: genderValue || null,
-            sport: sportsValue || null,
-            birthDate: unMaskedValue || null,
-          }),
-        }
-      );
+      const payload = {
+        full_name: nameValue || null,
+        bio: bioValue || null,
+        gender: genderValue || null,
+        sport: sportsValue || null,
+        birthDate: unMaskedValue || null,
+      };
 
-      if (!result.ok) {
-        const data = await result.json();
-        Alert.alert("Erro ao salvar alterações");
-        throw new Error(data.message || "Erro ao salvar alterações");
-      }
-
-      return result.json();
+      return editUserData(payload);
     },
     onSuccess: (data) => {
-      // console.log("Alterações salvas com sucesso", data);
+      console.log("[edit-user-data] alteracoes salvas com sucesso", data);
       bottomSheetAvatarRef.current?.close();
       bottomSheetRef.current?.close();
       bottomSheetSuccessRef.current?.expand();
@@ -252,7 +236,7 @@ export default function ProfileEdit() {
       queryClient.invalidateQueries({ queryKey: ["userData"] });
     },
     onError: (error) => {
-      console.error("Erro ao salvar alterações:", error);
+      console.error("[edit-user-data] erro ao salvar alteracoes", error);
       Alert.alert("Erro", "Não foi possível salvar as alterações.");
     },
   });

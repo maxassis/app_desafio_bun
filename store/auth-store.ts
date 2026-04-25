@@ -103,6 +103,7 @@
 import { createWithEqualityFn as create } from 'zustand/traditional';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
+import { apiClient } from '@/services/api-client';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -164,10 +165,12 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
+      await apiClient.post("/api/auth/sign-out");
+    } catch (error) {
+      console.log("Sign-out request failed, proceeding with local cleanup");
+    } finally {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
       set({ isAuthenticated: false, token: null });
-    } catch (error) {
-      console.error('Error removing the token:', error);
     }
   },
 
