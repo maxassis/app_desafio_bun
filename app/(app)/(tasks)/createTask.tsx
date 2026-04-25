@@ -30,6 +30,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
 import { TimePickerModal, TimePickerModalRef } from "@/components";
+import { API_BASE_URL } from "@/services/api-client";
 
 LocaleConfig.locales["pt-br"] = ptBR;
 LocaleConfig.defaultLocale = "pt-br";
@@ -91,7 +92,7 @@ export default function TaskCreate() {
 
   const criarTarefaMutation = useMutation({
     mutationFn: async (dadosTarefa: CheckCompletion) => {
-      const response = await fetch("https://bondis-app-backend.onrender.com/tasks/create", {
+      const response = await fetch(`${API_BASE_URL}/tasks/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

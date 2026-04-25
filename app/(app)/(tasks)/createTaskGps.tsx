@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
 import useDesafioStore from "../../../store/desafio-store";
+import { API_BASE_URL } from "@/services/api-client";
 
 interface DadosTarefaGps {
   name: string;
@@ -91,7 +92,7 @@ export default function CreateTaskGps() {
       dadosTarefa: DadosTarefaGps
     ): Promise<CreateTaskApiResponse> => {
       const response = await fetch(
-        "https://bondis-app-backend.onrender.com/tasks/create",
+        `${API_BASE_URL}/tasks/create`,
         {
           method: "POST",
           headers: {
