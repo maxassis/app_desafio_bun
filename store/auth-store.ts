@@ -103,7 +103,6 @@
 import { createWithEqualityFn as create } from 'zustand/traditional';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
-import { apiClient } from '@/services/api-client';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -165,11 +164,16 @@ const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await apiClient.post("/api/auth/sign-out");
+      const { authClient } = await import('@/services/auth-client');
+
+      const signOutResponse = await authClient.signOut();
     } catch (error) {
-      console.log("Sign-out request failed, proceeding with local cleanup");
+      console.log("[AUTH] Sign-out request failed:", error);
     } finally {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await SecureStore.deleteItemAsync("better-auth.session_token");
+      await SecureStore.deleteItemAsync("better-auth.session-expires-at");
+
       set({ isAuthenticated: false, token: null });
     }
   },

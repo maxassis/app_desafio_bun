@@ -26,7 +26,7 @@ export const fetchRankData = async (
     );
     return data;
   } catch (error) {
-    throw new Error(getErrorMessage(error, "Network response was not ok"));
+    throw new Error(getErrorMessage(error, "Failed to fetch ranking data"));
   }
 };
 

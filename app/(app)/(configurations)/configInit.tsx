@@ -25,9 +25,9 @@ export default function MenuConfigurations() {
         },
         {
           text: "SIM",
-          onPress: () => {
+          onPress: async () => {
+            await logout();
             queryClient.clear();
-            logout();
           },
         },
       ]);

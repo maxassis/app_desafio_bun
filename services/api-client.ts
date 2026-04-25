@@ -13,11 +13,23 @@ export const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(async (config) => {
   const token = getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  try {
+    const { authClient } = await import("./auth-client");
+    const cookie = authClient.getCookie();
+
+    if (cookie) {
+      config.headers.Cookie = cookie;
+    }
+  } catch (error) {
+    console.log("[API] Erro ao recuperar cookie do Better Auth:", error);
+  }
+
   return config;
 });
 
