@@ -18,6 +18,7 @@ import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import CheckGreen from "../../../assets/check-green.svg";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { API_BASE_URL } from "@/services/api-client";
 
 interface Criteria {
   length: boolean;
@@ -72,7 +73,7 @@ export default function RecoveryCreatePassword({ route }: any) {
     if (password !== password2) return
 
     try {
-      const response = await fetch("https://bondis-app-backend.onrender.com/users/change-password", {
+      const response = await fetch(`${API_BASE_URL}/users/change-password`, {
         method: "PATCH",
         headers: { "Content-type": "application/json" },
         body: JSON.stringify({ email, new_password: password }),

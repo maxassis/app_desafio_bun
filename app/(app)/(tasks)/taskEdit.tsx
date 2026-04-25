@@ -30,6 +30,7 @@ import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TimePickerModal, TimePickerModalRef } from "@/components";
+import { API_BASE_URL } from "@/services/api-client";
 
 dayjs.extend(utc);
 LocaleConfig.locales["pt-br"] = ptBR;
@@ -75,7 +76,7 @@ export default function TaskEdit() {
   const checkCompletionMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(
-        "https://bondis-app-backend.onrender.com/tasks/check-completion",
+        `${API_BASE_URL}/tasks/check-completion`,
         {
           method: "POST",
           headers: {
@@ -127,7 +128,7 @@ export default function TaskEdit() {
       const agora = dayjs(); // Hora atual do sistema
 
       const response = await fetch(
-        `https://bondis-app-backend.onrender.com/tasks/update-task/${taskData.id}`,
+        `${API_BASE_URL}/tasks/update-task/${taskData.id}`,
         {
           method: "PATCH",
           headers: {

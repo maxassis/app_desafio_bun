@@ -18,6 +18,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SystemBars } from "react-native-edge-to-edge";
 import Toast from "react-native-toast-message";
+import { API_BASE_URL } from "@/services/api-client";
 
 export default function RecoveryGetCode({ route }: any) {
   const [timeLeft, setTimeLeft] = useState<number>(0);
@@ -70,7 +71,7 @@ export default function RecoveryGetCode({ route }: any) {
   };
 
   function sendMail(showToast = true) {
-    fetch("https://bondis-app-backend.onrender.com/send-mail-recovery", {
+    fetch(`${API_BASE_URL}/send-mail-recovery`, {
       method: "POST",
       headers: { "Content-type": "application/json" },
       body: JSON.stringify({ email }),
@@ -102,7 +103,7 @@ export default function RecoveryGetCode({ route }: any) {
 
     try {
       const response = await fetch(
-        "https://bondis-app-backend.onrender.com/confirm-code/",
+        `${API_BASE_URL}/confirm-code/`,
         {
           method: "POST",
           headers: { "Content-type": "application/json" },

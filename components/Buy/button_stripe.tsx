@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserData } from "@/services/users-service";
+import { API_BASE_URL } from "@/services/api-client";
 import { useRouter } from "expo-router";
 
 const AcceptDesafioButton = ({
@@ -30,7 +31,7 @@ const AcceptDesafioButton = ({
   const mutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(
-        "https://bondis-app-backend.onrender.com/payments/payment-intent",
+        `${API_BASE_URL}/payments/payment-intent`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

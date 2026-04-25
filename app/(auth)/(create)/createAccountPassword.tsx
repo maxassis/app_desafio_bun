@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import CheckGreen from '../../../assets/check-green.svg'
 import Close from '../../../assets/Close.svg'
 import Logo from '../../../assets/logo2.svg'
+import { API_BASE_URL } from "@/services/api-client";
 
 interface Criteria {
   length: boolean
@@ -57,7 +58,7 @@ export default function CreatePassword() {
 
   const createUser = async (newPassword: string) => {
     const response = await fetch(
-      'https://bondis-app-backend.onrender.com/users',
+      `${API_BASE_URL}/users`,
       {
         method: 'POST',
         headers: { 'Content-type': 'application/json' },

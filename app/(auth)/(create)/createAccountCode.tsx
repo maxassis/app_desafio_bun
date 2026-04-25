@@ -15,6 +15,7 @@ import { cva } from "class-variance-authority";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Toast from "react-native-toast-message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { API_BASE_URL } from "@/services/api-client";
 
 const buttonDisabled = cva(
   "h-[52px] flex-row bg-bondis-green mt-auto rounded-full justify-center items-center",
@@ -77,7 +78,7 @@ export default function CreateAccountGetCode() {
   };
 
   function sendMail(showToast = true) {
-    fetch("https://bondis-app-backend.onrender.com/send-email", {
+    fetch(`${API_BASE_URL}/send-email`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email }),
@@ -109,7 +110,7 @@ export default function CreateAccountGetCode() {
   const onSubmit = async ({ code }: { code: string }) => {
     try {
       const response = await fetch(
-        "https://bondis-app-backend.onrender.com/confirm-code/",
+        `${API_BASE_URL}/confirm-code/`,
         {
           method: "POST",
           headers: { "Content-type": "application/json" },

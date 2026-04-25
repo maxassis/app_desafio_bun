@@ -20,6 +20,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
 import Left from "../../../assets/Icon-left.svg";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { API_BASE_URL } from "@/services/api-client";
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
@@ -67,7 +68,7 @@ export default function CreateTaskGps() {
       });
 
       const response = await fetch(
-        `https://bondis-app-backend.onrender.com/tasks/update-task/${taskData?.id}`,
+        `${API_BASE_URL}/tasks/update-task/${taskData?.id}`,
         {
           method: "PATCH",
           headers: {
