@@ -20,6 +20,7 @@ import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cva } from "class-variance-authority";
 import { editUserData, fetchUserData } from "@/services/users-service";
+import { API_BASE_URL } from "@/services/api-client";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -106,7 +107,7 @@ export default function ProfileEdit() {
       setLoadingUpload(true);
 
       const response = await fetch(
-        "https://bondis-app-backend.onrender.com/users/upload-avatar",
+        `${API_BASE_URL}/users/upload-avatar`,
         {
           method: "POST",
           headers: {
@@ -142,10 +143,11 @@ export default function ProfileEdit() {
       setLoadingUpload(true);
 
       const result = await fetch(
-        `https://bondis-app-backend.onrender.com/users/delete-avatar`,
+        `${API_BASE_URL}/users/delete-avatar`,
         {
           method: "DELETE",
           headers: {
+            "Content-Type": "application/json",
             authorization: "Bearer " + token,
           },
           body: JSON.stringify({
