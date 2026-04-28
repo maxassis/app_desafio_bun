@@ -20,7 +20,6 @@ import Indoor from "../../../assets/Indoor.svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Down from "../../../assets/down.svg";
-import tokenExists from "../../../store/auth-store";
 import Left from "../../../assets/Icon-left.svg";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { ptBR } from "../../../utils/localeCalendar";
@@ -30,7 +29,7 @@ import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TimePickerModal, TimePickerModalRef } from "@/components";
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient, getErrorMessage } from "@/services/api-client";
 
 dayjs.extend(utc);
 LocaleConfig.locales["pt-br"] = ptBR;
@@ -51,7 +50,6 @@ export default function TaskEdit() {
   const [activityName, setActivityName] = useState("");
   const [calories, setCalories] = useState("");
   const [local, setLocal] = useState("");
-  const token = tokenExists((state) => state.token);
   const { taskData, desafioSelecionado } = useDesafioStore();
   const [day, setDay] = useState<DateData>({} as DateData);
   const [initialDate, setInitialDate] = useState<any>();
@@ -75,24 +73,17 @@ export default function TaskEdit() {
   // Mutations
   const checkCompletionMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(
-        `${API_BASE_URL}/tasks/check-completion`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            inscriptionId: taskData.inscriptionId,
-            distance: +`${distance.kilometers}.${distance.meters}`,
-          }),
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Erro ao verificar conclusão do desafio");
+      try {
+        const { data } = await apiClient.post("/tasks/check-completion", {
+          inscriptionId: taskData.inscriptionId,
+          distance: +`${distance.kilometers}.${distance.meters}`,
+        });
+        return data;
+      } catch (error) {
+        throw new Error(
+          getErrorMessage(error, "Erro ao verificar conclusão do desafio")
+        );
       }
-      return response.json();
     },
     onSuccess: (data) => {
       if (data.willCompleteChallenge) {
@@ -126,37 +117,21 @@ export default function TaskEdit() {
   const updateTaskMutation = useMutation({
     mutationFn: async () => {
       const agora = dayjs(); // Hora atual do sistema
-
-      const response = await fetch(
-        `${API_BASE_URL}/tasks/update-task/${taskData.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: activityName,
-            distanceKm: +`${distance.kilometers}.${distance.meters}`,
-            environment: ambience,
-            // date: dataFinal.toISOString(), // Formato ISO completo: "2025-05-23T14:01:07.606Z"
-            date: initialDate
-              ? taskData.date // mantém hora original
-              : dayjs(
-                  `${day.dateString} ${agora.format("HH:mm:ss")}`
-                ).toISOString(),
-            duration: convertTimeToSeconds(selectedTime),
-            local: local,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Falha ao atualizar tarefa");
+      try {
+        const { data } = await apiClient.patch(`/tasks/update-task/${taskData.id}`, {
+          name: activityName,
+          distanceKm: +`${distance.kilometers}.${distance.meters}`,
+          environment: ambience,
+          date: initialDate
+            ? taskData.date
+            : dayjs(`${day.dateString} ${agora.format("HH:mm:ss")}`).toISOString(),
+          duration: convertTimeToSeconds(selectedTime),
+          local: local,
+        });
+        return data;
+      } catch (error) {
+        throw new Error(getErrorMessage(error, "Falha ao atualizar tarefa"));
       }
-
-      return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["desafios"] });

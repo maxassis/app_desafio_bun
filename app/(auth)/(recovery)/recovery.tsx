@@ -8,7 +8,7 @@ import { SystemBars } from "react-native-edge-to-edge";
 import Toast from "react-native-toast-message";
 import { Button } from "../../../components/button";
 import { useMutation } from "@tanstack/react-query";
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient } from "@/services/api-client";
 
 export default function Recovery() {
   const router = useRouter();
@@ -22,13 +22,10 @@ export default function Recovery() {
 
   const checkEmailMutation = useMutation({
     mutationFn: async (email: string) => {
-      const response = await fetch(
-        `${API_BASE_URL}/check-email`,
-        {
-          method: "POST",
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
+      const response = await apiClient.post(
+        "/check-email",
+        { email },
+        { validateStatus: () => true }
       );
       return response;
     },

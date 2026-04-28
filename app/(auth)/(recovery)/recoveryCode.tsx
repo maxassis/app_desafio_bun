@@ -18,7 +18,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SystemBars } from "react-native-edge-to-edge";
 import Toast from "react-native-toast-message";
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient } from "@/services/api-client";
 
 export default function RecoveryGetCode({ route }: any) {
   const [timeLeft, setTimeLeft] = useState<number>(0);
@@ -70,58 +70,41 @@ export default function RecoveryGetCode({ route }: any) {
     }${remainingSeconds}`;
   };
 
-  function sendMail(showToast = true) {
-    fetch(`${API_BASE_URL}/send-mail-recovery`, {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify({ email }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
+  async function sendMail(showToast = true) {
+    try {
+      await apiClient.post("/send-mail-recovery", { email });
 
-        if (!res.ok) {
-          console.error("Erro do servidor:", res.status, data);
-          return;
-        }
-
-        if (showToast) {
-          Toast.show({
-            type: "success",
-            text1: "Novo código enviado.",
-            text2: "Por favor, verifique seu e-mail.",
-            visibilityTime: 4000,
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Erro na requisição:", error);
-      });
+      if (showToast) {
+        Toast.show({
+          type: "success",
+          text1: "Novo código enviado.",
+          text2: "Por favor, verifique seu e-mail.",
+          visibilityTime: 4000,
+        });
+      }
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
   }
 
   const onSubmit = async ({ code }: { code: string }) => {
     // console.log("teste");
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/confirm-code/`,
-        {
-          method: "POST",
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify({ code, email }),
-        }
-      );
-      const data: { message: string } = await response.json();
-      console.log(data);
-
-      if (!response.ok) {
+      try {
+        const { data } = await apiClient.post<{ message: string }>("/confirm-code/", {
+          code,
+          email,
+        });
+        console.log(data);
+      } catch (error) {
         Alert.alert("Código invalido", "", [
           {
             text: "Ok",
             style: "cancel",
           },
         ]);
-
-        throw new Error(`Código inválido, status ${response.status}`);
+        throw error;
       }
 
       // console.log("codigo correto");

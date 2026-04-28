@@ -12,14 +12,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import Outdoor from "../../../assets/Outdoor.svg";
 import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
-import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
 import useDesafioStore from "../../../store/desafio-store";
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient, getErrorMessage } from "@/services/api-client";
 
 interface DadosTarefaGps {
   name: string;
@@ -43,7 +42,6 @@ interface CreateTaskApiResponse {
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
-  const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
   // const { inscriptionId, desafioId } = useLocalSearchParams();
   const { distanceStore, elapsedStore, cityStore } = useTrackerStore();
@@ -91,22 +89,15 @@ export default function CreateTaskGps() {
     mutationFn: async (
       dadosTarefa: DadosTarefaGps
     ): Promise<CreateTaskApiResponse> => {
-      const response = await fetch(
-        `${API_BASE_URL}/tasks/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(dadosTarefa),
-        }
-      );
-      if (!response.ok) {
-        const dadosErro = await response.json();
-        throw new Error(dadosErro.message || "Falha ao criar tarefa");
+      try {
+        const { data } = await apiClient.post<CreateTaskApiResponse>(
+          "/tasks/create",
+          dadosTarefa
+        );
+        return data;
+      } catch (error) {
+        throw new Error(getErrorMessage(error, "Falha ao criar tarefa"));
       }
-      return response.json();
     },
     onSuccess: (data: CreateTaskApiResponse) => {
       const metaAtingida = data.challengeCompleted;

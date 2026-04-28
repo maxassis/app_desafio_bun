@@ -15,7 +15,7 @@ import { cva } from "class-variance-authority";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Toast from "react-native-toast-message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient } from "@/services/api-client";
 
 const buttonDisabled = cva(
   "h-[52px] flex-row bg-bondis-green mt-auto rounded-full justify-center items-center",
@@ -77,57 +77,35 @@ export default function CreateAccountGetCode() {
     }${remainingSeconds}`;
   };
 
-  function sendMail(showToast = true) {
-    fetch(`${API_BASE_URL}/send-email`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
+  async function sendMail(showToast = true) {
+    try {
+      await apiClient.post("/send-email", { name, email });
 
-        if (!res.ok) {
-          console.error("Erro do servidor:", res.status, data);
-          return;
-        }
-
-        if (showToast) {
-          Toast.show({
-            type: "success",
-            text1: "Novo código enviado.",
-            text2: "Por favor, verifique seu e-mail.",
-            visibilityTime: 4000,
-          });
-        }
-
-        // console.log("Resposta do backend:", data);
-      })
-      .catch((error) => {
-        console.error("Erro na requisição:", error);
-      });
+      if (showToast) {
+        Toast.show({
+          type: "success",
+          text1: "Novo código enviado.",
+          text2: "Por favor, verifique seu e-mail.",
+          visibilityTime: 4000,
+        });
+      }
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    }
   }
 
   const onSubmit = async ({ code }: { code: string }) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/confirm-code/`,
-        {
-          method: "POST",
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify({ code, email }),
-        }
-      );
-      // const data: { message: string } = await response.json();
-
-      if (!response.ok) {
+      try {
+        await apiClient.post("/confirm-code/", { code, email });
+      } catch (error) {
         Toast.show({
           type: "error",
           text1: "Código incorreto.",
           text2: "Digite outra vez.",
           visibilityTime: 4000,
         });
-
-        throw new Error(`Código inválido, status ${response.status}`);
+        throw error;
       }
 
       router.push({

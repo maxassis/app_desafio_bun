@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { Button } from "../../../components/button";
 import { useMutation } from "@tanstack/react-query";
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient } from "@/services/api-client";
 
 type FormData = {
   name: string;
@@ -36,13 +36,10 @@ export default function CreateAccount() {
 
   const checkEmailMutation = useMutation({
     mutationFn: async (email: string) => {
-      const response = await fetch(
-        `${API_BASE_URL}/check-email`,
-        {
-          method: "POST",
-          headers: { "Content-type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
+      const response = await apiClient.post(
+        "/check-email",
+        { email },
+        { validateStatus: () => true }
       );
       return response;
     },

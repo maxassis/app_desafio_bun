@@ -18,7 +18,7 @@ import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import CheckGreen from "../../../assets/check-green.svg";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient, getErrorMessage } from "@/services/api-client";
 
 interface Criteria {
   length: boolean;
@@ -73,29 +73,16 @@ export default function RecoveryCreatePassword({ route }: any) {
     if (password !== password2) return
 
     try {
-      const response = await fetch(`${API_BASE_URL}/users/change-password`, {
-        method: "PATCH",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify({ email, new_password: password }),
+      await apiClient.patch("/users/change-password", {
+        email,
+        new_password: password,
       });
-      // const data = await response.json();
-      // console.log(data);
-
-      if (!response.ok) {
-           if(response.statusText === "User already exists") {
-             Alert.alert("Usuário ja existe", "", [
-               {
-                 text: "Ok",
-                 style: "cancel",
-               },
-             ]);
-           }
-          throw new Error(response.statusText);
-      }
     router.push("/recoveryDone");
 
 
     } catch (error) {
+      const message = getErrorMessage(error, "Erro ao alterar a senha");
+      Alert.alert("Erro", message);
       console.error(error);
     }
   }

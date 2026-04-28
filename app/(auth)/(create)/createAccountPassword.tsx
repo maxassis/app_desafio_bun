@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import CheckGreen from '../../../assets/check-green.svg'
 import Close from '../../../assets/Close.svg'
 import Logo from '../../../assets/logo2.svg'
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient, getErrorMessage } from "@/services/api-client";
 
 interface Criteria {
   length: boolean
@@ -57,25 +57,16 @@ export default function CreatePassword() {
   }
 
   const createUser = async (newPassword: string) => {
-    const response = await fetch(
-      `${API_BASE_URL}/users`,
-      {
-        method: 'POST',
-        headers: { 'Content-type': 'application/json' },
-        body: JSON.stringify({ name, email, password: newPassword }),
-      },
-    )
-
-    if (!response.ok) {
-      if (response.statusText === 'User already exists') {
-        throw new Error('Usuário já existe')
-      }
-      else {
-        throw new Error(response.statusText)
-      }
+    try {
+      const { data } = await apiClient.post('/users', {
+        name,
+        email,
+        password: newPassword,
+      })
+      return data
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'Erro ao criar usuário'))
     }
-
-    return response.json()
   }
 
   const { mutate, isPending } = useMutation({

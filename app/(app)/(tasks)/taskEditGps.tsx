@@ -15,16 +15,14 @@ import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
 
 import dayjs from "dayjs";
-import tokenExists from "../../../store/auth-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useDesafioStore from "../../../store/desafio-store";
 import Left from "../../../assets/Icon-left.svg";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient, getErrorMessage } from "@/services/api-client";
 
 export default function CreateTaskGps() {
   const [nomeAtividade, setNomeAtividade] = useState("");
-  const token = tokenExists((state) => state.token);
   const queryClient = useQueryClient();
   const { taskData, desafioSelecionado } = useDesafioStore();
   const insets = useSafeAreaInsets();
@@ -67,27 +65,19 @@ export default function CreateTaskGps() {
         duration: taskData?.duration,
       });
 
-      const response = await fetch(
-        `${API_BASE_URL}/tasks/update-task/${taskData?.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: nomeAtividade,
-            environment: taskData?.environment,
-            distanceKm: taskData ? +taskData.distanceKm : 0,
-            date: taskData?.date,
-            duration: taskData?.duration ? +taskData.duration : 0,
-          }),
-        }
-      );
-
-      const data = await response.json();
-      console.log(data);
-      return data;
+      try {
+        const { data } = await apiClient.patch(`/tasks/update-task/${taskData?.id}`, {
+          name: nomeAtividade,
+          environment: taskData?.environment,
+          distanceKm: taskData ? +taskData.distanceKm : 0,
+          date: taskData?.date,
+          duration: taskData?.duration ? +taskData.duration : 0,
+        });
+        console.log(data);
+        return data;
+      } catch (error) {
+        throw new Error(getErrorMessage(error, "Falha ao atualizar tarefa"));
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["desafios"] });

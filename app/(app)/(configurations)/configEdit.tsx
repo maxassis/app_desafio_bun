@@ -15,12 +15,11 @@ import User from "../../../assets/user.svg";
 import Cam from "../../../assets/camera.svg";
 import { MaskedTextInput } from "react-native-mask-text";
 import * as ImagePicker from "expo-image-picker";
-import tokenExists from "../../../store/auth-store";
 import { router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cva } from "class-variance-authority";
 import { editUserData, fetchUserData } from "@/services/users-service";
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient, getErrorMessage } from "@/services/api-client";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -45,7 +44,6 @@ const getFileSize = async (uri: string) => {
 };
 
 export default function ProfileEdit() {
-  const token = tokenExists((state) => state.token);
   const [bioValue, setBioValue] = useState("");
   const [nameValue, setNameValue] = useState("");
   const [unMaskedValue, setUnmaskedValue] = useState("");
@@ -105,28 +103,24 @@ export default function ProfileEdit() {
   const uploadAvatarMutation = useMutation({
     mutationFn: async (formData: FormData): Promise<uploadAvatarResponse> => {
       setLoadingUpload(true);
-
-      const response = await fetch(
-        `${API_BASE_URL}/users/upload-avatar`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "multipart/form-data",
-            authorization: "Bearer " + token,
-          },
-          body: formData,
-        }
-      );
-
-      bottomSheetAvatarRef.current?.close();
-      setLoadingUpload(false);
-
-      if (!response.ok) {
+      try {
+        const { data } = await apiClient.post<uploadAvatarResponse>(
+          "/users/upload-avatar",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        return data;
+      } catch (error) {
         Alert.alert("Erro ao fazer upload do avatar");
-        throw new Error("Erro ao fazer upload do avatar");
+        throw new Error(getErrorMessage(error, "Erro ao fazer upload do avatar"));
+      } finally {
+        bottomSheetAvatarRef.current?.close();
+        setLoadingUpload(false);
       }
-
-      return response.json();
     },
     onSuccess: (data) => {
       // console.log("Upload successful", data);
@@ -141,31 +135,23 @@ export default function ProfileEdit() {
   const deleteAvatarMutation = useMutation({
     mutationFn: async () => {
       setLoadingUpload(true);
-
-      const result = await fetch(
-        `${API_BASE_URL}/users/delete-avatar`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: "Bearer " + token,
-          },
-          body: JSON.stringify({
-            filename: userConfig?.avatar_filename,
-          }),
-        }
-      );
-
-      bottomSheetAvatarRef.current?.close();
-      setLoadingUpload(false);
-
-      if (!result.ok) {
-        // console.log("Erro ao deletar avatar", result);
+      try {
+        const { data } = await apiClient.delete<{ message?: string }>(
+          "/users/delete-avatar",
+          {
+            data: {
+              filename: userConfig?.avatar_filename,
+            },
+          }
+        );
+        return data;
+      } catch (error) {
         Alert.alert("Erro ao deletar avatar");
-        throw new Error("Erro ao deletar avatar");
+        throw new Error(getErrorMessage(error, "Erro ao deletar avatar"));
+      } finally {
+        bottomSheetAvatarRef.current?.close();
+        setLoadingUpload(false);
       }
-
-      return result.json();
     },
     onSuccess: () => {
       // Invalidate the userConfig query to fetch fresh data

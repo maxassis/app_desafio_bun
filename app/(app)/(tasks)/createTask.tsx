@@ -18,7 +18,6 @@ import Indoor from "../../../assets/Indoor.svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Down from "../../../assets/down.svg";
-import tokenExists from "../../../store/auth-store";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { ptBR } from "../../../utils/localeCalendar";
 import dayjs from "dayjs";
@@ -30,7 +29,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
 import { TimePickerModal, TimePickerModalRef } from "@/components";
-import { API_BASE_URL } from "@/services/api-client";
+import { apiClient, getErrorMessage } from "@/services/api-client";
 
 LocaleConfig.locales["pt-br"] = ptBR;
 LocaleConfig.defaultLocale = "pt-br";
@@ -80,7 +79,6 @@ export default function TaskCreate() {
     minutes: 0,
     seconds: 0,
   });
-  const token = tokenExists((state) => state.token);
   const { desafioSelecionado, setDesafioSelecionado } =
     useDesafioStore();
   const childRef = useRef<KilometerMeterPickerModalRef>(null);
@@ -92,19 +90,12 @@ export default function TaskCreate() {
 
   const criarTarefaMutation = useMutation({
     mutationFn: async (dadosTarefa: CheckCompletion) => {
-      const response = await fetch(`${API_BASE_URL}/tasks/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(dadosTarefa),
-      });
-      if (!response.ok) {
-        const dadosErro = await response.json();
-        throw new Error(dadosErro.message || "Falha ao criar tarefa");
+      try {
+        const { data } = await apiClient.post("/tasks/create", dadosTarefa);
+        return data;
+      } catch (error) {
+        throw new Error(getErrorMessage(error, "Falha ao criar tarefa"));
       }
-      return response.json();
     },
     onSuccess: (data) => {
       limparInputs();
