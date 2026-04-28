@@ -26,7 +26,7 @@ configureReanimatedLogger({
 const queryClient = new QueryClient()
 
 export default function RootLayout() {
-  const { isAuthenticated, loadToken, checkTokenExpiration } = useAuthStore()
+  const { isAuthenticated, loadSession, checkSessionExpiration } = useAuthStore()
   const router = useRouter()
   const segments = useSegments()
 
@@ -41,10 +41,10 @@ export default function RootLayout() {
   useEffect(() => {
     const prepareApp = async () => {
       try {
-        await loadToken()
+        await loadSession()
       }
       catch (e) {
-        console.warn('Erro ao carregar token:', e)
+        console.warn('Erro ao carregar sessao:', e)
       }
       finally {
         if (fontsLoaded) {
@@ -57,7 +57,7 @@ export default function RootLayout() {
     if (fontsLoaded) {
       prepareApp()
     }
-  }, [fontsLoaded, loadToken])
+  }, [fontsLoaded, loadSession])
 
   // useEffect(() => {
   //   if (appIsReady) {
@@ -85,20 +85,20 @@ export default function RootLayout() {
     }
   }, [isAuthenticated, appIsReady, segments, router])
 
-  // Verificação periódica de expiração do token
+  // Verificacao periodica da sessao
   useEffect(() => {
     if (!isAuthenticated)
       return
 
     const interval = setInterval(async () => {
-      const isValid = await checkTokenExpiration()
+      const isValid = await checkSessionExpiration()
       if (!isValid) {
-        console.error('Token expirou, deslogando...')
+        console.error('Sessao expirada, deslogando...')
       }
     }, 5 * 60 * 1000)
 
     return () => clearInterval(interval)
-  }, [isAuthenticated, checkTokenExpiration])
+  }, [isAuthenticated, checkSessionExpiration])
 
   if (!appIsReady)
     return null

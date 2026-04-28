@@ -18,10 +18,9 @@ import Facebook from '../../assets/facebook.svg'
 import Google from '../../assets/google.svg'
 import Logo from '../../assets/logo2.svg'
 import { Button } from '../../components/button'
-import { authClient, getAuthAccessToken } from '../../services/auth-client'
-import { exchangeAuthToken, signIn } from '../../services/auth-service'
+import { authClient } from '../../services/auth-client'
 import useAuthStore from '../../store/auth-store'
-import type { AuthAccessTokenResponse, AuthSigninRequest } from '../../@types/auth-signin'
+import type { AuthSigninRequest } from '../../@types/auth-signin'
 
 type LoginError = Error & {
   status?: number
@@ -41,11 +40,25 @@ export default function Login() {
 
   const mutation = useMutation({
     mutationFn: async (formData: AuthSigninRequest) => {
-      const signInData = await signIn(formData)
-      return exchangeAuthToken(signInData.token)
+      console.log('[LOGIN] 1. signIn.email() via Better Auth...')
+      const { error } = await authClient.signIn.email({
+        email: formData.email,
+        password: formData.password,
+      })
+      
+      if (error) {
+        console.log('[LOGIN] Erro do Better Auth:', error)
+        const authError = new Error(error.message || 'Erro ao fazer login') as LoginError
+        authError.status = error.status
+        throw authError
+      }
+      
+      console.log('[LOGIN] 2. Login OK, verificando cookie...')
+      const cookie = authClient.getCookie()
+      console.log('[LOGIN] 3. Cookie:', cookie ? '存在' : '不存在')
     },
-    onSuccess: (data: AuthAccessTokenResponse) => {
-      login(data.access_token)
+    onSuccess: () => {
+      login()
     },
     onError: (error: LoginError) => {
       if (error.status === 401) {
@@ -70,6 +83,7 @@ export default function Login() {
 
   const googleMutation = useMutation({
     mutationFn: async () => {
+      console.log('[LOGIN-GOOGLE] 1. Iniciando login social...')
       const { error } = await authClient.signIn.social({
         provider: 'google',
         callbackURL: googleRedirectUrl,
@@ -79,14 +93,17 @@ export default function Login() {
         throw new Error(error.message || 'Erro ao entrar com Google')
       }
 
-      if (!authClient.getCookie()) {
+      const cookie = authClient.getCookie()
+      console.log('[LOGIN-GOOGLE] 2. Login social OK, cookie:', cookie ? '存在' : '不存在')
+      
+      if (!cookie) {
         throw new Error('Sessão do Google não retornada')
       }
 
-      return getAuthAccessToken()
+      return true
     },
-    onSuccess: (data: AuthAccessTokenResponse) => {
-      login(data.access_token)
+    onSuccess: () => {
+      login()
     },
     onError: (error: LoginError) => {
       Toast.show({
