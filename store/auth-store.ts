@@ -1,202 +1,79 @@
-// import { create } from 'zustand';
-// import * as SecureStore from 'expo-secure-store';
-
-// interface AuthState {
-//   isAuthenticated: boolean;
-//   token: string | null;
-//   login: (token: string) => Promise<void>;
-//   logout: () => Promise<void>;
-//   loadToken: () => Promise<void>;
-// }
-
-// const TOKEN_KEY = 'token-desafio';
-
-// const useAuthStore = create<AuthState>((set) => ({
-//   isAuthenticated: false,
-//   token: null,
-
-//   login: async (token: string) => {
-//     try {
-//       await SecureStore.setItemAsync(TOKEN_KEY, token);
-//       set({ isAuthenticated: true, token });
-//     } catch (error) {
-//       console.error('Error storing the token', error);
-//     }
-//   },
-
-//   logout: async () => {
-//     try {
-//       await SecureStore.deleteItemAsync(TOKEN_KEY);
-//       set({ isAuthenticated: false, token: null });
-//     } catch (error) {
-//       console.error('Error removing the token', error);
-//     }
-//   },
-
-//   loadToken: async () => {
-//     try {
-//       const token = await SecureStore.getItemAsync(TOKEN_KEY);
-//       if (token) {
-//         set({ isAuthenticated: true, token });
-//       }
-//     } catch (error) {
-//       console.error('Error loading the token', error);
-//     }
-//   }
-// }));
-
-// export default useAuthStore;
-
-// import { create } from 'zustand';
-// import * as SecureStore from 'expo-secure-store';
-
-// interface AuthState {
-//   isAuthenticated: boolean;
-//   token: string | null;
-//   login: (token: string) => Promise<void>;
-//   logout: () => Promise<void>;
-//   loadToken: () => Promise<void>;
-// }
-
-// const TOKEN_KEY = 'token-desafio';
-
-// const useAuthStore = create<AuthState>((set) => ({
-//   isAuthenticated: false,
-//   token: null,
-
-//   login: async (token: string) => {
-//     try {
-//       await SecureStore.setItemAsync(TOKEN_KEY, token);
-//       set({ isAuthenticated: true, token });
-//     } catch (error) {
-//       console.error('Error storing the token:', error);
-//     }
-//   },
-
-//   logout: async () => {
-//     try {
-//       await SecureStore.deleteItemAsync(TOKEN_KEY);
-//       set({ isAuthenticated: false, token: null });
-//     } catch (error) {
-//       console.error('Error removing the token:', error);
-//     }
-//   },
-
-//   loadToken: async () => {
-//     try {
-//       const token = await SecureStore.getItemAsync(TOKEN_KEY);
-//       if (token) {
-//         console.log(token);
-//         set({ isAuthenticated: true, token });
-//       } else {
-//         set({ isAuthenticated: false, token: null });
-//       }
-//     } catch (error) {
-//       console.error('Error loading the token:', error);
-//       set({ isAuthenticated: false, token: null });
-//     }
-//   }
-// }));
-
-// export default useAuthStore;
-
-import { createWithEqualityFn as create } from 'zustand/traditional';
-import * as SecureStore from 'expo-secure-store';
-import { jwtDecode } from 'jwt-decode';
+import { createWithEqualityFn as create } from "zustand/traditional";
+import * as SecureStore from "expo-secure-store";
 
 interface AuthState {
   isAuthenticated: boolean;
-  token: string | null;
-  login: (token: string) => Promise<void>;
+  login: () => Promise<void>;
   logout: () => Promise<void>;
-  loadToken: () => Promise<void>;
-  isTokenExpired: (token?: string) => boolean;
-  checkTokenExpiration: () => Promise<boolean>;
+  loadSession: () => Promise<void>;
+  checkSessionExpiration: () => Promise<boolean>;
 }
 
-const TOKEN_KEY = 'token-desafio';
+const SESSION_TOKEN_KEY = "better-auth.session_token";
+const SESSION_EXPIRES_AT_KEY = "better-auth.session-expires-at";
 
 const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
-  token: null,
 
-  isTokenExpired: (token?: string) => {
+  checkSessionExpiration: async () => {
     try {
-      const tokenToCheck = token || get().token;
-      if (!tokenToCheck) return true;
+      const { authClient } = await import("@/services/auth-client");
+      const { data, error } = await authClient.getSession();
 
-      const decoded = jwtDecode(tokenToCheck);
-      const currentTime = Date.now() / 1000;
-      
-      return decoded.exp ? decoded.exp < currentTime : true;
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      return true;
-    }
-  },
-
-  checkTokenExpiration: async () => {
-    const { token, isTokenExpired, logout } = get();
-    
-    if (!token || isTokenExpired(token)) {
-      await logout();
-      return false;
-    }
-    return true;
-  },
-
-  login: async (token: string) => {
-    try {
-      const { isTokenExpired } = get();
-      
-      // Verifica se o token não está expirado antes de fazer login
-      if (isTokenExpired(token)) {
-        console.error('Cannot login with expired token');
-        return;
+      if (error || !data?.session) {
+        await get().logout();
+        return false;
       }
 
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
-      set({ isAuthenticated: true, token });
+      set({ isAuthenticated: true });
+      return true;
     } catch (error) {
-      console.error('Error storing the token:', error);
+      console.error("Error validating session:", error);
+      await get().logout();
+      return false;
+    }
+  },
+
+  login: async () => {
+    try {
+      const isValidSession = await get().checkSessionExpiration();
+      set({ isAuthenticated: isValidSession });
+    } catch (error) {
+      console.error("Error establishing session:", error);
+      set({ isAuthenticated: false });
     }
   },
 
   logout: async () => {
     try {
-      const { authClient } = await import('@/services/auth-client');
-
-      const signOutResponse = await authClient.signOut();
+      const { authClient } = await import("@/services/auth-client");
+      await authClient.signOut();
     } catch (error) {
       console.log("[AUTH] Sign-out request failed:", error);
     } finally {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
-      await SecureStore.deleteItemAsync("better-auth.session_token");
-      await SecureStore.deleteItemAsync("better-auth.session-expires-at");
-
-      set({ isAuthenticated: false, token: null });
+      await SecureStore.deleteItemAsync(SESSION_TOKEN_KEY);
+      await SecureStore.deleteItemAsync(SESSION_EXPIRES_AT_KEY);
+      set({ isAuthenticated: false });
     }
   },
 
-  loadToken: async () => {
+  loadSession: async () => {
     try {
-      const token = await SecureStore.getItemAsync(TOKEN_KEY);
-      const { isTokenExpired } = get();
-      
-      if (token && !isTokenExpired(token)) {
-        set({ isAuthenticated: true, token });
+      const { authClient } = await import("@/services/auth-client");
+      const { data, error } = await authClient.getSession();
+
+      if (!error && data?.session) {
+        set({ isAuthenticated: true });
       } else {
-        // Token expirado ou não existe, remove do storage
-        if (token) {
-          await SecureStore.deleteItemAsync(TOKEN_KEY);
-        }
-        set({ isAuthenticated: false, token: null });
+        await SecureStore.deleteItemAsync(SESSION_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(SESSION_EXPIRES_AT_KEY);
+        set({ isAuthenticated: false });
       }
     } catch (error) {
-      console.error('Error loading the token:', error);
-      set({ isAuthenticated: false, token: null });
+      console.error("Error loading session:", error);
+      set({ isAuthenticated: false });
     }
-  }
+  },
 }));
 
 export default useAuthStore;
