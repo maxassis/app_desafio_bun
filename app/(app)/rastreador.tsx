@@ -205,7 +205,6 @@ export default function Rastreador() {
 
     const checkLocationServices = async () => {
       const enabled = await Location.hasServicesEnabledAsync()
-      console.log('[RASTREADOR] Serviços de localização:', enabled ? 'ATIVOS' : 'INATIVOS')
       if (!isMounted)
         return
 
@@ -215,19 +214,15 @@ export default function Rastreador() {
       if (enabled && !permissionsChecked.current) {
         permissionsChecked.current = true
         const result = await requestPermissions()
-        console.log('[RASTREADOR] Permissões:', JSON.stringify(result))
         if (!result.foreground) {
-          console.warn('[RASTREADOR] Foreground negada, voltando...')
           handleDecline()
           return
         }
         if (!result.background) {
-          console.log('[RASTREADOR] Background negada, exibindo modal de instruções')
           setBgPermissionModalVisible(true)
           bgModalOpenRef.current = true
           return
         }
-        console.log('[RASTREADOR] Todas as permissões concedidas, iniciando countdown')
         setPermissionsGranted(true)
         permissionsGrantedRef.current = true
         setShowCountdown(true)
@@ -236,18 +231,13 @@ export default function Rastreador() {
 
     const recheckBgPermission = async () => {
       if (bgModalOpenRef.current && !permissionsGrantedRef.current) {
-        console.log('[RASTREADOR] Re-verificando permissão de background após retorno das Configurações...')
         const { status } = await Location.getBackgroundPermissionsAsync()
-        console.log('[RASTREADOR] Re-check background:', status)
         if (status === Location.PermissionStatus.GRANTED) {
-          console.log('[RASTREADOR] Background CONCEDIDA após retorno')
           setBgPermissionModalVisible(false)
           bgModalOpenRef.current = false
           setPermissionsGranted(true)
           permissionsGrantedRef.current = true
           setShowCountdown(true)
-        } else {
-          console.log('[RASTREADOR] Background ainda não concedida:', status)
         }
       }
     }

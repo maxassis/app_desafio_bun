@@ -394,23 +394,16 @@ export default function useTracker() {
   }
 
   async function requestPermissions(): Promise<PermissionResult> {
-    console.log('[PERM] Solicitando permissão de foreground...');
     const fg = await requestForegroundPermissionsAsync();
-    console.log('[PERM] Foreground:', fg.status);
     if (fg.status !== PermissionStatus.GRANTED) {
-      console.warn('[PERM] Foreground NEGADA');
       return { foreground: false, background: false };
     }
 
-    console.log('[PERM] Foreground OK, solicitando background...');
     const bg = await requestBackgroundPermissionsAsync();
-    console.log('[PERM] Background:', bg.status);
     if (bg.status === PermissionStatus.GRANTED) {
-      console.log('[PERM] Background concedida');
       return { foreground: true, background: true };
     }
 
-    console.warn('[PERM] Background status:', bg.status, '— exibir modal de instruções');
     return { foreground: true, background: false };
   }
 
