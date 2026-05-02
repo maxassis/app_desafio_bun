@@ -321,6 +321,11 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   }
 });
 
+type PermissionResult = {
+  foreground: boolean
+  background: boolean
+}
+
 export default function useTracker() {
   const [status, setStatus] = useState<Status>("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -388,26 +393,25 @@ export default function useTracker() {
     }
   }
 
-  async function requestPermissions() {
-    // console.log("1. Solicitando permissão de foreground...");
+  async function requestPermissions(): Promise<PermissionResult> {
+    console.log('[PERM] Solicitando permissão de foreground...');
     const fg = await requestForegroundPermissionsAsync();
-    // console.log("-> Status da permissão de foreground:", fg.status);
+    console.log('[PERM] Foreground:', fg.status);
     if (fg.status !== PermissionStatus.GRANTED) {
-      // console.warn("Permissão de foreground negada. A tarefa não pode iniciar.");
-      return false;
+      console.warn('[PERM] Foreground NEGADA');
+      return { foreground: false, background: false };
     }
 
-    // console.log("2. Solicitando permissão de background...");
+    console.log('[PERM] Foreground OK, solicitando background...');
     const bg = await requestBackgroundPermissionsAsync();
-    // console.log("-> Status da permissão de background:", bg.status);
-    if (bg.status !== PermissionStatus.GRANTED) {
-      // console.warn(
-      //   "Permissão de background negada. O rastreamento pode não funcionar com a tela desligada."
-      // );
+    console.log('[PERM] Background:', bg.status);
+    if (bg.status === PermissionStatus.GRANTED) {
+      console.log('[PERM] Background concedida');
+      return { foreground: true, background: true };
     }
 
-    // console.log("3. Verificação de permissões concluída.");
-    return true;
+    console.warn('[PERM] Background status:', bg.status, '— exibir modal de instruções');
+    return { foreground: true, background: false };
   }
 
   async function startWatcher() {

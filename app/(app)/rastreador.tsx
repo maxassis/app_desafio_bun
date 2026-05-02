@@ -28,6 +28,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { HoldProgressButton } from '@/components/Tracker/button_anime'
 import { PermissionModal } from '@/components/Tracker/permission_modal'
+import { BackgroundPermissionModal } from '@/components/Tracker/background_permission_modal'
 import Pause from '../../assets/Pause.svg'
 import Play from '../../assets/play.svg'
 
@@ -55,6 +56,7 @@ export default function Rastreador() {
   const insets = useSafeAreaInsets()
 
   const [modalVisible, setModalVisible] = useState(false)
+  const [bgPermissionModalVisible, setBgPermissionModalVisible] = useState(false)
   const [servicesEnabled, setServicesEnabled] = useState<boolean | null>(null)
   const [permissionsGranted, setPermissionsGranted] = useState(false)
   const [showCountdown, setShowCountdown] = useState(false)
@@ -71,6 +73,8 @@ export default function Rastreador() {
   const scale = useSharedValue(1)
   const opacity = useSharedValue(1)
   const permissionsChecked = useRef(false)
+  const bgModalOpenRef = useRef(false)
+  const permissionsGrantedRef = useRef(false)
 
   const isPaused = status === 'paused'
 
@@ -84,11 +88,28 @@ export default function Rastreador() {
 
   const handleDecline = () => {
     setModalVisible(false)
+    setBgPermissionModalVisible(false)
     Alert.alert(
       'Permissão Necessária',
       'A permissão de localização é necessária para rastrear sua atividade.',
       [{ text: 'OK', onPress: () => router.back() }],
     )
+  }
+
+  const handleBgPermissionAccept = async () => {
+    try {
+      await Location.requestBackgroundPermissionsAsync()
+    } catch {
+      await Linking.openSettings()
+    }
+  }
+
+  const handleBgPermissionDecline = () => {
+    setBgPermissionModalVisible(false)
+    bgModalOpenRef.current = false
+    setPermissionsGranted(true)
+    permissionsGrantedRef.current = true
+    setShowCountdown(true)
   }
 
   const handleAccept = async () => {
@@ -184,6 +205,7 @@ export default function Rastreador() {
 
     const checkLocationServices = async () => {
       const enabled = await Location.hasServicesEnabledAsync()
+      console.log('[RASTREADOR] Serviços de localização:', enabled ? 'ATIVOS' : 'INATIVOS')
       if (!isMounted)
         return
 
@@ -192,13 +214,40 @@ export default function Rastreador() {
 
       if (enabled && !permissionsChecked.current) {
         permissionsChecked.current = true
-        const granted = await requestPermissions()
-        if (granted) {
-          setPermissionsGranted(true)
-          setShowCountdown(true)
-        }
-        else {
+        const result = await requestPermissions()
+        console.log('[RASTREADOR] Permissões:', JSON.stringify(result))
+        if (!result.foreground) {
+          console.warn('[RASTREADOR] Foreground negada, voltando...')
           handleDecline()
+          return
+        }
+        if (!result.background) {
+          console.log('[RASTREADOR] Background negada, exibindo modal de instruções')
+          setBgPermissionModalVisible(true)
+          bgModalOpenRef.current = true
+          return
+        }
+        console.log('[RASTREADOR] Todas as permissões concedidas, iniciando countdown')
+        setPermissionsGranted(true)
+        permissionsGrantedRef.current = true
+        setShowCountdown(true)
+      }
+    }
+
+    const recheckBgPermission = async () => {
+      if (bgModalOpenRef.current && !permissionsGrantedRef.current) {
+        console.log('[RASTREADOR] Re-verificando permissão de background após retorno das Configurações...')
+        const { status } = await Location.getBackgroundPermissionsAsync()
+        console.log('[RASTREADOR] Re-check background:', status)
+        if (status === Location.PermissionStatus.GRANTED) {
+          console.log('[RASTREADOR] Background CONCEDIDA após retorno')
+          setBgPermissionModalVisible(false)
+          bgModalOpenRef.current = false
+          setPermissionsGranted(true)
+          permissionsGrantedRef.current = true
+          setShowCountdown(true)
+        } else {
+          console.log('[RASTREADOR] Background ainda não concedida:', status)
         }
       }
     }
@@ -208,6 +257,7 @@ export default function Rastreador() {
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         checkLocationServices()
+        recheckBgPermission()
       }
     })
 
@@ -269,6 +319,16 @@ export default function Rastreador() {
         visible={modalVisible}
         onAccept={handleAccept}
         onDecline={handleDecline}
+      />
+    )
+  }
+
+  if (bgPermissionModalVisible) {
+    return (
+      <BackgroundPermissionModal
+        visible={bgPermissionModalVisible}
+        onAccept={handleBgPermissionAccept}
+        onDecline={handleBgPermissionDecline}
       />
     )
   }
