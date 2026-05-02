@@ -19,7 +19,7 @@ import Google from '../../assets/google.svg'
 import Logo from '../../assets/logo2.svg'
 import { Button } from '../../components/button'
 import { authClient } from '../../services/auth-client'
-import useAuthStore from '../../store/auth-store'
+import { useAuth } from '@/contexts/auth-context'
 import type { AuthSigninRequest } from '../../@types/auth-signin'
 
 type LoginError = Error & {
@@ -27,8 +27,8 @@ type LoginError = Error & {
 }
 
 export default function Login() {
-  const { login } = useAuthStore()
   const router = useRouter()
+  const { setAuthenticated } = useAuth()
   const insets = useSafeAreaInsets()
   const googleRedirectUrl = Linking.createURL('login')
 
@@ -40,25 +40,20 @@ export default function Login() {
 
   const mutation = useMutation({
     mutationFn: async (formData: AuthSigninRequest) => {
-      console.log('[LOGIN] 1. signIn.email() via Better Auth...')
       const { error } = await authClient.signIn.email({
         email: formData.email,
         password: formData.password,
       })
       
       if (error) {
-        console.log('[LOGIN] Erro do Better Auth:', error)
         const authError = new Error(error.message || 'Erro ao fazer login') as LoginError
         authError.status = error.status
         throw authError
       }
-      
-      console.log('[LOGIN] 2. Login OK, verificando cookie...')
-      const cookie = authClient.getCookie()
-      console.log('[LOGIN] 3. Cookie:', cookie ? '存在' : '不存在')
     },
     onSuccess: () => {
-      login()
+      setAuthenticated(true)
+      router.replace('/(app)/dashboard')
     },
     onError: (error: LoginError) => {
       if (error.status === 401) {
@@ -77,13 +72,11 @@ export default function Login() {
           visibilityTime: 4000,
         })
       }
-      console.error('Erro ao fazer login:', error)
     },
   })
 
   const googleMutation = useMutation({
     mutationFn: async () => {
-      console.log('[LOGIN-GOOGLE] 1. Iniciando login social...')
       const { error } = await authClient.signIn.social({
         provider: 'google',
         callbackURL: googleRedirectUrl,
@@ -94,7 +87,6 @@ export default function Login() {
       }
 
       const cookie = authClient.getCookie()
-      console.log('[LOGIN-GOOGLE] 2. Login social OK, cookie:', cookie ? '存在' : '不存在')
       
       if (!cookie) {
         throw new Error('Sessão do Google não retornada')
@@ -103,7 +95,8 @@ export default function Login() {
       return true
     },
     onSuccess: () => {
-      login()
+      setAuthenticated(true)
+      router.replace('/(app)/dashboard')
     },
     onError: (error: LoginError) => {
       Toast.show({
@@ -112,7 +105,6 @@ export default function Login() {
         text2: error.message || 'Tente novamente',
         visibilityTime: 4000,
       })
-      console.error('Erro ao fazer login com Google:', error)
     },
   })
 

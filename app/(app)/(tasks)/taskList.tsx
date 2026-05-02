@@ -1,5 +1,4 @@
 import { useState, useRef, useMemo, useEffect } from "react";
-import useAuthStore from "../../../store/auth-store";
 import {
   View,
   Text,
@@ -26,9 +25,7 @@ export default function TaskList() {
   const { desafioSelecionado, setTaskData } =
     useDesafioStore();
 
-  const { isAuthenticated } = useAuthStore();
   const [task, setTask] = useState<TaskItemProps>();
-
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetEditRef = useRef<BottomSheet>(null);
   const queryClient = useQueryClient();
@@ -46,7 +43,7 @@ export default function TaskList() {
   const { data, isLoading, error } = useQuery<TaskItemProps[]>({
     queryKey: ["tasks", desafioSelecionado?.inscriptionId],
     queryFn: () => fetchTasks(desafioSelecionado?.inscriptionId as number),
-    enabled: !!desafioSelecionado?.inscriptionId && isAuthenticated,
+    enabled: !!desafioSelecionado?.inscriptionId,
   });
 
   const deleteMutation = useMutation({

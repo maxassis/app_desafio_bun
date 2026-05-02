@@ -10,7 +10,6 @@ import { Image } from 'expo-image'
 import { useQuery } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
 import Left from '../../assets/arrow-left.svg'
-import useAuthStore from '../../store/auth-store'
 import useDesafioStore from '../../store/desafio-store'
 import type { AllDesafios } from '../../@types/desafio-get-all-desafio'
 import { fetchAllDesafios } from '../../services/desafios-service'
@@ -18,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 
 export default function DesafioSelect() {
-  const { isAuthenticated } = useAuthStore()
   const setDesafioSelecionado = useDesafioStore(state => state.setDesafioSelecionado)
   const { gps } = useLocalSearchParams()
   const insets = useSafeAreaInsets()
@@ -33,7 +31,6 @@ export default function DesafioSelect() {
     queryKey: ['getAllDesafios'],
     queryFn: fetchAllDesafios,
     staleTime: 5 * 60 * 1000,
-    enabled: isAuthenticated,
   })
 
   // console.log(desafios)

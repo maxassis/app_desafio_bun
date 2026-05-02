@@ -15,7 +15,7 @@ import { configureReanimatedLogger } from 'react-native-reanimated'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from '@/utils/toastConfig'
-import useAuthStore from '../store/auth-store'
+import { AuthProvider, useAuth } from '@/contexts/auth-context'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -25,11 +25,10 @@ configureReanimatedLogger({
 
 const queryClient = new QueryClient()
 
-export default function RootLayout() {
-  const { isAuthenticated, loadSession, checkSessionExpiration } = useAuthStore()
+function RootLayoutNav() {
   const router = useRouter()
   const segments = useSegments()
-
+  const { isAuthenticated, isLoading } = useAuth()
   const [appIsReady, setAppIsReady] = useState(false)
 
   const [fontsLoaded] = useFonts({
@@ -39,36 +38,14 @@ export default function RootLayout() {
   })
 
   useEffect(() => {
-    const prepareApp = async () => {
-      try {
-        await loadSession()
-      }
-      catch (e) {
-        console.warn('Erro ao carregar sessao:', e)
-      }
-      finally {
-        if (fontsLoaded) {
-          setAppIsReady(true)
-          await SplashScreen.hideAsync()
-        }
-      }
+    if (fontsLoaded && !isLoading) {
+      setAppIsReady(true)
+      SplashScreen.hideAsync()
     }
+  }, [fontsLoaded, isLoading])
 
-    if (fontsLoaded) {
-      prepareApp()
-    }
-  }, [fontsLoaded, loadSession])
-
-  // useEffect(() => {
-  //   if (appIsReady) {
-  //     NavigationBar.setButtonStyleAsync('dark');
-  //     NavigationBar.setBackgroundColorAsync('transparent');
-  //   }
-  // }, [appIsReady]);
-
-  // Navegação baseada na autenticação
   useEffect(() => {
-    if (!appIsReady)
+    if (!appIsReady || isLoading)
       return
 
     const currentGroup = segments[0]
@@ -83,22 +60,7 @@ export default function RootLayout() {
         router.replace('/(app)/dashboard')
       }
     }
-  }, [isAuthenticated, appIsReady, segments, router])
-
-  // Verificacao periodica da sessao
-  useEffect(() => {
-    if (!isAuthenticated)
-      return
-
-    const interval = setInterval(async () => {
-      const isValid = await checkSessionExpiration()
-      if (!isValid) {
-        console.error('Sessao expirada, deslogando...')
-      }
-    }, 5 * 60 * 1000)
-
-    return () => clearInterval(interval)
-  }, [isAuthenticated, checkSessionExpiration])
+  }, [isAuthenticated, isLoading, appIsReady, segments, router])
 
   if (!appIsReady)
     return null
@@ -107,7 +69,6 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <StripeProvider
         publishableKey={Constants.expoConfig?.extra?.stripePublicKey}
-        // merchantIdentifier="merchant.com.seuapp.id"     // apenas necessário no iOS Apple Pay
       >
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView style={{ flex: 1 }}>
@@ -117,5 +78,13 @@ export default function RootLayout() {
       </StripeProvider>
       <Toast config={toastConfig} />
     </SafeAreaProvider>
+  )
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
   )
 }
