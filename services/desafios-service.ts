@@ -24,8 +24,8 @@ export const fetchRouteData = async (
       `/desafio/${desafioId}`
     );
 
-    if (!Array.isArray(data.location)) {
-      throw new Error("Location is not a valid coordinates array");
+    if (typeof data.location !== 'string') {
+      throw new Error("Location is not a valid encoded polyline string");
     }
 
     return data;
