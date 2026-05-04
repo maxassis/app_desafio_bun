@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Modal,
   Platform,
   Pressable,
   Text,
@@ -43,7 +44,7 @@ import { fetchUserData } from '@/services/users-service'
 import useDesafioStore from '@/store/desafio-store'
 import {
   calculateUserDistance,
-
+  decodePolyline,
   findPointAtDistance,
   haversine,
 } from '@/utils/gpsFunctions'
@@ -61,7 +62,7 @@ interface UserParticipation {
   totalTasks: number
   totalCalories: number
   totalDistanceKm: number
-  lastTaskDate: Date
+  lastTaskDate: string
 }
 
 type MapType = 'standard' | 'satellite' | 'hybrid'
@@ -70,6 +71,7 @@ type MapType = 'standard' | 'satellite' | 'hybrid'
 const MAP_EDGE_PADDING = { top: 50, right: 50, bottom: 50, left: 50 }
 const ANIMATION_DURATION = 1000
 const MARKERS_READY_DELAY = 1000
+const MAP_LOADING_HIDE_DELAY = 700
 const MAX_TILT = 60
 const TILT_STEP = 15
 
@@ -126,6 +128,7 @@ export default function Map2() {
   const [markersReady, setMarkersReady] = useState(false)
   const [userProgress, setUserProgress] = useState<number>(0)
   const [userDistance, setUserDistance] = useState<number>(0)
+  const [mapLoadingVisible, setMapLoadingVisible] = useState(true)
   const [usersParticipants, setUsersParticipants] = useState<
     UserParticipation[]
   >([])
@@ -138,6 +141,7 @@ export default function Map2() {
   // Refs & Store
   const mapRef = useRef<MapView>(null)
   const flatListRef = useRef<FlatList>(null)
+  const mapLoadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { desafioSelecionado } = useDesafioStore()
   // const insets = useSafeAreaInsets();
 
@@ -147,12 +151,16 @@ export default function Map2() {
   const { data: routeData, isLoading, isSuccess } = routeQuery
   const { data: userConfig } = userQuery
 
+  const coordinates = useMemo(() => {
+    if (!routeData?.location) return []
+    return decodePolyline(routeData.location)
+  }, [routeData?.location])
+
   // Process route data and participants
   const processRouteData = useCallback(() => {
-    if (!isSuccess || !routeData || !mapReady)
+    if (!isSuccess || !routeData || !mapReady || !coordinates.length)
       return
 
-    const coordinates = routeData.location
     setRouteCoordinates(coordinates)
 
     const totalDistance = +routeData.distance
@@ -191,9 +199,28 @@ export default function Map2() {
       animated: false,
     })
 
+    if (mapLoadingTimeoutRef.current)
+      clearTimeout(mapLoadingTimeoutRef.current)
+
+    mapLoadingTimeoutRef.current = setTimeout(() => {
+      setMapLoadingVisible(false)
+    }, MAP_LOADING_HIDE_DELAY)
+
     // Set markers ready after delay
     setTimeout(() => setMarkersReady(true), MARKERS_READY_DELAY)
-  }, [isSuccess, routeData, mapReady, userConfig?.usersId])
+  }, [isSuccess, routeData, mapReady, userConfig?.usersId, coordinates])
+
+  useEffect(() => {
+    setMapLoadingVisible(true)
+    setMarkersReady(false)
+  }, [routeData?.id])
+
+  useEffect(() => {
+    return () => {
+      if (mapLoadingTimeoutRef.current)
+        clearTimeout(mapLoadingTimeoutRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     processRouteData()
@@ -428,15 +455,6 @@ export default function Map2() {
     [focusOnUser, selectedUser, userConfig],
   )
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <View className="flex-1 bg-white justify-center items-center">
-        <ActivityIndicator size="large" color="#12FF55" />
-      </View>
-    )
-  }
-
   return (
     <View className="flex-1 bg-white justify-center items-center relative">
       <MapView
@@ -564,6 +582,14 @@ export default function Map2() {
       />
 
       <SystemBars style="dark" />
+
+      {(isLoading || mapLoadingVisible) && (
+        <Modal visible transparent animationType="none" statusBarTranslucent>
+          <View style={{ flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#12FF55" />
+          </View>
+        </Modal>
+      )}
     </View>
   )
 }

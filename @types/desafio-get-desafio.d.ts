@@ -8,7 +8,7 @@ export interface Coordinate {
 export interface RouteResponse {
   id: string;
   name: string;
-  location: Coordinate[];
+  location: string;
   distance: string;
   photo: string;
   inscriptions: Inscription[];
