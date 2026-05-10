@@ -86,10 +86,10 @@ export default function Login() {
         throw new Error(error.message || 'Erro ao entrar com Google')
       }
 
-      const cookie = authClient.getCookie()
-      
-      if (!cookie) {
-        throw new Error('Sessão do Google não retornada')
+      const { data, error: sessionError } = await authClient.getSession()
+
+      if (sessionError || !data?.session) {
+        throw new Error('Sessão do Google não confirmada')
       }
 
       return true
