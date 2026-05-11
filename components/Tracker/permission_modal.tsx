@@ -1,17 +1,45 @@
 import React from 'react'
-import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+type PermissionStep = {
+  title: string
+  description: string
+}
 
 interface PermissionModalProps {
   visible: boolean
   onAccept: () => void
   onDecline: () => void
+  title?: string
+  message?: string
+  steps?: PermissionStep[]
+  acceptLabel?: string
+  declineLabel?: string
 }
 
 const PermissionModal: React.FC<PermissionModalProps> = ({
   visible,
   onAccept,
   onDecline,
+  title = 'Ative a localização do seu dispositivo',
+  message = 'Os serviços de localização estão desativados. Ligue o GPS do dispositivo para que possamos iniciar o rastreamento da sua atividade.',
+  steps,
+  acceptLabel = 'Continuar',
+  declineLabel = 'Agora não',
 }) => {
+  const defaultSteps: PermissionStep[] = [
+    {
+      title: 'Abra as configurações',
+      description: 'Ative os serviços de localização do seu celular.',
+    },
+    {
+      title: 'Volte ao app',
+      description: 'Assim que o GPS estiver ligado, continuamos a configuração.',
+    },
+  ]
+
+  const modalSteps = steps ?? defaultSteps
+
   return (
     <Modal
       animationType="fade"
@@ -21,36 +49,30 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Ative a localização do seu dispositivo</Text>
+          <Text style={styles.modalTitle}>{title}</Text>
           <Text style={styles.modalText}>
-            Os serviços de localização estão desativados. Ligue o GPS do dispositivo para que possamos iniciar o rastreamento da sua atividade.
+            {message}
           </Text>
 
-          <View style={styles.permissionItem}>
-            <Image source={require('../../assets/map-pin-black.svg')} style={styles.icon} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.permissionTitle}>Abra as configurações</Text>
-              <Text style={styles.permissionDescription}>
-                Ative os serviços de localização do seu celular.
-              </Text>
+          {modalSteps.map((step, index) => (
+            <View key={`${step.title}-${index}`} style={styles.permissionItem}>
+              <View style={styles.stepCircle}>
+                <Text style={styles.stepNumber}>{index + 1}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.permissionTitle}>{step.title}</Text>
+                <Text style={styles.permissionDescription}>
+                  {step.description}
+                </Text>
+              </View>
             </View>
-          </View>
-
-          <View style={styles.permissionItem}>
-            <Image source={require('../../assets/track.svg')} style={styles.icon} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.permissionTitle}>Volte ao app</Text>
-              <Text style={styles.permissionDescription}>
-                Assim que o GPS estiver ligado, continuamos a configuração.
-              </Text>
-            </View>
-          </View>
+          ))}
 
           <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
-            <Text style={styles.acceptButtonText}>Continuar</Text>
+            <Text style={styles.acceptButtonText}>{acceptLabel}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onDecline}>
-            <Text style={styles.declineButtonText}>Agora não</Text>
+            <Text style={styles.declineButtonText}>{declineLabel}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -100,10 +122,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: '100%',
   },
-  icon: {
+  stepCircle: {
     width: 32,
     height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 15,
+    backgroundColor: '#74FE52',
+  },
+  stepNumber: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   permissionTitle: {
     fontWeight: 'bold',

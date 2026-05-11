@@ -5,12 +5,14 @@ interface BackgroundPermissionModalProps {
   visible: boolean
   onAccept: () => void
   onDecline: () => void
+  warningMessage?: string
 }
 
 const BackgroundPermissionModal: React.FC<BackgroundPermissionModalProps> = ({
   visible,
   onAccept,
   onDecline,
+  warningMessage,
 }) => {
   return (
     <Modal
@@ -62,11 +64,15 @@ const BackgroundPermissionModal: React.FC<BackgroundPermissionModalProps> = ({
             </View>
           </View>
 
+          {warningMessage && (
+            <Text style={styles.warningText}>{warningMessage}</Text>
+          )}
+
           <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
             <Text style={styles.acceptButtonText}>Continuar</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onDecline}>
-            <Text style={styles.declineButtonText}>Agora não</Text>
+            <Text style={styles.declineButtonText}>Voltar</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -137,6 +143,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     flexShrink: 1,
+  },
+  warningText: {
+    color: '#B00020',
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   acceptButton: {
     backgroundColor: '#74FE52',

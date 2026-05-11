@@ -217,9 +217,6 @@ import {
   Accuracy,
   LocationObject,
   reverseGeocodeAsync,
-  requestForegroundPermissionsAsync,
-  requestBackgroundPermissionsAsync,
-  PermissionStatus,
   startLocationUpdatesAsync,
   stopLocationUpdatesAsync,
   hasStartedLocationUpdatesAsync,
@@ -321,11 +318,6 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   }
 });
 
-type PermissionResult = {
-  foreground: boolean
-  background: boolean
-}
-
 export default function useTracker() {
   const [status, setStatus] = useState<Status>("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -391,20 +383,6 @@ export default function useTracker() {
     } catch (error) {
       // console.error("Erro ao obter cidade:", error);
     }
-  }
-
-  async function requestPermissions(): Promise<PermissionResult> {
-    const fg = await requestForegroundPermissionsAsync();
-    if (fg.status !== PermissionStatus.GRANTED) {
-      return { foreground: false, background: false };
-    }
-
-    const bg = await requestBackgroundPermissionsAsync();
-    if (bg.status === PermissionStatus.GRANTED) {
-      return { foreground: true, background: true };
-    }
-
-    return { foreground: true, background: false };
   }
 
   async function startWatcher() {
@@ -557,7 +535,6 @@ export default function useTracker() {
     elapsed,
     distance,
     city,
-    requestPermissions,
     startTracking,
     pauseTracking,
     resumeTracking,

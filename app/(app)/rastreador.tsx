@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import Constants from 'expo-constants'
 import * as Location from 'expo-location'
 import * as IntentLauncher from 'expo-intent-launcher'
 import { router } from 'expo-router'
@@ -46,7 +47,6 @@ export default function Rastreador() {
     status,
     elapsed,
     distance,
-    requestPermissions,
     startTracking,
     pauseTracking,
     resumeTracking,
@@ -56,7 +56,9 @@ export default function Rastreador() {
   const insets = useSafeAreaInsets()
 
   const [modalVisible, setModalVisible] = useState(false)
+  const [foregroundPermissionModalVisible, setForegroundPermissionModalVisible] = useState(false)
   const [bgPermissionModalVisible, setBgPermissionModalVisible] = useState(false)
+  const [bgPermissionWarning, setBgPermissionWarning] = useState<string | undefined>()
   const [servicesEnabled, setServicesEnabled] = useState<boolean | null>(null)
   const [permissionsGranted, setPermissionsGranted] = useState(false)
   const [showCountdown, setShowCountdown] = useState(false)
@@ -73,6 +75,7 @@ export default function Rastreador() {
   const scale = useSharedValue(1)
   const opacity = useSharedValue(1)
   const permissionsChecked = useRef(false)
+  const foregroundModalOpenRef = useRef(false)
   const bgModalOpenRef = useRef(false)
   const permissionsGrantedRef = useRef(false)
 
@@ -88,18 +91,107 @@ export default function Rastreador() {
 
   const handleDecline = () => {
     setModalVisible(false)
+    setForegroundPermissionModalVisible(false)
     setBgPermissionModalVisible(false)
-    Alert.alert(
-      'Permissão Necessária',
-      'A permissão de localização é necessária para rastrear sua atividade.',
-      [{ text: 'OK', onPress: () => router.back() }],
-    )
+    setBgPermissionWarning(undefined)
+    router.replace('/(app)/dashboard')
+  }
+
+  const openAppSettings = async () => {
+    const appPackage = Constants.expoConfig?.android?.package ?? Constants.applicationId
+
+    if (appPackage && Platform.OS === 'android') {
+      try {
+        await IntentLauncher.startActivityAsync(
+          IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS,
+          { data: `package:${appPackage}` },
+        )
+        return
+      }
+      catch {
+        await Linking.openSettings()
+        return
+      }
+    }
+
+    await Linking.openSettings()
+  }
+
+  const startCountdownAfterPermissions = () => {
+    setPermissionsGranted(true)
+    permissionsGrantedRef.current = true
+    setShowCountdown(true)
+  }
+
+  const showForegroundPermissionModal = () => {
+    setModalVisible(false)
+    setBgPermissionModalVisible(false)
+    setBgPermissionWarning(undefined)
+    setForegroundPermissionModalVisible(true)
+    foregroundModalOpenRef.current = true
+    setPermissionsGranted(false)
+    permissionsGrantedRef.current = false
+    setShowCountdown(false)
+  }
+
+  const handleForegroundPermissionAccept = async () => {
+    try {
+      const { status, canAskAgain } = await Location.requestForegroundPermissionsAsync()
+
+      if (status !== Location.PermissionStatus.GRANTED) {
+        if (!canAskAgain)
+          await openAppSettings()
+
+        return
+      }
+
+      setForegroundPermissionModalVisible(false)
+      foregroundModalOpenRef.current = false
+
+      const { status: backgroundStatus } = await Location.getBackgroundPermissionsAsync()
+      if (backgroundStatus !== Location.PermissionStatus.GRANTED) {
+        setBgPermissionModalVisible(true)
+        setBgPermissionWarning(undefined)
+        bgModalOpenRef.current = true
+        return
+      }
+
+      startCountdownAfterPermissions()
+    }
+    catch {
+      await openAppSettings()
+    }
+  }
+
+  const handleForegroundPermissionDecline = () => {
+    setForegroundPermissionModalVisible(false)
+    foregroundModalOpenRef.current = false
+    setPermissionsGranted(false)
+    permissionsGrantedRef.current = false
+    setShowCountdown(false)
+    router.replace('/(app)/dashboard')
   }
 
   const handleBgPermissionAccept = async () => {
     try {
-      await Location.requestBackgroundPermissionsAsync()
-    } catch {
+      const { status, canAskAgain } = await Location.requestBackgroundPermissionsAsync()
+
+      if (status === Location.PermissionStatus.GRANTED) {
+        setBgPermissionModalVisible(false)
+        bgModalOpenRef.current = false
+        setBgPermissionWarning(undefined)
+        startCountdownAfterPermissions()
+        return
+      }
+
+      if (!canAskAgain) {
+        await openAppSettings()
+        return
+      }
+
+      setBgPermissionWarning('Selecione "Permitir o tempo todo" para rastrear sua atividade com a tela bloqueada.')
+    }
+    catch {
       await Linking.openSettings()
     }
   }
@@ -107,9 +199,11 @@ export default function Rastreador() {
   const handleBgPermissionDecline = () => {
     setBgPermissionModalVisible(false)
     bgModalOpenRef.current = false
-    setPermissionsGranted(true)
-    permissionsGrantedRef.current = true
-    setShowCountdown(true)
+    setBgPermissionWarning(undefined)
+    setPermissionsGranted(false)
+    permissionsGrantedRef.current = false
+    setShowCountdown(false)
+    router.replace('/(app)/dashboard')
   }
 
   const handleAccept = async () => {
@@ -213,19 +307,42 @@ export default function Rastreador() {
 
       if (enabled && !permissionsChecked.current) {
         permissionsChecked.current = true
-        const result = await requestPermissions()
-        if (!result.foreground) {
-          handleDecline()
+        const { status: foregroundStatus } = await Location.getForegroundPermissionsAsync()
+        if (foregroundStatus !== Location.PermissionStatus.GRANTED) {
+          showForegroundPermissionModal()
           return
         }
-        if (!result.background) {
+
+        const { status: backgroundStatus } = await Location.getBackgroundPermissionsAsync()
+        if (backgroundStatus !== Location.PermissionStatus.GRANTED) {
           setBgPermissionModalVisible(true)
+          setBgPermissionWarning(undefined)
           bgModalOpenRef.current = true
           return
         }
-        setPermissionsGranted(true)
-        permissionsGrantedRef.current = true
-        setShowCountdown(true)
+
+        startCountdownAfterPermissions()
+      }
+    }
+
+    const recheckForegroundPermission = async () => {
+      if (foregroundModalOpenRef.current && !permissionsGrantedRef.current) {
+        const { status } = await Location.getForegroundPermissionsAsync()
+        if (status !== Location.PermissionStatus.GRANTED)
+          return
+
+        setForegroundPermissionModalVisible(false)
+        foregroundModalOpenRef.current = false
+
+        const { status: backgroundStatus } = await Location.getBackgroundPermissionsAsync()
+        if (backgroundStatus !== Location.PermissionStatus.GRANTED) {
+          setBgPermissionModalVisible(true)
+          setBgPermissionWarning(undefined)
+          bgModalOpenRef.current = true
+          return
+        }
+
+        startCountdownAfterPermissions()
       }
     }
 
@@ -235,9 +352,8 @@ export default function Rastreador() {
         if (status === Location.PermissionStatus.GRANTED) {
           setBgPermissionModalVisible(false)
           bgModalOpenRef.current = false
-          setPermissionsGranted(true)
-          permissionsGrantedRef.current = true
-          setShowCountdown(true)
+          setBgPermissionWarning(undefined)
+          startCountdownAfterPermissions()
         }
       }
     }
@@ -247,6 +363,7 @@ export default function Rastreador() {
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         checkLocationServices()
+        recheckForegroundPermission()
         recheckBgPermission()
       }
     })
@@ -307,8 +424,33 @@ export default function Rastreador() {
     return (
       <PermissionModal
         visible={modalVisible}
+        declineLabel="Voltar"
         onAccept={handleAccept}
         onDecline={handleDecline}
+      />
+    )
+  }
+
+  if (foregroundPermissionModalVisible) {
+    return (
+      <PermissionModal
+        visible={foregroundPermissionModalVisible}
+        title="Permissão de localização necessária"
+        message="Autorize o acesso à localização para iniciar o rastreamento da sua atividade."
+        steps={[
+          {
+            title: 'Permitir localização',
+            description: 'Toque em "Continuar" para abrir a solicitação de permissão do sistema.',
+          },
+          {
+            title: 'Autorizar o app',
+            description: 'Selecione a opção que permite usar sua localização durante a atividade.',
+          },
+        ]}
+        acceptLabel="Continuar"
+        declineLabel="Voltar"
+        onAccept={handleForegroundPermissionAccept}
+        onDecline={handleForegroundPermissionDecline}
       />
     )
   }
@@ -317,6 +459,7 @@ export default function Rastreador() {
     return (
       <BackgroundPermissionModal
         visible={bgPermissionModalVisible}
+        warningMessage={bgPermissionWarning}
         onAccept={handleBgPermissionAccept}
         onDecline={handleBgPermissionDecline}
       />
