@@ -443,8 +443,8 @@ export default function Rastreador() {
             description: 'Toque em "Continuar" para abrir a solicitação de permissão do sistema.',
           },
           {
-            title: 'Autorizar o app',
-            description: 'Selecione a opção que permite usar sua localização durante a atividade.',
+            title: 'Autorizar no app',
+            description: 'Permita o acesso à localização. Se o sistema não mostrar o pedido, você será direcionado para as configurações do app.',
           },
         ]}
         acceptLabel="Continuar"

@@ -25,7 +25,7 @@ const BackgroundPermissionModal: React.FC<BackgroundPermissionModalProps> = ({
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Permitir localização o tempo todo</Text>
           <Text style={styles.modalText}>
-            Para rastrear sua atividade com a tela desligada, selecione "Permitir o tempo todo". A opção "Durante o uso" não é suficiente para o rastreamento em segundo plano.
+            Para rastrear sua atividade com a tela desligada, selecione "Permitir o tempo todo". Se o sistema não mostrar o pedido de permissão, você será direcionado para as configurações do app.
           </Text>
 
           <View style={styles.permissionItem}>
@@ -33,9 +33,9 @@ const BackgroundPermissionModal: React.FC<BackgroundPermissionModalProps> = ({
               <Text style={styles.stepNumber}>1</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.permissionTitle}>Abrir Configurações do sistema</Text>
+              <Text style={styles.permissionTitle}>Solicitar permissão</Text>
               <Text style={styles.permissionDescription}>
-                Toque em "Continuar" para abrir a tela de permissão de localização do sistema.
+                Toque em "Continuar" para abrir o pedido de permissão de localização.
               </Text>
             </View>
           </View>
