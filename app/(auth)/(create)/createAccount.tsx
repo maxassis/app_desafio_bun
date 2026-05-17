@@ -14,10 +14,7 @@ import Logo from "../../../assets/logo2.svg";
 import Arrow from "../../../assets/arrow-right.svg";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 import { Button } from "../../../components/button";
-import { useMutation } from "@tanstack/react-query";
-import { apiClient } from "@/services/api-client";
 
 type FormData = {
   name: string;
@@ -34,51 +31,11 @@ export default function CreateAccount() {
     formState: { errors },
   } = useForm<FormData>();
 
-  const checkEmailMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const response = await apiClient.post(
-        "/check-email",
-        { email },
-        { validateStatus: () => true }
-      );
-      return response;
-    },
-  });
-
-  const onSubmit = async ({ name, email }: { name: string; email: string }) => {
-    try {
-      const response = await checkEmailMutation.mutateAsync(email);
-
-      if (response.status === 204) {
-        console.log("Email is available");
-        router.push({
-          pathname: "/createAccountCode",
-          params: { name, email },
-        });
-      } else if (response.status === 409) {
-        console.log("Email already exists");
-        Toast.show({
-          type: "error",
-          text1: "E-mail já cadastrado.",
-          text2: "Toque em “entrar” para acessar a conta.",
-          visibilityTime: 4000,
-        });
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Erro inesperado.",
-          visibilityTime: 4000,
-        });
-      }
-    } catch (e) {
-      console.error("Erro ao verificar e-mail", e);
-      Toast.show({
-        type: "error",
-        text1: "Erro inesperado.",
-        text2: "Tente novamente mais tarde.",
-        visibilityTime: 4000,
-      });
-    }
+  const onSubmit = ({ name, email }: { name: string; email: string }) => {
+    router.push({
+      pathname: "/createAccountPassword",
+      params: { name: name.trim(), email: email.toLowerCase().trim() },
+    });
   };
 
   return (
@@ -152,7 +109,6 @@ export default function CreateAccount() {
           title="Proximo"
           onPress={handleSubmit(onSubmit)}
           icon={<Arrow />}
-          isLoading={checkEmailMutation.isPending}
         />
 
         <Text className="text-center mt-8 text-base text-bondis-gray-dark">

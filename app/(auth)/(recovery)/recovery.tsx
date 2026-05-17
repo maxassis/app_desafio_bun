@@ -5,10 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SystemBars } from "react-native-edge-to-edge";
-import Toast from "react-native-toast-message";
 import { Button } from "../../../components/button";
-import { useMutation } from "@tanstack/react-query";
-import { apiClient } from "@/services/api-client";
 
 export default function Recovery() {
   const router = useRouter();
@@ -20,50 +17,11 @@ export default function Recovery() {
     formState: { errors },
   } = useForm<{ email: string }>();
 
-  const checkEmailMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const response = await apiClient.post(
-        "/check-email",
-        { email },
-        { validateStatus: () => true }
-      );
-      return response;
-    },
-  });
-
-  const onSubmit = async ({ email }: { email: string }) => {
-    try {
-      const response = await checkEmailMutation.mutateAsync(email);
-
-      if (response.status === 409) {
-        // Email EXISTS, proceed with recovery
-        router.push({
-          pathname: "/recoveryCode",
-          params: { email },
-        });
-      } else if (response.status === 204) {
-        // Email does NOT exist, show error toast
-        Toast.show({
-          type: "error",
-          text1: "E-mail não cadastrado.",
-          visibilityTime: 4000,
-        });
-      } else {
-        // Handle other potential errors
-        Toast.show({
-          type: "error",
-          text1: "Erro inesperado.",
-          visibilityTime: 4000,
-        });
-      }
-    } catch (e) {
-      console.error("Erro ao verificar e-mail", e);
-      Toast.show({
-        type: "error",
-        text1: "Tente outra vez.",
-        visibilityTime: 4000,
-      });
-    }
+  const onSubmit = ({ email }: { email: string }) => {
+    router.push({
+      pathname: "/recoveryCode",
+      params: { email: email.toLowerCase().trim() },
+    });
   };
 
   return (
@@ -120,7 +78,6 @@ export default function Recovery() {
           <Button
             title="Recuperar senha"
             onPress={handleSubmit(onSubmit)}
-            isLoading={checkEmailMutation.isPending}
           />
         </View>
       </View>
