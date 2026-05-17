@@ -11,30 +11,19 @@ import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import Arrow from "../../../assets/arrow-right.svg";
 import Refresh from "../../../assets/refresh.svg";
-import { cva } from "class-variance-authority";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Toast from "react-native-toast-message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { apiClient } from "@/services/api-client";
-
-const buttonDisabled = cva(
-  "h-[52px] flex-row bg-bondis-green mt-auto rounded-full justify-center items-center",
-  {
-    variants: {
-      intent: {
-        disabled: "opacity-50",
-      },
-    },
-  }
-);
+import { authClient } from "@/services/auth-client";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function CreateAccountGetCode() {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isActive, setIsActive] = useState<boolean>(false);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const insets = useSafeAreaInsets();
-  const { name, email } = useLocalSearchParams();
+  const { email } = useLocalSearchParams();
   const router = useRouter();
+  const { setAuthenticated } = useAuth();
   const {
     handleSubmit,
     control,
@@ -53,20 +42,12 @@ export default function CreateAccountGetCode() {
     }
 
     return () => clearInterval(timerId);
-  }, [isActive, timeLeft, hasStarted]);
-
-  useEffect(() => {
-    setTimeLeft(15);
-    setIsActive(true);
-    setHasStarted(false);
-    sendMail(false); // Send email when component mounts without showing toast
-  }, []);
+  }, [isActive, timeLeft]);
 
   const startTimer = () => {
-    setTimeLeft(20);
+    setTimeLeft(60);
     setIsActive(true);
-    setHasStarted(true);
-    sendMail(true); // Send email when user requests resend with toast
+    sendMail();
   };
 
   const formatTime = (seconds: number): string => {
@@ -77,43 +58,65 @@ export default function CreateAccountGetCode() {
     }${remainingSeconds}`;
   };
 
-  async function sendMail(showToast = true) {
+  async function sendMail() {
     try {
-      await apiClient.post("/send-email", { name, email });
+      const { error } = await authClient.emailOtp.sendVerificationOtp({
+        email: String(email),
+        type: "email-verification",
+      });
 
-      if (showToast) {
+      if (error) {
         Toast.show({
-          type: "success",
-          text1: "Novo código enviado.",
-          text2: "Por favor, verifique seu e-mail.",
+          type: "error",
+          text1: "Erro ao reenviar código.",
+          text2: error.message || "Tente novamente.",
           visibilityTime: 4000,
         });
+        return;
       }
-    } catch (error) {
-      console.error("Erro na requisição:", error);
+
+      Toast.show({
+        type: "success",
+        text1: "Novo código enviado.",
+        text2: "Por favor, verifique seu e-mail.",
+        visibilityTime: 4000,
+      });
+    } catch {
+      Toast.show({
+        type: "error",
+        text1: "Erro ao reenviar código.",
+        text2: "Tente novamente mais tarde.",
+        visibilityTime: 4000,
+      });
     }
   }
 
   const onSubmit = async ({ code }: { code: string }) => {
     try {
-      try {
-        await apiClient.post("/confirm-code/", { code, email });
-      } catch (error) {
+      const { error } = await authClient.emailOtp.verifyEmail({
+        email: String(email),
+        otp: code,
+      });
+
+      if (error) {
         Toast.show({
           type: "error",
           text1: "Código incorreto.",
-          text2: "Digite outra vez.",
+          text2: error.message || "Digite outra vez.",
           visibilityTime: 4000,
         });
-        throw error;
+        return;
       }
 
-      router.push({
-        pathname: "/createAccountPassword",
-        params: { name, email },
+      setAuthenticated(true);
+      router.replace("/(app)/dashboard");
+    } catch (err) {
+      Toast.show({
+        type: "error",
+        text1: "Código incorreto.",
+        text2: "Digite outra vez.",
+        visibilityTime: 4000,
       });
-    } catch (error) {
-      console.error(error);
     }
   };
 
@@ -132,7 +135,7 @@ export default function CreateAccountGetCode() {
         <Logo />
 
         <Text className="text-2xl font-inter-bold mt-4">
-          {name}, verifique seu e-mail
+          Verifique seu e-mail
         </Text>
 
         <Text className="mt-4 text-bondis-gray-dark text-base">
@@ -147,8 +150,8 @@ export default function CreateAccountGetCode() {
           rules={{
             required: "Código obrigatório",
             minLength: {
-              value: 6,
-              message: "O código possui 6 digitos",
+              value: 5,
+              message: "O código possui 5 digitos",
             },
           }}
           render={({ field: { value, onChange } }) => (
@@ -195,11 +198,10 @@ export default function CreateAccountGetCode() {
 
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
-          // className="h-[52px] flex-row bg-bondis-green mt-auto rounded-full justify-center items-center"
           disabled={isActive}
-          className={buttonDisabled({
-            intent: isActive ? "disabled" : null,
-          })}
+          className={`h-[52px] flex-row mt-auto rounded-full justify-center items-center ${
+            isActive ? "bg-bondis-green/50" : "bg-bondis-green"
+          }`}
         >
           <Text className="font-inter-bold text-base">Proximo </Text>
           <Arrow />

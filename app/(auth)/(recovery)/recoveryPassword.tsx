@@ -18,7 +18,8 @@ import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import CheckGreen from "../../../assets/check-green.svg";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { apiClient, getErrorMessage } from "@/services/api-client";
+import { authClient } from "@/services/auth-client";
+import { getErrorMessage } from "@/services/api-client";
 
 interface Criteria {
   length: boolean;
@@ -30,7 +31,7 @@ interface Criteria {
 
 export default function RecoveryCreatePassword({ route }: any) {
   const router = useRouter();
-  const { email } = useLocalSearchParams();
+  const { email, otp } = useLocalSearchParams();
   const [password, setPassword] = useState<string>("");
   const [password2, setPassword2] = useState<string>("");
   const [criteria, setCriteria] = useState<Criteria>({
@@ -68,22 +69,30 @@ export default function RecoveryCreatePassword({ route }: any) {
   };
 
  async function reqCreatePassword() {
-    // console.log(password, password2);
-
     if (password !== password2) return
 
     try {
-      await apiClient.patch("/users/change-password", {
-        email,
-        new_password: password,
+      const { error } = await authClient.emailOtp.resetPassword({
+        email: String(email),
+        otp: String(otp),
+        password,
       });
-    router.push("/recoveryDone");
 
+      if (error) {
+        const isInvalidOtp = error.code === 'INVALID_OTP' || error.message?.toLowerCase().includes('otp');
+        Alert.alert(
+          "Erro",
+          isInvalidOtp
+            ? "Código incorreto ou expirado. Volte e solicite um novo."
+            : error.message || "Erro ao alterar a senha"
+        );
+        return;
+      }
 
-    } catch (error) {
-      const message = getErrorMessage(error, "Erro ao alterar a senha");
+      router.push("/recoveryDone");
+    } catch (err) {
+      const message = getErrorMessage(err, "Erro ao alterar a senha");
       Alert.alert("Erro", message);
-      console.error(error);
     }
   }
 

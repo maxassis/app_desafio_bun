@@ -5,7 +5,6 @@ import {
   SafeAreaView,
   TouchableOpacity,
   TextInput,
-  Alert,
   StatusBar,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
@@ -18,12 +17,11 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SystemBars } from "react-native-edge-to-edge";
 import Toast from "react-native-toast-message";
-import { apiClient } from "@/services/api-client";
+import { authClient } from "@/services/auth-client";
 
 export default function RecoveryGetCode({ route }: any) {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isActive, setIsActive] = useState<boolean>(false);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const router = useRouter();
   const { email } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -46,20 +44,18 @@ export default function RecoveryGetCode({ route }: any) {
     }
 
     return () => clearInterval(timerId);
-  }, [isActive, timeLeft, hasStarted]);
+  }, [isActive, timeLeft]);
 
   useEffect(() => {
-    sendMail(false); // Send email when component mounts without showing toast
-    setTimeLeft(15);
+    sendMail(false);
+    setTimeLeft(60);
     setIsActive(true);
-    setHasStarted(false);
   }, []);
 
   const startTimer = () => {
-    setTimeLeft(20);
+    setTimeLeft(60);
     setIsActive(true);
-    setHasStarted(true);
-    sendMail(true); // Send email when user requests resend with toast
+    sendMail(true);
   };
 
   const formatTime = (seconds: number): string => {
@@ -72,7 +68,22 @@ export default function RecoveryGetCode({ route }: any) {
 
   async function sendMail(showToast = true) {
     try {
-      await apiClient.post("/send-mail-recovery", { email });
+      const { error } = await authClient.emailOtp.sendVerificationOtp({
+        email: String(email),
+        type: "forget-password",
+      });
+
+      if (error) {
+        if (showToast) {
+          Toast.show({
+            type: "error",
+            text1: "Erro ao enviar código.",
+            text2: error.message || "Tente novamente.",
+            visibilityTime: 4000,
+          });
+        }
+        return;
+      }
 
       if (showToast) {
         Toast.show({
@@ -82,44 +93,27 @@ export default function RecoveryGetCode({ route }: any) {
           visibilityTime: 4000,
         });
       }
-    } catch (error) {
-      console.error("Erro na requisição:", error);
+    } catch {
+      if (showToast) {
+        Toast.show({
+          type: "error",
+          text1: "Erro ao enviar código.",
+          text2: "Tente novamente mais tarde.",
+          visibilityTime: 4000,
+        });
+      }
     }
   }
 
   const onSubmit = async ({ code }: { code: string }) => {
-    // console.log("teste");
-
     try {
-      try {
-        const { data } = await apiClient.post<{ message: string }>("/confirm-code/", {
-          code,
-          email,
-        });
-        console.log(data);
-      } catch (error) {
-        Alert.alert("Código invalido", "", [
-          {
-            text: "Ok",
-            style: "cancel",
-          },
-        ]);
-        throw error;
-      }
-
-      // console.log("codigo correto");
       router.push({
         pathname: "/recoveryPassword",
-        params: { email },
+        params: { email, otp: code },
       });
     } catch (error) {
       console.error(error);
     }
-
-    // router.push({
-    //     pathname: "/recoveryPassword",
-    //     params: { email },
-    //   });
   };
 
   return (
@@ -155,8 +149,8 @@ export default function RecoveryGetCode({ route }: any) {
           rules={{
             required: "Código obrigatório",
             minLength: {
-              value: 6,
-              message: "O código possui 6 digitos",
+              value: 5,
+              message: "O código possui 5 digitos",
             },
           }}
           render={({ field: { value, onChange } }) => (

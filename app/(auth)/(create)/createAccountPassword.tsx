@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import CheckGreen from '../../../assets/check-green.svg'
 import Close from '../../../assets/Close.svg'
 import Logo from '../../../assets/logo2.svg'
-import { apiClient, getErrorMessage } from "@/services/api-client";
+import { authClient } from "@/services/auth-client";
 
 interface Criteria {
   length: boolean
@@ -57,25 +57,33 @@ export default function CreatePassword() {
   }
 
   const createUser = async (newPassword: string) => {
-    try {
-      const { data } = await apiClient.post('/users', {
-        name,
-        email,
-        password: newPassword,
-      })
-      return data
-    } catch (error) {
-      throw new Error(getErrorMessage(error, 'Erro ao criar usuário'))
+    const { error } = await authClient.signUp.email({
+      name: String(name),
+      email: String(email),
+      password: newPassword,
+    })
+
+    if (error) {
+      const authError = new Error(error.message || 'Erro ao criar usuário') as Error & { status?: number }
+      authError.status = error.status
+      throw authError
     }
   }
 
   const { mutate, isPending } = useMutation({
     mutationFn: () => createUser(password),
     onSuccess: () => {
-      router.push('/createAccountDone')
+      router.push({
+        pathname: '/createAccountCode',
+        params: { email },
+      })
     },
-    onError: (error: Error) => {
-      Alert.alert('Erro', error.message, [{ text: 'Ok', style: 'cancel' }])
+    onError: (error: Error & { status?: number }) => {
+      if (error.status === 422) {
+        Alert.alert('E-mail já cadastrado', 'Toque em "entrar" para acessar a conta.', [{ text: 'Ok', style: 'cancel' }])
+      } else {
+        Alert.alert('Erro', error.message, [{ text: 'Ok', style: 'cancel' }])
+      }
     },
   })
 

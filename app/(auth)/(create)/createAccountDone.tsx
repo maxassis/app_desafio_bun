@@ -23,7 +23,7 @@ export default function AccountDone() {
 
             <Text className="text-sm text-[#565656] mt-8 text-center">bora começar um desafio?</Text>
 
-            <TouchableOpacity onPress={() => router.replace("/login")} className="h-[52px] flex-row bg-bondis-green mt-8 rounded-full justify-center items-center">
+            <TouchableOpacity onPress={() => router.replace("/(app)/dashboard")} className="h-[52px] flex-row bg-bondis-green mt-8 rounded-full justify-center items-center">
                 <Text className="font-inter-bold text-base">Bora 💪</Text> 
             </TouchableOpacity> 
             </View> 
