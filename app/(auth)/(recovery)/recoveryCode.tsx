@@ -198,8 +198,9 @@ export default function RecoveryGetCode({ route }: any) {
 
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
+          disabled={isActive}
           className={buttonDisabled({
-            intent: null,
+            intent: isActive ? "disabled" : null,
           })}
         >
           <Text className="font-inter-bold text-base">Proximo </Text>

@@ -198,7 +198,10 @@ export default function CreateAccountGetCode() {
 
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
-          className="h-[52px] flex-row bg-bondis-green mt-auto rounded-full justify-center items-center"
+          disabled={isActive}
+          className={`h-[52px] flex-row mt-auto rounded-full justify-center items-center ${
+            isActive ? "bg-bondis-green/50" : "bg-bondis-green"
+          }`}
         >
           <Text className="font-inter-bold text-base">Proximo </Text>
           <Arrow />
