@@ -6,6 +6,7 @@ import {
   ScrollView,
   BackHandler,
   FlatList,
+  Alert,
 } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,6 +19,7 @@ import Settings from "../../assets/settings.svg";
 import { useRouter } from "expo-router";
 import { fetchAllDesafios } from "@/services/desafios-service";
 import { fetchUserData } from "@/services/users-service";
+import { fetchStravaStatus } from "@/services/strava-service";
 import { 
   AvatarSkeleton, 
   UserInfoSkeleton, 
@@ -30,7 +32,7 @@ import { CardDesafio } from "@/components";
 export default function Profile() {
   const router = useRouter();
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["30%"], []);
+  const snapPoints = useMemo(() => ["35%"], []);
   const insets = useSafeAreaInsets();
 
   const isBottomSheetOpen = useRef(false);
@@ -53,6 +55,14 @@ export default function Profile() {
   } = useQuery({
     queryKey: ["getAllDesafios"],
     queryFn: fetchAllDesafios,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const {
+    data: stravaStatus,
+  } = useQuery({
+    queryKey: ["strava-status"],
+    queryFn: fetchStravaStatus,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -427,6 +437,32 @@ export default function Profile() {
               className="h-[51px] justify-center items-center border-b-[0.2px] border-b-gray-400"
             >
               <Text className="text-base">Cadastrar manualmente</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                bottomSheetRef.current?.close();
+                if (!stravaStatus?.connected) {
+                  Alert.alert(
+                    'Strava não conectado',
+                    'Conecte sua conta Strava para importar atividades.',
+                    [
+                      { text: 'Cancelar', style: 'cancel' },
+                      {
+                        text: 'Conectar Strava',
+                        onPress: () => router.push('/connections'),
+                      },
+                    ],
+                  );
+                  return;
+                }
+                router.push({
+                  pathname: "/desafios",
+                  params: { strava: "true" },
+                });
+              }}
+              className="h-[51px] justify-center items-center"
+            >
+              <Text className="text-base">Importar do Strava</Text>
             </TouchableOpacity>
           </View>
         </BottomSheetView>

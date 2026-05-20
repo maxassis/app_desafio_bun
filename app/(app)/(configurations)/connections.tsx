@@ -1,5 +1,9 @@
 import { Feather } from '@expo/vector-icons'
+import { useCallback } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import * as Linking from 'expo-linking'
+import * as WebBrowser from 'expo-web-browser'
 import { useRouter } from 'expo-router'
 import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
@@ -7,25 +11,52 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
 import {
-  connectStrava,
   disconnectStrava,
   fetchStravaStatus,
 } from '@/services/strava-service'
+import { authClient } from '@/services/auth-client'
 
 export default function Connections() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['strava-status'],
     queryFn: fetchStravaStatus,
   })
 
+  useFocusEffect(
+    useCallback(() => {
+      refetch()
+    }, [refetch]),
+  )
+
   const connectMutation = useMutation({
-    mutationFn: connectStrava,
+    mutationFn: async () => {
+      const callbackURL = Linking.createURL('connections')
+      const { data, error } = await authClient.oauth2.link({
+        providerId: 'strava',
+        callbackURL,
+      })
+
+      if (error) {
+        throw new Error(error.message || 'Erro ao conectar Strava')
+      }
+
+      if (!data?.url) {
+        throw new Error('URL de autorização do Strava não encontrada')
+      }
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, callbackURL)
+
+      if (result.type !== 'success') {
+        throw new Error('Autorização do Strava cancelada')
+      }
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['strava-status'] })
+      await refetch()
       Toast.show({
         type: 'success',
         text1: 'Strava conectado',
