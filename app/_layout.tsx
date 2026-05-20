@@ -5,7 +5,9 @@ import {
   useFonts,
 } from '@expo-google-fonts/inter'
 import { StripeProvider } from '@stripe/stripe-react-native'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { persister } from '@/utils/query-persister'
 import Constants from 'expo-constants'
 import { Slot, useRouter, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
@@ -70,11 +72,18 @@ function RootLayoutNav() {
       <StripeProvider
         publishableKey={Constants.expoConfig?.extra?.stripePublicKey}
       >
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{
+            persister,
+            maxAge: 30 * 60 * 1000,
+            buster: 'v1',
+          }}
+        >
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Slot />
           </GestureHandlerRootView>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </StripeProvider>
       <Toast config={toastConfig} />
     </SafeAreaProvider>
