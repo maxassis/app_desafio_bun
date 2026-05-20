@@ -76,7 +76,7 @@ function RootLayoutNav() {
           client={queryClient}
           persistOptions={{
             persister,
-            maxAge: 30 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000,
             buster: 'v1',
           }}
         >
