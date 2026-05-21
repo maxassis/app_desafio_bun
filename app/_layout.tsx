@@ -78,6 +78,14 @@ function RootLayoutNav() {
             persister,
             maxAge: 24 * 60 * 60 * 1000,
             buster: 'v1',
+            dehydrateOptions: {
+              shouldDehydrateQuery: (query) => {
+                const key = (query.queryKey as Array<unknown>)[0]
+                if (key === 'strava-status') return false
+                if (key === 'stravaActivities') return false
+                return true
+              },
+            },
           }}
         >
           <GestureHandlerRootView style={{ flex: 1 }}>

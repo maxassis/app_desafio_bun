@@ -109,6 +109,7 @@ function useMapData(desafioId: string) {
     queryKey: ['routeData', desafioId],
     queryFn: () => fetchRouteData(desafioId),
     enabled: !!desafioId,
+    staleTime: 30 * 60 * 1000,
   })
 
   const userQuery = useQuery({
