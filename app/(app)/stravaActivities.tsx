@@ -47,8 +47,9 @@ export default function StravaActivities() {
     isError,
     error,
   } = useQuery({
-    queryKey: ['stravaActivities'],
-    queryFn: fetchStravaActivities,
+    queryKey: ['stravaActivities', desafioSelecionado?.inscriptionId],
+    queryFn: () => fetchStravaActivities(desafioSelecionado!.inscriptionId),
+    enabled: !!desafioSelecionado?.inscriptionId,
   })
 
   const selectedActivities = useMemo(

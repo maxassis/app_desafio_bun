@@ -22,9 +22,11 @@ export async function disconnectStrava() {
   }
 }
 
-export async function fetchStravaActivities(): Promise<StravaActivitiesResponse> {
+export async function fetchStravaActivities(inscriptionId: number): Promise<StravaActivitiesResponse> {
   try {
-    const { data } = await apiClient.get<StravaActivitiesResponse>('/integrations/strava/activities')
+    const { data } = await apiClient.get<StravaActivitiesResponse>(
+      `/integrations/strava/activities?inscriptionId=${inscriptionId}`,
+    )
     return data
   } catch (error) {
     throw new Error(getErrorMessage(error, 'Erro ao buscar atividades do Strava'))
