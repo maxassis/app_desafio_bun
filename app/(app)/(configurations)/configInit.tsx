@@ -52,10 +52,10 @@ export default function MenuConfigurations() {
             <Tool />
             <Text className="text-base font-inter-regular">Configurações da conta</Text>
           </View>
-          <View className="flex-row items-center gap-x-4 border-b-[0.2px] mb-[bg-bondis-text-gray] py-4">
+          <TouchableOpacity onPress={() => router.push('/connections')} className="flex-row items-center gap-x-4 border-b-[0.2px] mb-[bg-bondis-text-gray] py-4">
             <Chat />
             <Text className="text-base font-inter-regular">Conexões</Text>
-          </View>
+          </TouchableOpacity>
           <View className="flex-row items-center gap-x-4 border-b-[0.2px] mb-[bg-bondis-text-gray] py-4">
             <Lock />
             <Text className="text-base font-inter-regular">Termo de serviço e privacidade</Text>

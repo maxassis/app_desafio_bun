@@ -8,14 +8,13 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { KeyboardAwareScrollView, LinearGradient, BottomSheetView } from "@/components/uniwind-components";
 import KilometerMeterPicker, {
   KilometerMeterPickerModalRef,
 } from "../../../components/Tasks/distance_picker";
 import Left from "../../../assets/arrow-left.svg";
 import Outdoor from "../../../assets/Outdoor.svg";
 import Indoor from "../../../assets/Indoor.svg";
-import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Down from "../../../assets/down.svg";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
@@ -26,7 +25,7 @@ import useDesafioStore from "../../../store/desafio-store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
 import { TimePickerModal, TimePickerModalRef } from "@/components";
 import { apiClient, getErrorMessage } from "@/services/api-client";

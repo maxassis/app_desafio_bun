@@ -8,14 +8,14 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { LinearGradient, BottomSheetView } from "@/components/uniwind-components";
 import Outdoor from "../../../assets/Outdoor.svg";
 import { convertSecondsToTimeStringWithSeconds } from "@/utils/timeUtils";
 import dayjs from "dayjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTrackerStore } from "@/store/rastreador-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { Button } from "@/components/button";
 import useDesafioStore from "../../../store/desafio-store";
 import { apiClient, getErrorMessage } from "@/services/api-client";

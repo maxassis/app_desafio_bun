@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllDesafios } from "@/services/desafios-service";
 import { getProfile } from "@/services/users-service";
-import { Image } from "expo-image";
+import { Image } from "@/components/uniwind-components";
 import * as Progress from "react-native-progress";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";

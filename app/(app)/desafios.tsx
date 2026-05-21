@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
-import { Image } from 'expo-image'
+import { Image, BottomSheetView } from '@/components/uniwind-components'
 import { useQuery } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
 import Left from '../../assets/arrow-left.svg'
@@ -14,11 +14,11 @@ import useDesafioStore from '../../store/desafio-store'
 import type { AllDesafios } from '../../@types/desafio-get-all-desafio'
 import { fetchAllDesafios } from '../../services/desafios-service'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import BottomSheet from '@gorhom/bottom-sheet'
 
 export default function DesafioSelect() {
   const setDesafioSelecionado = useDesafioStore(state => state.setDesafioSelecionado)
-  const { gps } = useLocalSearchParams()
+  const { gps, strava } = useLocalSearchParams()
   const insets = useSafeAreaInsets()
   const bottomSheetRef = useRef<BottomSheet>(null)
   const snapPoints = useMemo(() => ['33%'], [])
@@ -43,8 +43,11 @@ export default function DesafioSelect() {
   // 🔙 Corrige o problema de "voltar nativo" não funcionar
   useEffect(() => {
     const backAction = () => {
-      if (gps) {
+      if (gps === 'true') {
         bottomSheetRef.current?.expand()
+      }
+      else if (strava === 'true') {
+        router.replace('/dashboard')
       }
       else {
         router.back()
@@ -58,7 +61,7 @@ export default function DesafioSelect() {
     )
 
     return () => backHandler.remove()
-  }, [gps])
+  }, [gps, strava])
 
   const handleDesafioPress = (item: AllDesafios) => {
     setDesafioSelecionado(item);
@@ -72,6 +75,9 @@ export default function DesafioSelect() {
         },
       })
     }
+    else if (strava === 'true') {
+      router.push('/stravaActivities')
+    }
     else {
       router.push('/createTask')
     }
@@ -84,9 +90,27 @@ export default function DesafioSelect() {
     >
       <SystemBars style="dark" />
       <View className="pt-[28px] px-5 flex-1">
-        {!gps && (
+        {!gps && !strava && (
           <TouchableOpacity
             onPress={() => router.push('/dashboard')}
+            className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center mb-[10px]"
+          >
+            <Left />
+          </TouchableOpacity>
+        )}
+
+        {gps === 'true' && (
+          <TouchableOpacity
+            onPress={() => bottomSheetRef.current?.expand()}
+            className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center mb-[10px]"
+          >
+            <Left />
+          </TouchableOpacity>
+        )}
+
+        {strava === 'true' && (
+          <TouchableOpacity
+            onPress={() => router.replace('/dashboard')}
             className="h-[43px] w-[43px] rounded-full bg-bondis-text-gray justify-center items-center mb-[10px]"
           >
             <Left />

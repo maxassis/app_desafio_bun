@@ -1,3 +1,5 @@
+import '../global.css'
+
 import { Anton_400Regular } from '@expo-google-fonts/anton'
 import {
   Inter_400Regular,
@@ -5,7 +7,9 @@ import {
   useFonts,
 } from '@expo-google-fonts/inter'
 import { StripeProvider } from '@stripe/stripe-react-native'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { persister } from '@/utils/query-persister'
 import Constants from 'expo-constants'
 import { Slot, useRouter, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
@@ -70,11 +74,26 @@ function RootLayoutNav() {
       <StripeProvider
         publishableKey={Constants.expoConfig?.extra?.stripePublicKey}
       >
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{
+            persister,
+            maxAge: 24 * 60 * 60 * 1000,
+            buster: 'v1',
+            dehydrateOptions: {
+              shouldDehydrateQuery: (query) => {
+                const key = (query.queryKey as Array<unknown>)[0]
+                if (key === 'strava-status') return false
+                if (key === 'stravaActivities') return false
+                return true
+              },
+            },
+          }}
+        >
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Slot />
           </GestureHandlerRootView>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </StripeProvider>
       <Toast config={toastConfig} />
     </SafeAreaProvider>

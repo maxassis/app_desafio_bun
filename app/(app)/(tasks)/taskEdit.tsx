@@ -10,14 +10,13 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { KeyboardAwareScrollView, LinearGradient } from "@/components/uniwind-components";
 import KilometerMeterPicker, {
   KilometerMeterPickerModalRef,
 } from "../../../components/Tasks/distance_picker";
 import { router } from "expo-router";
 import Outdoor from "../../../assets/Outdoor.svg";
 import Indoor from "../../../assets/Indoor.svg";
-import { LinearGradient } from "expo-linear-gradient";
 import { cva } from "class-variance-authority";
 import Down from "../../../assets/down.svg";
 import Left from "../../../assets/Icon-left.svg";

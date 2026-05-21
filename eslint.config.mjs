@@ -19,7 +19,7 @@ export default (async () => {
     },
     {
       rules: {
-        'perfectionist/sort-imports': 'true',
+        'perfectionist/sort-imports': 'error',
         'style/multiline-ternary': 'off',
         'ts/no-require-imports': 'off',
         'ts/no-use-before-define': 'off',

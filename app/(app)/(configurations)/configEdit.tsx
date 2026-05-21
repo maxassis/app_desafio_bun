@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   BackHandler,
 } from "react-native";
-import { Image } from "expo-image";
+import { Image, BottomSheetView } from "@/components/uniwind-components";
 import Left from "../../../assets/arrow-left.svg";
 import User from "../../../assets/user.svg";
 import Cam from "../../../assets/camera.svg";
@@ -22,7 +22,7 @@ import { editUserData, fetchUserData } from "@/services/users-service";
 import { apiClient, getErrorMessage } from "@/services/api-client";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import LottieView from "lottie-react-native";
 
 interface uploadAvatarResponse {
