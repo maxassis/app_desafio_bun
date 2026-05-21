@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
-import { Image } from 'expo-image'
+import { Image, BottomSheetView } from '@/components/uniwind-components'
 import { useQuery } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
 import Left from '../../assets/arrow-left.svg'
@@ -14,7 +14,7 @@ import useDesafioStore from '../../store/desafio-store'
 import type { AllDesafios } from '../../@types/desafio-get-all-desafio'
 import { fetchAllDesafios } from '../../services/desafios-service'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import BottomSheet from '@gorhom/bottom-sheet'
 
 export default function DesafioSelect() {
   const setDesafioSelecionado = useDesafioStore(state => state.setDesafioSelecionado)

@@ -10,9 +10,9 @@ import {
 } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
+import { Image, BottomSheetView } from "@/components/uniwind-components";
 import Plus from "../../assets/plus.svg";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { useQuery } from "@tanstack/react-query";
 import Logo from "../../assets/logo-white.svg";
 import Settings from "../../assets/settings.svg";

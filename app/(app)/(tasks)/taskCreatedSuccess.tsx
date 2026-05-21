@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, TouchableOpacity, Alert } from "react-native";
 import useDesafioStore from "../../../store/desafio-store";
-import { Image } from "expo-image";
+import { Image } from "@/components/uniwind-components";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllDesafios } from "@/services/desafios-service";
 import * as Progress from "react-native-progress";

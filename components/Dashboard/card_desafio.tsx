@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router'
 import { Text, TouchableOpacity, View } from 'react-native'
-import { Image } from 'expo-image'
+import { Image } from '@/components/uniwind-components'
 import useDesafioStore from '@/store/desafio-store'
 
 interface desafioProps {

@@ -9,8 +9,7 @@ import {
   ActivityIndicator,
   Pressable,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { LinearGradient } from "expo-linear-gradient";
+import { KeyboardAwareScrollView, LinearGradient } from "@/components/uniwind-components";
 import { cva } from "class-variance-authority";
 import Outdoor from "../../../assets/Outdoor.svg";
 

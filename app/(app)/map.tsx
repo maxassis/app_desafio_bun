@@ -17,10 +17,8 @@ import {
   View,
 } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
-import { Image as ExpoImage } from 'expo-image'
-import type {
-  Camera,
-} from 'react-native-maps'
+import { Image as ExpoImage } from '@/components/uniwind-components'
+import type { Camera } from 'react-native-maps'
 import MapView, {
   Marker,
   Polyline,
@@ -461,7 +459,7 @@ export default function Map2() {
       <MapView
         ref={mapRef}
         onMapReady={() => setMapReady(true)}
-        className="flex-1 w-full"
+        style={{ flex: 1, width: '100%' }}
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapType === 'standard' ? mapStyle : []}
         showsCompass={false}

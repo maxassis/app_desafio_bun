@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Image } from 'expo-image'
-import { LinearGradient } from 'expo-linear-gradient'
+import { Image, LinearGradient } from '@/components/uniwind-components'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import {
