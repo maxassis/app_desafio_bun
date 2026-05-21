@@ -9,13 +9,14 @@ import {
 } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import dayjs from 'dayjs'
 import Left from '../../assets/arrow-left.svg'
 import useDesafioStore from '../../store/desafio-store'
 import type { StravaActivity } from '@/@types/strava-activities'
 import { fetchStravaActivities } from '@/services/strava-service'
+import { importStravaActivities } from '@/services/tasks-service'
 
 function formatDuration(seconds: number) {
   const safeSeconds = seconds ?? 0
@@ -29,8 +30,14 @@ function formatDuration(seconds: number) {
   return `${minutes}min`
 }
 
+const ENVIRONMENT_LABELS: Record<string, string> = {
+  livre: 'Livre',
+  esteira: 'Esteira',
+}
+
 export default function StravaActivities() {
   const insets = useSafeAreaInsets()
+  const queryClient = useQueryClient()
   const { desafioSelecionado } = useDesafioStore()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
@@ -45,7 +52,7 @@ export default function StravaActivities() {
   })
 
   const selectedActivities = useMemo(
-    () => activities?.filter(activity => selectedIds.includes(activity.id)) ?? [],
+    () => activities?.filter(activity => selectedIds.includes(activity.stravaActivityId)) ?? [],
     [activities, selectedIds],
   )
 
@@ -57,17 +64,42 @@ export default function StravaActivities() {
     )
   }
 
+  const importMutation = useMutation({
+    mutationFn: () => {
+      if (!desafioSelecionado?.inscriptionId) {
+        throw new Error('Desafio selecionado não possui inscriptionId')
+      }
+
+      return importStravaActivities(desafioSelecionado.inscriptionId, selectedActivities)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', desafioSelecionado?.inscriptionId] })
+      Alert.alert(
+        'Importação concluída',
+        `${selectedActivities.length} atividade(s) importada(s) com sucesso.`,
+        [
+          {
+            text: 'Ok',
+            onPress: () => router.replace('/dashboard'),
+          },
+        ],
+      )
+    },
+    onError: (err) => {
+      Alert.alert(
+        'Erro na importação',
+        err instanceof Error ? err.message : 'Ocorreu um erro ao importar as atividades.',
+      )
+    },
+  })
+
   function handleImport() {
     if (selectedActivities.length === 0) {
       Alert.alert('Selecione uma atividade', 'Escolha ao menos uma atividade do Strava para importar.')
       return
     }
 
-    Alert.alert(
-      'Importação em breve',
-      `${selectedActivities.length} atividade(s) selecionada(s). O envio para o backend ainda será implementado.`,
-      [{ text: 'Ok', style: 'cancel' }],
-    )
+    importMutation.mutate()
   }
 
   if (!desafioSelecionado) {
@@ -146,16 +178,16 @@ export default function StravaActivities() {
         {!isLoading && !isError && activities && activities.length > 0 && (
           <FlatList
             data={activities}
-            keyExtractor={item => String(item.id)}
+            keyExtractor={item => String(item.stravaActivityId)}
             overScrollMode="never"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 110 }}
             renderItem={({ item }: { item: StravaActivity }) => {
-              const isSelected = selectedIds.includes(item.id)
+              const isSelected = selectedIds.includes(item.stravaActivityId)
 
               return (
                 <TouchableOpacity
-                  onPress={() => toggleActivity(item.id)}
+                  onPress={() => toggleActivity(item.stravaActivityId)}
                   className="min-h-[92px] flex-row items-center border-b border-[#D9D9D9] py-4"
                 >
                   <View
@@ -169,11 +201,12 @@ export default function StravaActivities() {
                   <View className="flex-1">
                     <Text className="font-inter-bold text-base">{item.name ?? 'Atividade'}</Text>
                     <Text className="text-sm text-bondis-gray-dark mt-1">
-                      {(item.distanceKm ?? 0).toFixed(2)} km • {formatDuration(item.duration ?? 0)}
+                      {(item.distance ?? 0).toFixed(2)} km • {formatDuration(item.duration ?? 0)}
                     </Text>
                     <Text className="text-sm text-bondis-gray-dark mt-1">
                       {dayjs(item.date ?? new Date()).format('DD/MM/YYYY')}
-                      {item.type ? ` • ${item.type}` : ''}
+                      {' • '}
+                      {ENVIRONMENT_LABELS[item.environment] ?? item.environment}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -186,14 +219,18 @@ export default function StravaActivities() {
       <View className="absolute left-0 right-0 px-5 bg-white" style={{ bottom: insets.bottom + 10 }}>
         <TouchableOpacity
           onPress={handleImport}
-          disabled={selectedActivities.length === 0}
+          disabled={selectedActivities.length === 0 || importMutation.isPending}
           className={`h-[52px] bg-bondis-green rounded-full justify-center items-center ${
-            selectedActivities.length === 0 ? 'opacity-50' : ''
+            selectedActivities.length === 0 || importMutation.isPending ? 'opacity-50' : ''
           }`}
         >
-          <Text className="font-inter-bold text-base">
-            Importar selecionadas ({selectedActivities.length})
-          </Text>
+          {importMutation.isPending ? (
+            <ActivityIndicator color="#000" />
+          ) : (
+            <Text className="font-inter-bold text-base">
+              Importar selecionadas ({selectedActivities.length})
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

@@ -1,10 +1,11 @@
 export interface StravaActivity {
-  id: string
+  stravaActivityId: string
   name: string
-  distanceKm: number
+  distance: number
   duration: number
   date: string
-  type?: string
+  environment: 'livre' | 'esteira'
+  calories?: number | null
 }
 
 export type StravaActivitiesResponse = StravaActivity[]
