@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react'
-import { Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import * as Progress from 'react-native-progress'
 import { LinearGradient } from '@/components/uniwind-components'
@@ -14,7 +14,7 @@ import { convertSecondsToTimeString } from '@/utils'
 import useDesafioStore from '@/store/desafio-store'
 import { router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface BottomSheetProps {
   routeData: RouteResponse | undefined
@@ -71,7 +71,8 @@ function RankingBottomSheet({
       }}
     >
       <BottomSheetScrollView>
-        <SafeAreaView className="mx-5">
+        <SafeAreaView edges={['bottom']}>
+          <View className="px-5">
           <Text className="text-sm font-inter-regular text-bondis-gray-secondary">
             Desafio
           </Text>
@@ -352,6 +353,7 @@ function RankingBottomSheet({
                     />
                   </TouchableOpacity>
                 ))}
+          </View>
           </View>
         </SafeAreaView>
       </BottomSheetScrollView>

@@ -542,19 +542,19 @@ export default function Map2() {
           onPress={() => adjustTilt(TILT_STEP)}
           className="h-[40px] w-[40px] justify-center items-center border-b border-gray-400"
         >
-          <AntDesign name="arrowup" size={16} color="black" />
+          <AntDesign name="arrow-up" size={16} color="black" />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => adjustTilt(-TILT_STEP)}
           className="h-[40px] w-[40px] justify-center items-center border-b border-gray-400"
         >
-          <AntDesign name="arrowdown" size={16} color="black" />
+          <AntDesign name="arrow-down" size={16} color="black" />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={resetCamera}
           className="h-[40px] w-[40px] justify-center items-center"
         >
-          <AntDesign name="reload1" size={16} color="black" />
+          <AntDesign name="reload" size={16} color="black" />
         </TouchableOpacity>
       </View>
 

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   View,
   Text,
-  SafeAreaView,
   TouchableOpacity,
   TextInput,
   StatusBar,
@@ -14,7 +13,7 @@ import Refresh from "../../../assets/refresh.svg";
 import Arrow from "../../../assets/arrow-right.svg";
 import { cva } from "class-variance-authority";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { SystemBars } from "react-native-edge-to-edge";
 import Toast from "react-native-toast-message";
 import { authClient } from "@/services/auth-client";

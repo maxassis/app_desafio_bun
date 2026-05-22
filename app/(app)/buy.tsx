@@ -6,14 +6,13 @@ import {
   ActivityIndicator,
   Dimensions,
   ImageBackground,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
 import Carousel from 'react-native-reanimated-carousel'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { fetchPurchaseData } from '@/services/desafios-service'
 import Left from '../../assets/arrow-left.svg'
 import Track from '../../assets/track.svg'

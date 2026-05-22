@@ -90,8 +90,11 @@ export default {
             "Este app precisa da sua localização para rastrear suas atividades enquanto você o utiliza.",
         },
       ],
+      ["@stripe/stripe-react-native", {}],
+      "expo-font",
       "expo-router",
       "expo-secure-store",
+      "expo-web-browser",
     ],
     extra: {
       eas: {

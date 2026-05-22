@@ -1,4 +1,5 @@
-import { SafeAreaView, Text, View, TouchableOpacity, StatusBar } from "react-native"
+import { Text, View, TouchableOpacity, StatusBar } from "react-native"
+import { SafeAreaView } from 'react-native-safe-area-context'
 import Close from "../../../assets/Close.svg"
 import Done from "../../../assets/green-check.svg"
 import { useRouter } from "expo-router";

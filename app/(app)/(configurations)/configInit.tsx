@@ -1,4 +1,4 @@
-import { Text, View, SafeAreaView, Alert, TouchableOpacity } from "react-native";
+import { Text, View, Alert, TouchableOpacity } from "react-native";
 import Left from "../../../assets/arrow-left.svg";
 import Pen from "../../../assets/pen.svg";
 import Tool from "../../../assets/tool.svg";

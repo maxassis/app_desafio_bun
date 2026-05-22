@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  SafeAreaView,
   Text,
   View,
   TextInput,
@@ -17,7 +16,7 @@ import { cva } from "class-variance-authority";
 import Close from "../../../assets/Close.svg";
 import Logo from "../../../assets/logo2.svg";
 import CheckGreen from "../../../assets/check-green.svg";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authClient } from "@/services/auth-client";
 import { getErrorMessage } from "@/services/api-client";
 

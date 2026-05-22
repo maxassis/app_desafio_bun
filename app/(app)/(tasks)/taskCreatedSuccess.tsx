@@ -1,4 +1,5 @@
-import { View, Text, SafeAreaView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import useDesafioStore from "../../../store/desafio-store";
 import { Image } from "@/components/uniwind-components";
 import { useQuery } from "@tanstack/react-query";

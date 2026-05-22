@@ -10,11 +10,11 @@ import { StatusBar } from 'expo-status-bar'
 import React, { useCallback } from 'react'
 import {
   ImageBackground,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '../../assets/Logo3.svg'
 
 SplashScreen.preventAutoHideAsync()

@@ -11,7 +11,6 @@ import {
   ImageBackground,
   Linking,
   Platform,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
@@ -26,7 +25,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { HoldProgressButton } from '@/components/Tracker/button_anime'
 import { PermissionModal } from '@/components/Tracker/permission_modal'
 import { BackgroundPermissionModal } from '@/components/Tracker/background_permission_modal'
